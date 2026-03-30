@@ -764,11 +764,10 @@
   function selectType(type) {
     document.getElementById('type-buyer').classList.toggle('selected', type === 'buyer');
     document.getElementById('type-reseller').classList.toggle('selected', type === 'reseller');
-    document.getElementById('reseller-fields').style.display = type === 'reseller' ? 'block' : 'none';
-    document.getElementById('reseller-notice').classList.toggle('visible', type === 'reseller');
 
-    const btn = document.getElementById('signup-btn');
-    btn.textContent = type === 'reseller' ? 'Submit reseller application' : 'Create my account';
+    if (type === 'reseller') {
+      window.location.href = 'bidbridge-reseller-apply_1.html';
+    }
   }
 
   /* ─── PASSWORD TOGGLE ─── */

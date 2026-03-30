@@ -967,10 +967,6 @@
             </select>
           </div>
         </div>
-        <div class="form-group" style="margin-bottom:0">
-          <label>Product line <span class="required">*</span></label>
-          <input type="text" id="vendor-product-${id}" placeholder="e.g. Catalyst 9300 Series">
-        </div>
       </div>
       <div class="form-group" id="vendor-other-wrap-${id}" style="display:none; margin-top:14px;">
         <label>Vendor name <span class="required">*</span></label>
@@ -1117,7 +1113,6 @@
       vendorHTML += `
         <div class="review-vendor-block">
           <div class="review-vendor-name">${name}</div>
-          <div class="review-row"><span class="review-label">Product line</span><span class="review-value">${product}</span></div>
           ${skuHTML}
           ${notes ? `<div class="review-row"><span class="review-label">Notes</span><span class="review-value">${notes}</span></div>` : ''}
         </div>

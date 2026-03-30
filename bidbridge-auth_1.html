@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Sign In / Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --error: #FF6B6B;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body {
+    height: 100%;
+    background-color: var(--navy);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── LAYOUT ─── */
+  .auth-wrapper {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* ─── LEFT PANEL ─── */
+  .left-panel {
+    background: var(--navy-mid);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px 56px;
+    position: relative;
+    overflow: hidden;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .left-panel::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: -120px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,200,150,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .left-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,200,150,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .panel-logo {
+    font-family: var(--font-head);
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    text-decoration: none;
+    display: inline-block;
+  }
+  .panel-logo span { color: var(--accent); }
+
+  .panel-content { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 60px 0; }
+
+  .panel-content h2 {
+    font-family: var(--font-head);
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+  }
+
+  .panel-content h2 em { font-style: normal; color: var(--accent); }
+
+  .panel-content p {
+    font-size: 16px; font-weight: 300;
+    color: var(--slate-light);
+    line-height: 1.7;
+    max-width: 380px;
+    margin-bottom: 48px;
+  }
+
+  .proof-items { display: flex; flex-direction: column; gap: 20px; }
+
+  .proof-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 20px 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    transition: border-color .2s;
+  }
+  .proof-item:hover { border-color: rgba(0,200,150,0.2); }
+
+  .proof-icon {
+    width: 40px; height: 40px; min-width: 40px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,200,150,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .proof-text h4 {
+    font-family: var(--font-head);
+    font-size: 14px; font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .proof-text p { font-size: 13px; color: var(--slate); margin: 0; line-height: 1.5; }
+
+  .panel-footer {
+    font-size: 13px; color: var(--slate);
+  }
+
+  /* ─── RIGHT PANEL ─── */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 56px;
+    background: var(--navy);
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 440px;
+  }
+
+  /* ─── TAB SWITCHER ─── */
+  .tab-switcher {
+    display: flex;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 36px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 11px;
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    font-family: var(--font-body);
+    font-size: 14px; font-weight: 500;
+    color: var(--slate);
+    cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+
+  .tab-btn.active {
+    background: var(--navy-light);
+    color: var(--white);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  /* ─── FORM HEADER ─── */
+  .form-header { margin-bottom: 32px; }
+
+  .form-header h1 {
+    font-family: var(--font-head);
+    font-size: 26px; font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+
+  .form-header p { font-size: 14px; color: var(--slate-light); }
+
+  /* ─── ACCOUNT TYPE SELECTOR ─── */
+  .account-type {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .type-card {
+    padding: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+
+  .type-card:hover { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.04); }
+
+  .type-card.selected {
+    border-color: var(--accent);
+    background: rgba(0,200,150,0.07);
+  }
+
+  .type-card input[type="radio"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+  }
+
+  .type-icon { font-size: 22px; margin-bottom: 8px; display: block; }
+
+  .type-label {
+    font-family: var(--font-head);
+    font-size: 13px; font-weight: 600;
+    display: block; margin-bottom: 3px;
+  }
+
+  .type-desc { font-size: 12px; color: var(--slate); line-height: 1.4; }
+
+  .type-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s, background .2s;
+  }
+
+  .type-card.selected .type-check {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .type-card.selected .type-check::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--navy);
+  }
+
+  /* ─── FORM FIELDS ─── */
+  .form-group { margin-bottom: 18px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  label {
+    display: block;
+    font-size: 13px; font-weight: 500;
+    color: var(--slate-light);
+    margin-bottom: 8px;
+  }
+
+  .field-wrap { position: relative; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s, background .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder { color: var(--slate); }
+
+  input:focus,
+  select:focus {
+    border-color: var(--accent);
+    background: rgba(0,200,150,0.04);
+  }
+
+  input.error { border-color: var(--error); }
+
+  .field-error {
+    font-size: 12px;
+    color: var(--error);
+    margin-top: 6px;
+    display: none;
+  }
+
+  .field-error.visible { display: block; }
+
+  /* password toggle */
+  .pwd-toggle {
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--slate); cursor: pointer;
+    font-size: 13px; padding: 4px;
+    transition: color .2s;
+  }
+  .pwd-toggle:hover { color: var(--white); }
+
+  input[type="password"] { padding-right: 48px; }
+
+  /* select arrow */
+  .select-wrap::after {
+    content: '▾';
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate);
+    pointer-events: none;
+    font-size: 12px;
+  }
+
+  select { padding-right: 40px; }
+  select option { background: var(--navy-mid); color: var(--white); }
+
+  /* ─── DIVIDER ─── */
+  .or-divider {
+    display: flex; align-items: center; gap: 14px;
+    margin: 24px 0;
+    font-size: 13px; color: var(--slate);
+  }
+  .or-divider::before,
+  .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  /* ─── SUBMIT BUTTON ─── */
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: var(--navy);
+    font-family: var(--font-body);
+    font-size: 15px; font-weight: 500;
+    border: none; border-radius: 10px;
+    cursor: pointer;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    margin-top: 8px;
+    position: relative;
+  }
+
+  .btn-submit:hover {
+    background: var(--accent-dim);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,200,150,0.2);
+  }
+
+  .btn-submit:active { transform: translateY(0); }
+
+  .btn-submit.loading { color: transparent; pointer-events: none; }
+
+  .btn-submit.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 18px; height: 18px;
+    margin: -9px 0 0 -9px;
+    border: 2px solid rgba(11,27,51,0.3);
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── GOOGLE SSO ─── */
+  .btn-google {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: var(--slate-light);
+    font-family: var(--font-body);
+    font-size: 14px; font-weight: 400;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: border-color .2s, background .2s, color .2s;
+  }
+
+  .btn-google:hover {
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.04);
+    color: var(--white);
+  }
+
+  .google-icon {
+    width: 18px; height: 18px;
+  }
+
+  /* ─── FOOTER LINKS ─── */
+  .form-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--slate);
+  }
+
+  .form-footer a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .form-footer a:hover { text-decoration: underline; }
+
+  .terms-note {
+    font-size: 12px;
+    color: var(--slate);
+    text-align: center;
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+  .terms-note a { color: var(--slate-light); text-decoration: underline; }
+
+  /* ─── FORGOT PASSWORD ─── */
+  .forgot-link {
+    display: block;
+    text-align: right;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    margin-top: -10px;
+    margin-bottom: 18px;
+  }
+  .forgot-link:hover { text-decoration: underline; }
+
+  /* ─── SUCCESS STATE ─── */
+  .success-state {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    animation: fadeIn .4s ease;
+  }
+
+  .success-state.visible { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .success-icon {
+    width: 64px; height: 64px;
+    background: var(--accent-glow);
+    border: 2px solid rgba(0,200,150,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 28px;
+  }
+
+  .success-state h3 {
+    font-family: var(--font-head);
+    font-size: 24px; font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .success-state p { font-size: 15px; color: var(--slate-light); margin-bottom: 32px; }
+
+  .btn-dashboard {
+    display: inline-block;
+    padding: 13px 32px;
+    background: var(--accent);
+    color: var(--navy);
+    font-family: var(--font-body);
+    font-size: 15px; font-weight: 500;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .btn-dashboard:hover { background: var(--accent-dim); }
+
+  /* ─── PANEL VISIBILITY ─── */
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  /* ─── RESELLER PENDING NOTICE ─── */
+  .pending-notice {
+    display: none;
+    padding: 14px 16px;
+    background: rgba(245,200,66,0.08);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--gold);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .pending-notice.visible { display: block; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .auth-wrapper { grid-template-columns: 1fr; }
+    .left-panel { display: none; }
+    .right-panel { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <a href="index.html" class="panel-logo">IT Pricing <span>Network</span></a>
+
+    <div class="panel-content">
+      <h2>The smarter way to buy <em>IT technology</em></h2>
+      <p>Post one RFQ. Let authorized resellers compete. Get the best price the market can offer — without the phone calls.</p>
+
+      <div class="proof-items">
+        <div class="proof-item">
+          <div class="proof-icon">📋</div>
+          <div class="proof-text">
+            <h4>Post in minutes</h4>
+            <p>Describe what you need — vendor, product, quantity. Takes less than 5 minutes.</p>
+          </div>
+        </div>
+        <div class="proof-item">
+          <div class="proof-icon">⚖️</div>
+          <div class="proof-text">
+            <h4>Market-driven pricing</h4>
+            <p>Verified resellers compete for your business. No bias, no personal favors.</p>
+          </div>
+        </div>
+        <div class="proof-item">
+          <div class="proof-icon">✅</div>
+          <div class="proof-text">
+            <h4>Only verified resellers</h4>
+            <p>Every reseller is admin-approved and authorized for the vendors they bid on.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      &copy; 2026 IT Pricing Network, Inc. &mdash; <a href="#" style="color:var(--slate);text-decoration:none;">Privacy</a> &mdash; <a href="#" style="color:var(--slate);text-decoration:none;">Terms</a>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="auth-card">
+
+      <!-- Tab switcher -->
+      <div class="tab-switcher">
+        <button class="tab-btn active" onclick="switchTab('login')">Sign in</button>
+        <button class="tab-btn" onclick="switchTab('signup')">Create account</button>
+      </div>
+
+      <!-- ── LOGIN FORM ── -->
+      <div class="form-panel active" id="panel-login">
+        <div class="form-header">
+          <h1>Welcome back</h1>
+          <p>Sign in to your IT Pricing Network account</p>
+        </div>
+
+        <form id="login-form" onsubmit="handleLogin(event)" novalidate>
+          <div class="form-group">
+            <label for="login-email">Email address</label>
+            <div class="field-wrap">
+              <input type="email" id="login-email" placeholder="you@company.com" autocomplete="email">
+              <div class="field-error" id="login-email-error">Please enter a valid email address</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <div class="field-wrap">
+              <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password">
+              <button type="button" class="pwd-toggle" onclick="togglePwd('login-password', this)">Show</button>
+              <div class="field-error" id="login-password-error">Password is required</div>
+            </div>
+          </div>
+
+          <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+
+          <button type="submit" class="btn-submit" id="login-btn">Sign in to IT Pricing Network</button>
+        </form>
+
+        <div class="or-divider">or</div>
+
+        <button class="btn-google" onclick="handleGoogleAuth()">
+          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="form-footer">
+          Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Create one free</a>
+        </div>
+      </div>
+
+      <!-- ── SIGNUP FORM ── -->
+      <div class="form-panel" id="panel-signup">
+        <div class="form-header">
+          <h1>Create your account</h1>
+          <p>Join IT Pricing Network — it's free to get started</p>
+        </div>
+
+        <!-- Account type selector -->
+        <div class="account-type" id="account-type-selector">
+          <label class="type-card selected" id="type-buyer">
+            <input type="radio" name="account-type" value="buyer" checked onchange="selectType('buyer')">
+            <div class="type-check"></div>
+            <span class="type-icon">🏢</span>
+            <span class="type-label">I'm a Buyer</span>
+            <span class="type-desc">I want to post RFQs and receive competitive bids</span>
+          </label>
+          <label class="type-card" id="type-reseller">
+            <input type="radio" name="account-type" value="reseller" onchange="selectType('reseller')">
+            <div class="type-check"></div>
+            <span class="type-icon">🤝</span>
+            <span class="type-label">I'm a Reseller</span>
+            <span class="type-desc">I want to bid on RFQs as an authorized VAR</span>
+          </label>
+        </div>
+
+        <!-- Reseller pending notice -->
+        <div class="pending-notice" id="reseller-notice">
+          <strong>Note:</strong> Reseller accounts require admin verification before you can bid. You'll be notified within 1–2 business days once approved.
+        </div>
+
+        <form id="signup-form" onsubmit="handleSignup(event)" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="signup-first">First name</label>
+              <div class="field-wrap">
+                <input type="text" id="signup-first" placeholder="Jane" autocomplete="given-name">
+                <div class="field-error" id="signup-first-error">First name is required</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="signup-last">Last name</label>
+              <div class="field-wrap">
+                <input type="text" id="signup-last" placeholder="Smith" autocomplete="family-name">
+                <div class="field-error" id="signup-last-error">Last name is required</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-company">Company name</label>
+            <div class="field-wrap">
+              <input type="text" id="signup-company" placeholder="Acme Corp" autocomplete="organization">
+              <div class="field-error" id="signup-company-error">Company name is required</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-email">Work email</label>
+            <div class="field-wrap">
+              <input type="email" id="signup-email" placeholder="jane@acme.com" autocomplete="email">
+              <div class="field-error" id="signup-email-error">Please enter a valid email address</div>
+            </div>
+          </div>
+
+          <!-- Reseller-only fields (hidden by default) -->
+          <div id="reseller-fields" style="display:none;">
+            <div class="form-group">
+              <label for="signup-vendor">Primary vendor authorization</label>
+              <div class="field-wrap select-wrap">
+                <select id="signup-vendor">
+                  <option value="" disabled selected>Select your primary vendor</option>
+                  <option>Cisco</option>
+                  <option>Fortinet</option>
+                  <option>Palo Alto Networks</option>
+                  <option>HPE / Aruba</option>
+                  <option>Dell Technologies</option>
+                  <option>Juniper Networks</option>
+                  <option>Microsoft</option>
+                  <option>VMware</option>
+                  <option>NetApp</option>
+                  <option>CrowdStrike</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <div class="field-wrap">
+              <input type="password" id="signup-password" placeholder="Min. 8 characters" autocomplete="new-password">
+              <button type="button" class="pwd-toggle" onclick="togglePwd('signup-password', this)">Show</button>
+              <div class="field-error" id="signup-password-error">Password must be at least 8 characters</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit" id="signup-btn">Create my account</button>
+
+          <p class="terms-note">
+            By creating an account you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>.
+          </p>
+        </form>
+
+        <div class="or-divider">or</div>
+
+        <button class="btn-google" onclick="handleGoogleAuth()">
+          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="form-footer">
+          Already have an account? <a href="#" onclick="switchTab('login'); return false;">Sign in</a>
+        </div>
+      </div>
+
+      <!-- ── SUCCESS STATE ── -->
+      <div class="success-state" id="success-state">
+        <div class="success-icon">✓</div>
+        <h3 id="success-title">You're in!</h3>
+        <p id="success-msg">Your account has been created. Redirecting you to your dashboard...</p>
+        <a href="buyer-dashboard.html" class="btn-dashboard" id="success-cta">Go to dashboard →</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── TAB SWITCHING ─── */
+  function switchTab(tab) {
+    const panels = document.querySelectorAll('.form-panel');
+    const btns = document.querySelectorAll('.tab-btn');
+    const successState = document.getElementById('success-state');
+
+    panels.forEach(p => p.classList.remove('active'));
+    btns.forEach(b => b.classList.remove('active'));
+    successState.classList.remove('visible');
+
+    document.getElementById('panel-' + tab).classList.add('active');
+    btns[tab === 'login' ? 0 : 1].classList.add('active');
+  }
+
+  /* ─── ACCOUNT TYPE SELECTION ─── */
+  function selectType(type) {
+    document.getElementById('type-buyer').classList.toggle('selected', type === 'buyer');
+    document.getElementById('type-reseller').classList.toggle('selected', type === 'reseller');
+    document.getElementById('reseller-fields').style.display = type === 'reseller' ? 'block' : 'none';
+    document.getElementById('reseller-notice').classList.toggle('visible', type === 'reseller');
+
+    const btn = document.getElementById('signup-btn');
+    btn.textContent = type === 'reseller' ? 'Submit reseller application' : 'Create my account';
+  }
+
+  /* ─── PASSWORD TOGGLE ─── */
+  function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    btn.textContent = isText ? 'Show' : 'Hide';
+  }
+
+  /* ─── VALIDATION HELPERS ─── */
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function showError(inputId, errorId) {
+    document.getElementById(inputId).classList.add('error');
+    document.getElementById(errorId).classList.add('visible');
+  }
+
+  function clearError(inputId, errorId) {
+    document.getElementById(inputId).classList.remove('error');
+    document.getElementById(errorId).classList.remove('visible');
+  }
+
+  function clearAllErrors(ids) {
+    ids.forEach(([input, error]) => clearError(input, error));
+  }
+
+  /* Live validation — clear errors on input */
+  ['login-email','login-password','signup-first','signup-last','signup-company','signup-email','signup-password'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+      el.classList.remove('error');
+      const errEl = document.getElementById(id + '-error');
+      if (errEl) errEl.classList.remove('visible');
+    });
+  });
+
+  /* ─── LOGIN HANDLER ─── */
+  function handleLogin(e) {
+    e.preventDefault();
+    let valid = true;
+
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    clearAllErrors([['login-email','login-email-error'],['login-password','login-password-error']]);
+
+    if (!isValidEmail(email)) { showError('login-email','login-email-error'); valid = false; }
+    if (!password) { showError('login-password','login-password-error'); valid = false; }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('login-btn');
+    btn.classList.add('loading');
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Authentication
+     * ─────────────────────────────────────────────────────────────
+     * Replace the setTimeout below with a real API call:
+     *
+     * const response = await fetch('/api/auth/login', {
+     *   method: 'POST',
+     *   headers: { 'Content-Type': 'application/json' },
+     *   body: JSON.stringify({ email, password })
+     * });
+     *
+     * const data = await response.json();
+     *
+     * if (response.ok) {
+     *   localStorage.setItem('bb_token', data.token);
+     *   localStorage.setItem('bb_user_type', data.userType); // 'buyer' | 'reseller' | 'admin'
+     *   redirectToDashboard(data.userType);
+     * } else {
+     *   showLoginError(data.message);
+     * }
+     * ─────────────────────────────────────────────────────────────
+     */
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      showSuccess('login');
+    }, 1400);
+  }
+
+  /* ─── SIGNUP HANDLER ─── */
+  function handleSignup(e) {
+    e.preventDefault();
+    let valid = true;
+
+    const first = document.getElementById('signup-first').value.trim();
+    const last = document.getElementById('signup-last').value.trim();
+    const company = document.getElementById('signup-company').value.trim();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const accountType = document.querySelector('input[name="account-type"]:checked').value;
+
+    clearAllErrors([
+      ['signup-first','signup-first-error'],
+      ['signup-last','signup-last-error'],
+      ['signup-company','signup-company-error'],
+      ['signup-email','signup-email-error'],
+      ['signup-password','signup-password-error']
+    ]);
+
+    if (!first) { showError('signup-first','signup-first-error'); valid = false; }
+    if (!last) { showError('signup-last','signup-last-error'); valid = false; }
+    if (!company) { showError('signup-company','signup-company-error'); valid = false; }
+    if (!isValidEmail(email)) { showError('signup-email','signup-email-error'); valid = false; }
+    if (password.length < 8) { showError('signup-password','signup-password-error'); valid = false; }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('signup-btn');
+    btn.classList.add('loading');
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — User Registration
+     * ─────────────────────────────────────────────────────────────
+     * Replace the setTimeout below with a real API call:
+     *
+     * const payload = {
+     *   firstName: first,
+     *   lastName: last,
+     *   company,
+     *   email,
+     *   password,
+     *   accountType,  // 'buyer' | 'reseller'
+     *   ...(accountType === 'reseller' && {
+     *     primaryVendor: document.getElementById('signup-vendor').value
+     *   })
+     * };
+     *
+     * const response = await fetch('/api/auth/register', {
+     *   method: 'POST',
+     *   headers: { 'Content-Type': 'application/json' },
+     *   body: JSON.stringify(payload)
+     * });
+     *
+     * const data = await response.json();
+     *
+     * if (response.ok) {
+     *   if (accountType === 'reseller') {
+     *     showResellerPending();
+     *   } else {
+     *     localStorage.setItem('bb_token', data.token);
+     *     redirectToDashboard('buyer');
+     *   }
+     * } else {
+     *   showSignupError(data.message);
+     * }
+     * ─────────────────────────────────────────────────────────────
+     */
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      showSuccess(accountType);
+    }, 1600);
+  }
+
+  /* ─── GOOGLE AUTH HANDLER ─── */
+  function handleGoogleAuth() {
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Google OAuth
+     * ─────────────────────────────────────────────────────────────
+     * Implement Google OAuth 2.0 flow:
+     *
+     * window.location.href = '/api/auth/google';
+     *
+     * Server should handle the OAuth callback and redirect to
+     * the appropriate dashboard based on user type.
+     * ─────────────────────────────────────────────────────────────
+     */
+    alert('Google OAuth — connect to your OAuth provider (e.g. Google Identity Services)');
+  }
+
+  /* ─── SUCCESS STATE ─── */
+  function showSuccess(type) {
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+    const state = document.getElementById('success-state');
+    const title = document.getElementById('success-title');
+    const msg = document.getElementById('success-msg');
+    const cta = document.getElementById('success-cta');
+
+    if (type === 'reseller') {
+      title.textContent = 'Application submitted!';
+      msg.textContent = 'Your reseller account is pending admin verification. You\'ll receive an email within 1–2 business days.';
+      cta.textContent = 'Back to homepage';
+      cta.href = 'index.html';
+    } else if (type === 'login') {
+      title.textContent = 'Welcome back!';
+      msg.textContent = 'Signing you in... redirecting to your dashboard.';
+      cta.textContent = 'Go to dashboard →';
+      cta.href = 'buyer-dashboard.html';
+    } else {
+      title.textContent = 'Account created!';
+      msg.textContent = 'Welcome to IT Pricing Network. Your account is ready — let\'s get your first RFQ posted.';
+      cta.textContent = 'Go to my dashboard →';
+      cta.href = 'buyer-dashboard.html';
+    }
+
+    state.classList.add('visible');
+  }
+
+  /*
+   * ─────────────────────────────────────────────────────────────
+   * BACKEND INTEGRATION POINT — Route guard / redirect helper
+   * ─────────────────────────────────────────────────────────────
+   * function redirectToDashboard(userType) {
+   *   const routes = {
+   *     buyer: '/buyer/dashboard',
+   *     reseller: '/reseller/dashboard',
+   *     admin: '/admin/dashboard'
+   *   };
+   *   window.location.href = routes[userType] || '/';
+   * }
+   *
+   * On page load, check if already authenticated:
+   * const token = localStorage.getItem('bb_token');
+   * if (token) redirectToDashboard(localStorage.getItem('bb_user_type'));
+   * ─────────────────────────────────────────────────────────────
+   */
+</script>
+
+</body>
+</html>

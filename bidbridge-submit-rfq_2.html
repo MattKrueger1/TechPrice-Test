@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Submit RFQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-dim: rgba(245,200,66,0.10);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body {
+    min-height: 100%;
+    background: var(--navy);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 64px;
+    background: rgba(11,27,51,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: fixed; top: 0; z-index: 100;
+  }
+
+  .logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+
+  .nav-right { display: flex; align-items: center; gap: 20px; font-size: 14px; color: var(--slate-light); }
+  .nav-right a { color: var(--slate-light); text-decoration: none; }
+  .nav-right a:hover { color: var(--white); }
+
+  .nav-user {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    font-size: 13px;
+  }
+
+  .user-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,200,150,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--accent);
+  }
+
+  /* ─── PAGE LAYOUT ─── */
+  .page-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 32px 100px;
+  }
+
+  /* ─── PAGE HEADER ─── */
+  .page-header { margin-bottom: 48px; }
+
+  .breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--slate);
+    margin-bottom: 16px;
+  }
+  .breadcrumb a { color: var(--slate); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--white); }
+  .breadcrumb span { color: var(--slate); opacity: 0.5; }
+
+  .page-header h1 {
+    font-family: var(--font-head);
+    font-size: 32px; font-weight: 700;
+    letter-spacing: -0.5px; margin-bottom: 8px;
+  }
+
+  .page-header p { font-size: 16px; color: var(--slate-light); font-weight: 300; }
+
+  /* ─── STEP INDICATOR ─── */
+  .step-indicator {
+    display: flex; align-items: center;
+    margin-bottom: 48px;
+    gap: 0;
+  }
+
+  .step {
+    display: flex; align-items: center; gap: 10px;
+    flex: 1;
+    position: relative;
+  }
+
+  .step:not(:last-child)::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 12px;
+  }
+
+  .step-num {
+    width: 32px; height: 32px; min-width: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head);
+    font-size: 13px; font-weight: 700;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--slate);
+    transition: all .3s;
+  }
+
+  .step.active .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--navy);
+  }
+
+  .step.completed .step-num {
+    background: rgba(0,200,150,0.15);
+    border-color: rgba(0,200,150,0.4);
+    color: var(--accent);
+  }
+
+  .step-label {
+    font-size: 13px; font-weight: 500;
+    color: var(--slate);
+    white-space: nowrap;
+  }
+
+  .step.active .step-label { color: var(--white); }
+  .step.completed .step-label { color: var(--accent); }
+
+  /* ─── FORM SECTIONS ─── */
+  .form-section {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 36px;
+    margin-bottom: 24px;
+    display: none;
+  }
+
+  .form-section.active { display: block; animation: fadeUp .3s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 20px; font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 6px;
+  }
+
+  .section-sub { font-size: 14px; color: var(--slate-light); margin-bottom: 32px; }
+
+  /* ─── FORM FIELDS ─── */
+  .form-group { margin-bottom: 22px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+
+  label {
+    display: block;
+    font-size: 13px; font-weight: 500;
+    color: var(--slate-light);
+    margin-bottom: 8px;
+  }
+
+  label .required { color: var(--accent); margin-left: 3px; }
+  label .optional { color: var(--slate); font-weight: 400; font-size: 12px; margin-left: 6px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s, background .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+  input::placeholder, textarea::placeholder { color: var(--slate); }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    background: rgba(0,200,150,0.04);
+  }
+  input.error, select.error, textarea.error { border-color: var(--error); }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾'; position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--slate);
+    pointer-events: none; font-size: 12px;
+  }
+  select option { background: var(--navy-mid); color: var(--white); }
+
+  .field-hint { font-size: 12px; color: var(--slate); margin-top: 6px; }
+  .field-error { font-size: 12px; color: var(--error); margin-top: 6px; display: none; }
+  .field-error.visible { display: block; }
+
+  /* ─── VENDOR LINE ITEMS ─── */
+  .vendor-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+
+  .vendor-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 20px 24px;
+    position: relative;
+    animation: fadeUp .25s ease;
+  }
+
+  .vendor-item-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .vendor-item-label {
+    font-family: var(--font-head);
+    font-size: 14px; font-weight: 600;
+    color: var(--accent);
+  }
+
+  .btn-remove-vendor {
+    background: none; border: none;
+    color: var(--slate); cursor: pointer;
+    font-size: 13px; padding: 4px 10px;
+    border-radius: 6px;
+    transition: color .2s, background .2s;
+  }
+  .btn-remove-vendor:hover { color: var(--error); background: rgba(255,107,107,0.08); }
+
+  .btn-add-vendor {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,200,150,0.07);
+    border: 1px dashed rgba(0,200,150,0.3);
+    border-radius: 10px;
+    padding: 14px 20px;
+    color: var(--accent);
+    font-family: var(--font-body);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background .2s, border-color .2s;
+  }
+  .btn-add-vendor:hover { background: rgba(0,200,150,0.12); border-color: rgba(0,200,150,0.5); }
+
+  /* ─── SOURCING STRATEGY ─── */
+  .strategy-cards {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 8px;
+  }
+
+  .strategy-card {
+    padding: 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+
+  .strategy-card:hover { border-color: rgba(0,200,150,0.3); }
+
+  .strategy-card.selected {
+    border-color: var(--accent);
+    background: rgba(0,200,150,0.06);
+  }
+
+  .strategy-card input[type="radio"] { position: absolute; opacity: 0; }
+
+  .strategy-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+
+  .strategy-title {
+    font-family: var(--font-head);
+    font-size: 16px; font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .strategy-desc { font-size: 13px; color: var(--slate-light); line-height: 1.6; }
+
+  .strategy-check {
+    position: absolute; top: 16px; right: 16px;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .strategy-card.selected .strategy-check {
+    border-color: var(--accent); background: var(--accent);
+  }
+  .strategy-card.selected .strategy-check::after {
+    content: ''; width: 7px; height: 7px;
+    border-radius: 50%; background: var(--navy);
+  }
+
+  .strategy-note {
+    font-size: 13px; color: var(--slate);
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border-left: 3px solid rgba(0,200,150,0.3);
+    margin-top: 12px;
+    display: none;
+  }
+  .strategy-note.visible { display: block; }
+
+  /* ─── PARTNER TIER FILTER ─── */
+  .tier-filter-wrap {
+    background: rgba(245,200,66,0.05);
+    border: 1px solid rgba(245,200,66,0.15);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 8px;
+  }
+
+  .tier-filter-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .tier-filter-title {
+    font-size: 14px; font-weight: 500; color: var(--gold);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .toggle-switch {
+    position: relative; width: 40px; height: 22px;
+    display: inline-block;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 999px; cursor: pointer;
+    transition: background .2s;
+  }
+  .toggle-thumb {
+    position: absolute; top: 3px; left: 3px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--white); transition: transform .2s;
+  }
+  .toggle-switch input:checked + .toggle-track { background: var(--gold); }
+  .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+  .tier-options { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .tier-pill {
+    padding: 8px 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    color: var(--slate-light);
+    cursor: pointer;
+    transition: all .2s;
+    user-select: none;
+  }
+
+  .tier-pill:hover { border-color: rgba(245,200,66,0.4); color: var(--gold); }
+  .tier-pill.selected {
+    background: rgba(245,200,66,0.12);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* ─── FILE UPLOAD ─── */
+  .file-upload-area {
+    border: 2px dashed rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 36px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+  .file-upload-area:hover {
+    border-color: rgba(0,200,150,0.3);
+    background: rgba(0,200,150,0.03);
+  }
+  .file-upload-area input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 32px; margin-bottom: 12px; display: block; }
+  .upload-label { font-size: 14px; color: var(--slate-light); }
+  .upload-label strong { color: var(--accent); }
+  .upload-hint { font-size: 12px; color: var(--slate); margin-top: 6px; }
+  .file-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .file-chip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(0,200,150,0.08);
+    border: 1px solid rgba(0,200,150,0.2);
+    border-radius: 8px;
+    font-size: 13px; color: var(--accent);
+  }
+  .file-chip button {
+    background: none; border: none; color: var(--slate);
+    cursor: pointer; font-size: 16px; padding: 0 4px;
+  }
+  .file-chip button:hover { color: var(--error); }
+
+  /* ─── REVIEW SECTION ─── */
+  .review-grid { display: flex; flex-direction: column; gap: 12px; }
+
+  .review-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+  }
+  .review-row:last-child { border-bottom: none; }
+  .review-label { color: var(--slate); }
+  .review-value { color: var(--white); font-weight: 500; text-align: right; max-width: 60%; }
+
+  .review-vendor-block {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 8px;
+  }
+
+  .review-vendor-name {
+    font-family: var(--font-head);
+    font-size: 14px; font-weight: 600;
+    color: var(--accent); margin-bottom: 8px;
+  }
+
+  /* ─── NAVIGATION BUTTONS ─── */
+  .form-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--slate-light);
+    font-family: var(--font-body);
+    font-size: 14px; font-weight: 400;
+    padding: 12px 24px; border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-back:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  .btn-next {
+    background: var(--accent);
+    border: none;
+    color: var(--navy);
+    font-family: var(--font-body);
+    font-size: 15px; font-weight: 500;
+    padding: 13px 32px; border-radius: 10px;
+    cursor: pointer;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    position: relative;
+  }
+  .btn-next:hover {
+    background: var(--accent-dim);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,200,150,0.2);
+  }
+  .btn-next.loading { color: transparent; pointer-events: none; }
+  .btn-next.loading::after {
+    content: ''; position: absolute;
+    top: 50%; left: 50%;
+    width: 18px; height: 18px; margin: -9px 0 0 -9px;
+    border: 2px solid rgba(11,27,51,0.3);
+    border-top-color: var(--navy);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── SUCCESS STATE ─── */
+  .success-screen {
+    display: none; text-align: center;
+    padding: 80px 32px;
+    animation: fadeUp .4s ease;
+  }
+  .success-screen.visible { display: block; }
+
+  .success-ring {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(0,200,150,0.1);
+    border: 2px solid rgba(0,200,150,0.35);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 28px;
+    font-size: 36px;
+  }
+
+  .success-screen h2 {
+    font-family: var(--font-head);
+    font-size: 28px; font-weight: 700;
+    letter-spacing: -0.5px; margin-bottom: 12px;
+  }
+
+  .success-screen p {
+    font-size: 16px; color: var(--slate-light);
+    max-width: 480px; margin: 0 auto 16px; line-height: 1.7;
+  }
+
+  .rfq-id-badge {
+    display: inline-block;
+    background: rgba(0,200,150,0.1);
+    border: 1px solid rgba(0,200,150,0.2);
+    color: var(--accent);
+    font-family: var(--font-head);
+    font-size: 14px; font-weight: 600;
+    padding: 8px 20px; border-radius: 999px;
+    margin-bottom: 36px;
+  }
+
+  .success-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+  .btn-dashboard {
+    padding: 13px 28px;
+    background: var(--accent); color: var(--navy);
+    font-family: var(--font-body); font-size: 15px; font-weight: 500;
+    border-radius: 10px; text-decoration: none;
+    transition: background .2s;
+  }
+  .btn-dashboard:hover { background: var(--accent-dim); }
+
+  .btn-another {
+    padding: 13px 28px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--slate-light);
+    font-family: var(--font-body); font-size: 15px;
+    border-radius: 10px; cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-another:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  @media (max-width: 680px) {
+    nav { padding: 16px 20px; }
+    .page-wrap { padding: 32px 16px 80px; }
+    .form-section { padding: 24px 20px; }
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .strategy-cards { grid-template-columns: 1fr; }
+    .step-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">IT Pricing <span>Network</span></a>
+  <div class="nav-right">
+    <a href="buyer-dashboard.html">Dashboard</a>
+    <div class="nav-user">
+      <div class="user-avatar">JM</div>
+      <span>James M.</span>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="buyer-dashboard.html">Dashboard</a>
+      <span>›</span>
+      <span>New RFQ</span>
+    </div>
+    <h1>Submit a Request for Quote</h1>
+    <p>Tell us what technology you need. We'll notify every authorized reseller who can compete for your business.</p>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div class="step-indicator" id="step-indicator">
+    <div class="step active" id="step-1">
+      <div class="step-num">1</div>
+      <div class="step-label">Project details</div>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,0.1);margin:0 12px;"></span>
+    </div>
+    <div class="step" id="step-2">
+      <div class="step-num">2</div>
+      <div class="step-label">Vendors &amp; products</div>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,0.1);margin:0 12px;"></span>
+    </div>
+    <div class="step" id="step-3">
+      <div class="step-num">3</div>
+      <div class="step-label">Sourcing strategy</div>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,0.1);margin:0 12px;"></span>
+    </div>
+    <div class="step" id="step-4">
+      <div class="step-num">4</div>
+      <div class="step-label">Review &amp; submit</div>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: PROJECT DETAILS ── -->
+  <div class="form-section active" id="section-1">
+    <div class="section-title">Project details</div>
+    <p class="section-sub">Give resellers the context they need to put together a competitive bid.</p>
+
+    <div class="form-group">
+      <label for="project-title">Project name <span class="required">*</span></label>
+      <input type="text" id="project-title" placeholder="e.g. Network infrastructure refresh — Austin HQ">
+      <div class="field-error" id="project-title-error">Project name is required</div>
+    </div>
+
+    <div class="form-group">
+      <label for="project-desc">Project description <span class="required">*</span></label>
+      <textarea id="project-desc" placeholder="Describe the project scope, environment, and any relevant context. The more detail you provide, the more accurate the bids will be."></textarea>
+      <div class="field-error" id="project-desc-error">Please describe the project</div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="project-deadline">Bid deadline <span class="required">*</span></label>
+        <input type="date" id="project-deadline">
+        <div class="field-hint">How long resellers have to submit bids</div>
+        <div class="field-error" id="project-deadline-error">Please set a bid deadline</div>
+      </div>
+      <div class="form-group">
+        <label for="project-delivery">Expected delivery date <span class="optional">(optional)</span></label>
+        <input type="date" id="project-delivery">
+        <div class="field-hint">When you need the technology delivered</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="project-budget">Budget <span class="optional">(optional)</span></label>
+        <input type="number" id="project-budget" placeholder="e.g. 150000" min="0">
+        <div class="field-hint">Sharing a budget can attract more targeted bids</div>
+      </div>
+      <div class="form-group">
+        <label for="project-location">Delivery location <span class="required">*</span></label>
+        <input type="text" id="project-location" placeholder="e.g. Austin, TX 78701">
+        <div class="field-error" id="project-location-error">Delivery location is required</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Supporting documents <span class="optional">(optional)</span></label>
+      <div class="file-upload-area" id="upload-area">
+        <input type="file" id="file-input" multiple accept=".pdf,.docx,.xlsx,.pptx,.png,.jpg" onchange="handleFileUpload(this)">
+        <span class="upload-icon">📎</span>
+        <div class="upload-label"><strong>Click to upload</strong> or drag and drop</div>
+        <div class="upload-hint">PDF, Word, Excel, PowerPoint, images — max 25MB per file</div>
+      </div>
+      <div class="file-list" id="file-list"></div>
+    </div>
+
+    <div class="form-nav">
+      <span></span>
+      <button class="btn-next" onclick="goToStep(2)">Next: Vendors &amp; products →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: VENDORS & PRODUCTS ── -->
+  <div class="form-section" id="section-2">
+    <div class="section-title">Vendors &amp; products</div>
+    <p class="section-sub">Add each technology vendor and the specific products you need. You can add multiple vendors to a single RFQ.</p>
+
+    <div class="vendor-list" id="vendor-list"></div>
+
+    <button class="btn-add-vendor" onclick="addVendorItem()">
+      <span style="font-size:18px;">+</span> Add a vendor
+    </button>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="goToStep(1)">← Back</button>
+      <button class="btn-next" onclick="goToStep(3)">Next: Sourcing strategy →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: SOURCING STRATEGY ── -->
+  <div class="form-section" id="section-3">
+    <div class="section-title">Sourcing strategy</div>
+    <p class="section-sub">Choose how you want resellers to bid on this project.</p>
+
+    <!-- Only show strategy choice if multiple vendors -->
+    <div id="strategy-section">
+      <div class="strategy-cards">
+        <label class="strategy-card selected" id="card-sole">
+          <input type="radio" name="strategy" value="sole" checked onchange="selectStrategy('sole')">
+          <div class="strategy-check"></div>
+          <span class="strategy-icon">🤝</span>
+          <div class="strategy-title">Sole source</div>
+          <div class="strategy-desc">One reseller bids the entire project — all vendors included in a single all-in price. Simpler to manage, one relationship, one purchase order.</div>
+        </label>
+        <label class="strategy-card" id="card-split">
+          <input type="radio" name="strategy" value="split" onchange="selectStrategy('split')">
+          <div class="strategy-check"></div>
+          <span class="strategy-icon">⚖️</span>
+          <div class="strategy-title">Split bid</div>
+          <div class="strategy-desc">Each vendor is bid separately. The best authorized reseller per vendor competes independently. Maximum price competition on every line item.</div>
+        </label>
+      </div>
+
+      <div class="strategy-note visible" id="strategy-note-sole">
+        Resellers who bid must be authorized to sell <strong>all</strong> vendors in your project. Only multi-vendor authorized partners will be notified.
+      </div>
+      <div class="strategy-note" id="strategy-note-split">
+        Your RFQ will be split into separate lots — one per vendor. The top authorized resellers for each vendor will be notified independently. You can select a different winner for each vendor.
+      </div>
+    </div>
+
+    <div style="margin-top:36px;">
+      <div class="section-title" style="font-size:17px;margin-bottom:6px;">Partner tier filter</div>
+      <p class="section-sub" style="margin-bottom:16px;">Optionally restrict bids to resellers who hold a minimum partner tier status with the vendors in your project.</p>
+
+      <div class="tier-filter-wrap">
+        <div class="tier-filter-header">
+          <div class="tier-filter-title">
+            ⭐ Require minimum partner tier
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="tier-toggle" onchange="toggleTierFilter(this)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+
+        <div id="tier-options" style="display:none;">
+          <p style="font-size:13px;color:var(--slate-light);margin-bottom:14px;">Select the minimum tier level resellers must hold with each vendor to be eligible to bid:</p>
+          <div class="tier-options" id="tier-pills">
+            <div class="tier-pill" onclick="selectTier(this, 'authorized')">Authorized</div>
+            <div class="tier-pill" onclick="selectTier(this, 'silver')">Silver / Select</div>
+            <div class="tier-pill selected" onclick="selectTier(this, 'gold')">Gold</div>
+            <div class="tier-pill" onclick="selectTier(this, 'platinum')">Platinum</div>
+            <div class="tier-pill" onclick="selectTier(this, 'top')">Top tier only</div>
+          </div>
+          <p class="field-hint" style="margin-top:12px;">Selecting a higher tier reduces the number of eligible resellers but typically means access to better pricing discounts from the vendor.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:36px;">
+      <div class="section-title" style="font-size:17px;margin-bottom:6px;">RFQ visibility</div>
+      <p class="section-sub" style="margin-bottom:16px;">Control who can see and bid on this RFQ.</p>
+      <div class="form-group">
+        <div class="select-wrap">
+          <select id="rfq-visibility">
+            <option value="all">Open to all verified resellers (recommended)</option>
+            <option value="tier-filtered">Filtered by partner tier only</option>
+            <option value="invited">Invited resellers only (coming soon)</option>
+          </select>
+        </div>
+        <div class="field-hint">Most customers get the best pricing by opening bids to all verified resellers.</div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="goToStep(2)">← Back</button>
+      <button class="btn-next" onclick="goToStep(4)">Next: Review &amp; submit →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: REVIEW & SUBMIT ── -->
+  <div class="form-section" id="section-4">
+    <div class="section-title">Review &amp; submit</div>
+    <p class="section-sub">Review your RFQ before it goes live. Once submitted, authorized resellers will be notified immediately.</p>
+
+    <div class="review-grid" id="review-content">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="goToStep(3)">← Back</button>
+      <button class="btn-next" id="submit-btn" onclick="submitRFQ()">Submit RFQ &amp; notify resellers →</button>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-ring">✓</div>
+    <h2>Your RFQ is live!</h2>
+    <p>Authorized resellers are being notified now. You'll receive an email when the first bid comes in.</p>
+    <div class="rfq-id-badge" id="rfq-id-badge">RFQ #—</div>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:32px;">Bids will appear in your dashboard as resellers respond. Your deadline is set — sit back and let the market work.</p>
+    <div class="success-actions">
+      <a href="buyer-dashboard.html" class="btn-dashboard">View my dashboard →</a>
+      <button class="btn-another" onclick="resetForm()">Submit another RFQ</button>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+  /* ═══════════════════════════════════════════════
+     STATE
+  ═══════════════════════════════════════════════ */
+  let currentStep = 1;
+  let vendorCount = 0;
+  let uploadedFiles = [];
+  let selectedStrategy = 'sole';
+  let selectedTier = 'gold';
+  let tierFilterEnabled = false;
+
+  const VENDORS = [
+    'Cisco','Fortinet','Palo Alto Networks','HPE / Aruba','Dell Technologies',
+    'Juniper Networks','Microsoft','VMware','NetApp','Rubrik','Zscaler',
+    'CrowdStrike','Pure Storage','Arista Networks','F5 Networks','Commvault',
+    'SentinelOne','Check Point','Extreme Networks','Nutanix','Veeam',
+    'Veritas','IBM','Lenovo','Supermicro','Other'
+  ];
+
+  /* ═══════════════════════════════════════════════
+     STEP NAVIGATION
+  ═══════════════════════════════════════════════ */
+  function goToStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return;
+
+    // Hide all sections
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.step').forEach((s, i) => {
+      s.classList.remove('active');
+      if (i + 1 < n) s.classList.add('completed');
+      else s.classList.remove('completed');
+    });
+
+    currentStep = n;
+    document.getElementById('section-' + n).classList.add('active');
+    document.getElementById('step-' + n).classList.add('active');
+
+    if (n === 2 && vendorCount === 0) addVendorItem();
+    if (n === 3) updateStrategyVisibility();
+    if (n === 4) buildReview();
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ═══════════════════════════════════════════════
+     VALIDATION
+  ═══════════════════════════════════════════════ */
+  function validateStep(step) {
+    let valid = true;
+
+    if (step === 1) {
+      const checks = [
+        ['project-title', 'project-title-error', v => v.trim().length > 0],
+        ['project-desc', 'project-desc-error', v => v.trim().length > 10],
+        ['project-deadline', 'project-deadline-error', v => v.trim().length > 0],
+        ['project-location', 'project-location-error', v => v.trim().length > 0],
+      ];
+      checks.forEach(([id, errId, fn]) => {
+        const el = document.getElementById(id);
+        const err = document.getElementById(errId);
+        if (!fn(el.value)) {
+          el.classList.add('error');
+          err.classList.add('visible');
+          valid = false;
+        } else {
+          el.classList.remove('error');
+          err.classList.remove('visible');
+        }
+      });
+    }
+
+    if (step === 2) {
+      if (vendorCount === 0) {
+        alert('Please add at least one vendor before continuing.');
+        valid = false;
+      }
+    }
+
+    return valid;
+  }
+
+  /* ═══════════════════════════════════════════════
+     FILE UPLOAD
+  ═══════════════════════════════════════════════ */
+  function handleFileUpload(input) {
+    const files = Array.from(input.files);
+    files.forEach(f => {
+      if (!uploadedFiles.find(u => u.name === f.name)) {
+        uploadedFiles.push(f);
+      }
+    });
+    renderFileList();
+  }
+
+  function renderFileList() {
+    const list = document.getElementById('file-list');
+    list.innerHTML = uploadedFiles.map((f, i) => `
+      <div class="file-chip">
+        <span>📄 ${f.name} <span style="color:var(--slate);font-weight:400;">(${(f.size/1024/1024).toFixed(1)} MB)</span></span>
+        <button onclick="removeFile(${i})" title="Remove">×</button>
+      </div>
+    `).join('');
+  }
+
+  function removeFile(i) {
+    uploadedFiles.splice(i, 1);
+    renderFileList();
+  }
+
+  /* ═══════════════════════════════════════════════
+     VENDOR LINE ITEMS
+  ═══════════════════════════════════════════════ */
+  function addVendorItem() {
+    vendorCount++;
+    const id = vendorCount;
+    const vendorOptions = VENDORS.map(v => `<option value="${v}">${v}</option>`).join('');
+
+    const item = document.createElement('div');
+    item.className = 'vendor-item';
+    item.id = 'vendor-item-' + id;
+    item.innerHTML = `
+      <div class="vendor-item-header">
+        <div class="vendor-item-label">Vendor ${id}</div>
+        <button class="btn-remove-vendor" onclick="removeVendor(${id})" ${id === 1 ? 'style="display:none"' : ''}>Remove</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label>Vendor / OEM <span class="required">*</span></label>
+          <div class="select-wrap">
+            <select id="vendor-name-${id}">
+              <option value="" disabled selected>Select vendor</option>
+              ${vendorOptions}
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Product line <span class="required">*</span></label>
+          <input type="text" id="vendor-product-${id}" placeholder="e.g. Catalyst 9300 Series">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:14px;">
+        <div class="form-group" style="margin-bottom:0">
+          <label>Part number(s) <span class="optional">(optional)</span></label>
+          <input type="text" id="vendor-part-${id}" placeholder="e.g. C9300-48P-A">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Quantity <span class="required">*</span></label>
+          <input type="number" id="vendor-qty-${id}" placeholder="e.g. 12" min="1">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px;margin-bottom:0;">
+        <label>Additional notes <span class="optional">(optional)</span></label>
+        <input type="text" id="vendor-notes-${id}" placeholder="e.g. Requires 3-year SmartNet, PoE+ required">
+      </div>
+    `;
+
+    document.getElementById('vendor-list').appendChild(item);
+    updateStrategyVisibility();
+  }
+
+  function removeVendor(id) {
+    const item = document.getElementById('vendor-item-' + id);
+    if (item) {
+      item.remove();
+      updateStrategyVisibility();
+    }
+  }
+
+  function getVendorCount() {
+    return document.querySelectorAll('.vendor-item').length;
+  }
+
+  /* ═══════════════════════════════════════════════
+     SOURCING STRATEGY
+  ═══════════════════════════════════════════════ */
+  function updateStrategyVisibility() {
+    const count = getVendorCount();
+    const strategySection = document.getElementById('strategy-section');
+    if (strategySection) {
+      strategySection.style.opacity = count <= 1 ? '0.4' : '1';
+      strategySection.style.pointerEvents = count <= 1 ? 'none' : 'auto';
+      const note = document.querySelector('.section-sub');
+      if (count <= 1 && currentStep === 3) {
+        document.querySelector('#section-3 .section-sub').textContent =
+          'Add multiple vendors in step 2 to unlock sourcing strategy options.';
+      }
+    }
+  }
+
+  function selectStrategy(type) {
+    selectedStrategy = type;
+    document.getElementById('card-sole').classList.toggle('selected', type === 'sole');
+    document.getElementById('card-split').classList.toggle('selected', type === 'split');
+    document.getElementById('strategy-note-sole').classList.toggle('visible', type === 'sole');
+    document.getElementById('strategy-note-split').classList.toggle('visible', type === 'split');
+  }
+
+  /* ═══════════════════════════════════════════════
+     TIER FILTER
+  ═══════════════════════════════════════════════ */
+  function toggleTierFilter(checkbox) {
+    tierFilterEnabled = checkbox.checked;
+    document.getElementById('tier-options').style.display = tierFilterEnabled ? 'block' : 'none';
+  }
+
+  function selectTier(el, tier) {
+    document.querySelectorAll('.tier-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedTier = tier;
+  }
+
+  /* ═══════════════════════════════════════════════
+     REVIEW BUILD
+  ═══════════════════════════════════════════════ */
+  function buildReview() {
+    const title = document.getElementById('project-title').value;
+    const desc = document.getElementById('project-desc').value;
+    const deadline = document.getElementById('project-deadline').value;
+    const delivery = document.getElementById('project-delivery').value;
+    const budget = document.getElementById('project-budget').value;
+    const location = document.getElementById('project-location').value;
+    const visibility = document.getElementById('rfq-visibility');
+    const visibilityText = visibility.options[visibility.selectedIndex].text;
+
+    // Collect vendors
+    const vendorItems = document.querySelectorAll('.vendor-item');
+    let vendorHTML = '';
+    vendorItems.forEach((item, i) => {
+      const id = item.id.replace('vendor-item-', '');
+      const name = document.getElementById('vendor-name-' + id)?.value || '—';
+      const product = document.getElementById('vendor-product-' + id)?.value || '—';
+      const part = document.getElementById('vendor-part-' + id)?.value || '—';
+      const qty = document.getElementById('vendor-qty-' + id)?.value || '—';
+      const notes = document.getElementById('vendor-notes-' + id)?.value;
+      vendorHTML += `
+        <div class="review-vendor-block">
+          <div class="review-vendor-name">${name}</div>
+          <div class="review-row"><span class="review-label">Product line</span><span class="review-value">${product}</span></div>
+          <div class="review-row"><span class="review-label">Part number</span><span class="review-value">${part || '—'}</span></div>
+          <div class="review-row"><span class="review-label">Quantity</span><span class="review-value">${qty}</span></div>
+          ${notes ? `<div class="review-row"><span class="review-label">Notes</span><span class="review-value">${notes}</span></div>` : ''}
+        </div>
+      `;
+    });
+
+    const tierLabel = tierFilterEnabled
+      ? `Minimum: ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`
+      : 'No minimum tier required';
+
+    document.getElementById('review-content').innerHTML = `
+      <div class="review-row"><span class="review-label">Project name</span><span class="review-value">${title}</span></div>
+      <div class="review-row"><span class="review-label">Description</span><span class="review-value" style="font-size:13px;color:var(--slate-light);">${desc.substring(0,120)}${desc.length > 120 ? '...' : ''}</span></div>
+      <div class="review-row"><span class="review-label">Bid deadline</span><span class="review-value">${formatDate(deadline)}</span></div>
+      <div class="review-row"><span class="review-label">Delivery date</span><span class="review-value">${delivery ? formatDate(delivery) : 'Not specified'}</span></div>
+      <div class="review-row"><span class="review-label">Budget</span><span class="review-value">${budget ? '$' + Number(budget).toLocaleString() : 'Not disclosed'}</span></div>
+      <div class="review-row"><span class="review-label">Delivery location</span><span class="review-value">${location}</span></div>
+      <div class="review-row"><span class="review-label">Sourcing strategy</span><span class="review-value">${selectedStrategy === 'sole' ? '🤝 Sole source' : '⚖️ Split bid per vendor'}</span></div>
+      <div class="review-row"><span class="review-label">Partner tier filter</span><span class="review-value">${tierLabel}</span></div>
+      <div class="review-row"><span class="review-label">Visibility</span><span class="review-value">${visibilityText}</span></div>
+      <div class="review-row"><span class="review-label">Documents attached</span><span class="review-value">${uploadedFiles.length > 0 ? uploadedFiles.length + ' file(s)' : 'None'}</span></div>
+      <div style="margin-top:8px;">
+        <div style="font-size:13px;color:var(--slate);margin-bottom:12px;font-weight:500;">VENDORS (${vendorItems.length})</div>
+        ${vendorHTML}
+      </div>
+    `;
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  /* ═══════════════════════════════════════════════
+     SUBMIT
+  ═══════════════════════════════════════════════ */
+  function submitRFQ() {
+    const btn = document.getElementById('submit-btn');
+    btn.classList.add('loading');
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — RFQ Submission
+     * ─────────────────────────────────────────────────────────────
+     * Collect all form data and POST to API:
+     *
+     * const vendorItems = document.querySelectorAll('.vendor-item');
+     * const vendors = Array.from(vendorItems).map(item => {
+     *   const id = item.id.replace('vendor-item-', '');
+     *   return {
+     *     vendor: document.getElementById('vendor-name-' + id).value,
+     *     productLine: document.getElementById('vendor-product-' + id).value,
+     *     partNumbers: document.getElementById('vendor-part-' + id).value,
+     *     quantity: document.getElementById('vendor-qty-' + id).value,
+     *     notes: document.getElementById('vendor-notes-' + id).value,
+     *   };
+     * });
+     *
+     * const payload = {
+     *   projectTitle: document.getElementById('project-title').value,
+     *   description: document.getElementById('project-desc').value,
+     *   bidDeadline: document.getElementById('project-deadline').value,
+     *   deliveryDate: document.getElementById('project-delivery').value,
+     *   budget: document.getElementById('project-budget').value,
+     *   deliveryLocation: document.getElementById('project-location').value,
+     *   sourcingStrategy: selectedStrategy,    // 'sole' | 'split'
+     *   tierFilter: tierFilterEnabled ? selectedTier : null,
+     *   visibility: document.getElementById('rfq-visibility').value,
+     *   vendors,
+     * };
+     *
+     * // For file uploads, use FormData:
+     * const formData = new FormData();
+     * formData.append('rfq', JSON.stringify(payload));
+     * uploadedFiles.forEach(f => formData.append('documents', f));
+     *
+     * const response = await fetch('/api/rfq/create', {
+     *   method: 'POST',
+     *   headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') },
+     *   body: formData
+     * });
+     *
+     * const data = await response.json();
+     *
+     * if (response.ok) {
+     *   // data.rfqId = the new RFQ ID
+     *   // data.notifiedCount = number of resellers notified
+     *   showSuccess(data.rfqId);
+     *
+     *   // If split bid: platform creates sub-RFQs per vendor
+     *   // and routes notifications to authorized resellers per vendor
+     *   // If sole source: one RFQ, notifies multi-vendor authorized resellers only
+     * }
+     * ─────────────────────────────────────────────────────────────
+     */
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      showSuccess();
+    }, 2000);
+  }
+
+  function showSuccess() {
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-indicator').style.display = 'none';
+
+    const rfqNum = '#' + Math.floor(Math.random() * 9000 + 1000);
+    document.getElementById('rfq-id-badge').textContent = 'RFQ ' + rfqNum;
+    document.getElementById('success-screen').classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    location.reload();
+  }
+
+  /* ═══════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════ */
+  // Set default deadline to 7 days from today
+  window.addEventListener('DOMContentLoaded', () => {
+    const deadline = document.getElementById('project-deadline');
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    deadline.value = d.toISOString().split('T')[0];
+    deadline.min = new Date().toISOString().split('T')[0];
+
+    const delivery = document.getElementById('project-delivery');
+    delivery.min = new Date().toISOString().split('T')[0];
+
+    // Live validation — clear errors on input
+    ['project-title','project-desc','project-deadline','project-location'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => {
+        el.classList.remove('error');
+        const err = document.getElementById(id + '-error');
+        if (err) err.classList.remove('visible');
+      });
+    });
+  });
+</script>
+</body>
+</html>

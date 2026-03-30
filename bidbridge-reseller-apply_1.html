@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Apply as an Authorized Reseller</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  /* ─── NAV ─── */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 64px; background: rgba(11,27,51,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; z-index: 100; }
+  .logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--white); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; }
+  .nav-links a { color: var(--slate-light); text-decoration: none; transition: color .2s; }
+  .nav-links a:hover { color: var(--white); }
+  .btn-signin { padding: 9px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; transition: all .2s; text-decoration: none; }
+  .btn-signin:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 72px 64px 56px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-left h1 {
+    font-family: var(--font-head);
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+  .hero-left h1 em { font-style: normal; color: var(--accent); }
+
+  .hero-left p { font-size: 17px; font-weight: 300; color: var(--slate-light); line-height: 1.7; margin-bottom: 36px; }
+
+  .benefit-list { display: flex; flex-direction: column; gap: 14px; }
+  .benefit-item { display: flex; align-items: flex-start; gap: 14px; font-size: 15px; color: var(--slate-light); }
+  .benefit-icon { width: 34px; height: 34px; min-width: 34px; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-top: 1px; }
+
+  .hero-right {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 36px;
+  }
+
+  .process-steps { display: flex; flex-direction: column; gap: 0; }
+  .process-step { display: flex; align-items: flex-start; gap: 16px; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .process-step:last-child { border-bottom: none; }
+  .step-circle { width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.25); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--accent); }
+  .step-text h4 { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+  .step-text p { font-size: 13px; color: var(--slate); line-height: 1.5; }
+
+  /* ─── FORM SECTION ─── */
+  .form-section { max-width: 860px; margin: 0 auto; padding: 0 64px 100px; }
+
+  /* ─── STEP INDICATOR ─── */
+  .step-indicator { display: flex; align-items: center; margin-bottom: 48px; }
+  .step-item { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .step-item:not(:last-child)::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); margin: 0 12px; }
+  .step-num { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--slate); transition: all .3s; }
+  .step-item.active .step-num { background: var(--accent); border-color: var(--accent); color: var(--navy); }
+  .step-item.completed .step-num { background: rgba(0,200,150,0.15); border-color: rgba(0,200,150,0.4); color: var(--accent); }
+  .step-label { font-size: 13px; font-weight: 500; color: var(--slate); white-space: nowrap; }
+  .step-item.active .step-label { color: var(--white); }
+  .step-item.completed .step-label { color: var(--accent); }
+
+  /* ─── FORM PANELS ─── */
+  .form-panel { display: none; animation: fadeUp .3s ease; }
+  .form-panel.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  .panel-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 36px; margin-bottom: 20px; }
+  .panel-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
+  .panel-sub { font-size: 14px; color: var(--slate-light); margin-bottom: 28px; }
+
+  /* ─── FORM FIELDS ─── */
+  .form-group { margin-bottom: 20px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--slate-light); margin-bottom: 8px; }
+  label .required { color: var(--accent); margin-left: 3px; }
+  label .optional { color: var(--slate); font-weight: 400; font-size: 11px; margin-left: 6px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 15px; outline: none; transition: border-color .2s, background .2s; appearance: none;
+  }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; font-size: 14px; }
+  input::placeholder, textarea::placeholder { color: var(--slate); }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); background: rgba(0,200,150,0.04); }
+  input.error, select.error { border-color: var(--error); }
+  .field-error { font-size: 12px; color: var(--error); margin-top: 5px; display: none; }
+  .field-error.visible { display: block; }
+  .field-hint { font-size: 12px; color: var(--slate); margin-top: 5px; }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+  select option { background: var(--navy-mid); }
+
+  /* ─── VENDOR AUTHORIZATION BUILDER ─── */
+  .vendor-auth-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+
+  .vendor-auth-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 20px 22px;
+    position: relative;
+    animation: fadeUp .25s ease;
+  }
+
+  .vendor-auth-item.verified { border-color: rgba(0,200,150,0.2); }
+
+  .vendor-auth-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .vendor-auth-num { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .btn-remove-vendor { background: none; border: none; color: var(--slate); cursor: pointer; font-size: 13px; padding: 4px 10px; border-radius: 6px; transition: all .2s; }
+  .btn-remove-vendor:hover { color: var(--error); background: rgba(255,107,107,0.08); }
+
+  .vendor-auth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+  /* tier selector */
+  .tier-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .tier-option { padding: 10px 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center; cursor: pointer; transition: all .2s; }
+  .tier-option:hover { border-color: rgba(255,255,255,0.2); }
+  .tier-option.selected { border-color: var(--gold); background: rgba(245,200,66,0.07); }
+  .tier-option input[type="radio"] { display: none; }
+  .tier-option-name { font-size: 12px; font-weight: 600; display: block; margin-bottom: 2px; }
+  .tier-option-sub { font-size: 10px; color: var(--slate); }
+  .tier-option.selected .tier-option-name { color: var(--gold); }
+
+  /* doc upload per vendor */
+  .doc-upload-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed rgba(255,255,255,0.12);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+  .doc-upload-row:hover { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.03); }
+  .doc-upload-row input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .doc-upload-icon { font-size: 20px; }
+  .doc-upload-text { flex: 1; font-size: 13px; color: var(--slate-light); }
+  .doc-upload-text strong { color: var(--accent); }
+  .doc-upload-hint { font-size: 11px; color: var(--slate); }
+  .doc-uploaded { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(0,200,150,0.08); border: 1px solid rgba(0,200,150,0.2); border-radius: 9px; font-size: 13px; color: var(--accent); }
+  .doc-uploaded button { background: none; border: none; color: var(--slate); cursor: pointer; margin-left: auto; font-size: 16px; }
+  .doc-uploaded button:hover { color: var(--error); }
+
+  .btn-add-vendor-auth {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,200,150,0.06); border: 1px dashed rgba(0,200,150,0.25);
+    border-radius: 10px; padding: 13px 18px; color: var(--accent);
+    font-family: var(--font-body); font-size: 14px; font-weight: 500;
+    cursor: pointer; width: 100%; transition: all .2s;
+  }
+  .btn-add-vendor-auth:hover { background: rgba(0,200,150,0.1); border-color: rgba(0,200,150,0.4); }
+
+  /* ─── REFERENCES ─── */
+  .reference-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 20px 22px; margin-bottom: 12px; }
+  .reference-num { font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 12px; }
+
+  /* ─── AGREEMENT ─── */
+  .agreement-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 20px; max-height: 200px; overflow-y: auto; font-size: 13px; color: var(--slate); line-height: 1.75; margin-bottom: 16px; }
+  .agreement-block h4 { color: var(--white); font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+  .agreement-block p { margin-bottom: 10px; }
+
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s; }
+  .check-item:hover { border-color: rgba(0,200,150,0.25); }
+  .check-item.checked { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.04); }
+  .check-item input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+  .check-text { font-size: 13px; color: var(--slate-light); line-height: 1.6; }
+  .check-text strong { color: var(--white); }
+  .check-text a { color: var(--accent); }
+
+  /* ─── NAVIGATION BUTTONS ─── */
+  .form-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 28px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .btn-back { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--slate-light); font-family: var(--font-body); font-size: 14px; padding: 12px 24px; border-radius: 10px; cursor: pointer; transition: all .2s; }
+  .btn-back:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+  .btn-next { background: var(--accent); border: none; color: var(--navy); font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 13px 32px; border-radius: 10px; cursor: pointer; transition: background .2s, transform .15s; }
+  .btn-next:hover { background: var(--accent-dim); transform: translateY(-1px); }
+  .btn-next:disabled { background: rgba(255,255,255,0.1); color: var(--slate); cursor: not-allowed; transform: none; }
+
+  /* ─── REVIEW ─── */
+  .review-section { margin-bottom: 24px; }
+  .review-section-title { font-size: 12px; font-weight: 500; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+  .review-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+  .review-row:last-child { border-bottom: none; }
+  .review-label { color: var(--slate); }
+  .review-value { color: var(--white); font-weight: 500; text-align: right; max-width: 60%; }
+
+  /* ─── SUCCESS ─── */
+  .success-screen { display: none; text-align: center; padding: 80px 32px; animation: fadeUp .4s ease; }
+  .success-screen.visible { display: block; }
+  .success-ring { width: 80px; height: 80px; border-radius: 50%; background: rgba(0,200,150,0.1); border: 2px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; }
+  .success-screen h2 { font-family: var(--font-head); font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 14px; }
+  .success-screen p { font-size: 16px; color: var(--slate-light); line-height: 1.7; max-width: 520px; margin: 0 auto 32px; }
+  .success-steps { display: flex; flex-direction: column; gap: 12px; max-width: 480px; margin: 0 auto 40px; text-align: left; }
+  .success-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px; background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 12px; font-size: 14px; }
+  .success-step-icon { font-size: 18px; margin-top: 1px; }
+  .success-step-text { color: var(--slate-light); line-height: 1.6; }
+  .success-step-text strong { color: var(--white); display: block; margin-bottom: 2px; }
+  .btn-home { display: inline-block; padding: 13px 32px; background: var(--accent); color: var(--navy); font-family: var(--font-body); font-size: 15px; font-weight: 500; border-radius: 10px; text-decoration: none; transition: background .2s; }
+  .btn-home:hover { background: var(--accent-dim); }
+
+  /* ─── FOOTER ─── */
+  footer { background: var(--navy-mid); border-top: 1px solid rgba(255,255,255,0.06); padding: 28px 64px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--slate); }
+  footer a { color: var(--slate); text-decoration: none; }
+  footer a:hover { color: var(--white); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .hero { grid-template-columns: 1fr; padding: 48px 24px 40px; gap: 40px; }
+    .hero-right { display: none; }
+    .form-section { padding: 0 24px 80px; }
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .vendor-auth-grid { grid-template-columns: 1fr; }
+    .tier-selector { grid-template-columns: repeat(2, 1fr); }
+    footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">IT Pricing <span>Network</span></a>
+  <div class="nav-links">
+    <a href="index.html#buyers">For buyers</a>
+    <a href="#">For resellers</a>
+    <a href="index.html#vendors">Vendors</a>
+    <a href="bidbridge-auth.html" class="btn-signin">Sign in</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <h1>Become an authorized <em>IT Pricing Network</em> reseller</h1>
+    <p>Access qualified, high-intent buyers who are actively looking for what you sell. No cold calls, no prospecting — just compete on price and win on merit.</p>
+    <div class="benefit-list">
+      <div class="benefit-item"><div class="benefit-icon">🎯</div><span>Receive instant alerts when buyers post RFQs that match your vendor authorizations</span></div>
+      <div class="benefit-item"><div class="benefit-icon">⚖️</div><span>Compete on a level playing field — price wins, not personal relationships</span></div>
+      <div class="benefit-item"><div class="benefit-icon">📊</div><span>See your bid ranking in real time — know if you're in 1st or 2nd place without seeing competitor prices</span></div>
+      <div class="benefit-item"><div class="benefit-icon">🔒</div><span>Your identity and pricing are always private from competing resellers</span></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:20px;">How the application works</div>
+    <div class="process-steps">
+      <div class="process-step">
+        <div class="step-circle">1</div>
+        <div class="step-text">
+          <h4>Tell us about your company</h4>
+          <p>Basic company info, contact details, and how long you've been in the channel.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-circle">2</div>
+        <div class="step-text">
+          <h4>List your vendor authorizations</h4>
+          <p>Select the vendors you're authorized to sell and your partner tier for each. Upload your certification documents.</p>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-circle">3</div>
+        <div class="step-text">
+          <h4>Review &amp; submit</h4>
+          <p>Review everything before submitting. Our admin team verifies your documentation within 1–2 business days.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM SECTION -->
+<div class="form-section">
+
+  <!-- STEP INDICATOR -->
+  <div class="step-indicator" id="step-indicator">
+    <div class="step-item active" id="si-1">
+      <div class="step-num">1</div>
+      <div class="step-label">Company info</div>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,0.1);margin:0 12px;"></span>
+    </div>
+    <div class="step-item" id="si-2">
+      <div class="step-num">2</div>
+      <div class="step-label">Vendor authorizations</div>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,0.1);margin:0 12px;"></span>
+    </div>
+    <div class="step-item" id="si-3">
+      <div class="step-num">3</div>
+      <div class="step-label">Review &amp; submit</div>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: COMPANY INFO ── -->
+  <div class="form-panel active" id="panel-1">
+    <div class="panel-card">
+      <div class="panel-title">Company information</div>
+      <p class="panel-sub">Tell us about your business so we can verify you as an authorized reseller on IT Pricing Network.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="company-name">Company name <span class="required">*</span></label>
+          <input type="text" id="company-name" placeholder="NetStar Solutions Inc.">
+          <div class="field-error" id="company-name-error">Company name is required</div>
+        </div>
+        <div class="form-group">
+          <label for="company-website">Company website <span class="optional">(optional)</span></label>
+          <input type="url" id="company-website" placeholder="https://netstar.com">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="company-founded">Year founded <span class="required">*</span></label>
+          <input type="number" id="company-founded" placeholder="2014" min="1950" max="2026">
+          <div class="field-error" id="company-founded-error">Year founded is required</div>
+        </div>
+        <div class="form-group">
+          <label for="company-size">Company size <span class="required">*</span></label>
+          <div class="select-wrap">
+            <select id="company-size">
+              <option value="" disabled selected>Select headcount</option>
+              <option>1–10 employees</option>
+              <option>11–25 employees</option>
+              <option>26–50 employees</option>
+              <option>51–100 employees</option>
+              <option>101–250 employees</option>
+              <option>250+ employees</option>
+            </select>
+          </div>
+          <div class="field-error" id="company-size-error">Please select company size</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="company-city">City <span class="required">*</span></label>
+          <input type="text" id="company-city" placeholder="Dallas">
+          <div class="field-error" id="company-city-error">City is required</div>
+        </div>
+        <div class="form-group">
+          <label for="company-state">State <span class="required">*</span></label>
+          <input type="text" id="company-state" placeholder="TX">
+          <div class="field-error" id="company-state-error">State is required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="company-desc">Brief company description <span class="optional">(optional)</span></label>
+        <textarea id="company-desc" placeholder="Tell us about your focus areas, the customers you serve, and what makes your team stand out in the channel..."></textarea>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-title">Primary contact</div>
+      <p class="panel-sub">Who should we contact about this application?</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contact-first">First name <span class="required">*</span></label>
+          <input type="text" id="contact-first" placeholder="Mike">
+          <div class="field-error" id="contact-first-error">First name is required</div>
+        </div>
+        <div class="form-group">
+          <label for="contact-last">Last name <span class="required">*</span></label>
+          <input type="text" id="contact-last" placeholder="Reynolds">
+          <div class="field-error" id="contact-last-error">Last name is required</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contact-title">Job title <span class="required">*</span></label>
+          <input type="text" id="contact-title" placeholder="VP of Sales">
+          <div class="field-error" id="contact-title-error">Job title is required</div>
+        </div>
+        <div class="form-group">
+          <label for="contact-email">Work email <span class="required">*</span></label>
+          <input type="email" id="contact-email" placeholder="m.reynolds@netstar.com">
+          <div class="field-error" id="contact-email-error">Valid email is required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contact-phone">Phone number <span class="required">*</span></label>
+        <input type="tel" id="contact-phone" placeholder="(214) 555-0182">
+        <div class="field-error" id="contact-phone-error">Phone number is required</div>
+      </div>
+
+      <div class="form-group">
+        <label for="contact-password">Create a password <span class="required">*</span></label>
+        <input type="password" id="contact-password" placeholder="Min. 8 characters">
+        <div class="field-error" id="contact-password-error">Password must be at least 8 characters</div>
+        <div class="field-hint">You'll use this email and password to log in once approved.</div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <span></span>
+      <button class="btn-next" onclick="goToStep(2)">Next: Vendor authorizations →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: VENDOR AUTHORIZATIONS ── -->
+  <div class="form-panel" id="panel-2">
+    <div class="panel-card">
+      <div class="panel-title">Vendor authorizations</div>
+      <p class="panel-sub">Add every vendor you are authorized to sell. For each one, select your partner tier and upload your authorization certificate or partner letter. Our admin team will verify each document before approving your account.</p>
+
+      <div class="vendor-auth-list" id="vendor-auth-list"></div>
+
+      <button class="btn-add-vendor-auth" onclick="addVendorAuth()">
+        <span style="font-size:18px;">+</span> Add another vendor authorization
+      </button>
+
+      <div style="margin-top:20px;padding:14px 16px;background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.14);border-radius:10px;font-size:13px;color:var(--slate-light);line-height:1.6;">
+        ⭐ <strong style="color:var(--gold);">Partner tier matters.</strong> Buyers can filter RFQs to only accept bids from resellers at specific tier levels. Higher tiers unlock more opportunities. Make sure your tier selection matches your current certification level exactly — misrepresentation may result in removal.
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="goToStep(1)">← Back</button>
+      <button class="btn-next" onclick="goToStep(3)">Next: Review &amp; submit →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: REVIEW & SUBMIT ── -->
+  <div class="form-panel" id="panel-3">
+    <div class="panel-card">
+      <div class="panel-title">Review your application</div>
+      <p class="panel-sub">Check everything looks correct before submitting. Our admin team will review your application and respond within 1–2 business days.</p>
+
+      <div class="review-section" id="review-content">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-title">Terms &amp; agreements</div>
+      <p class="panel-sub" style="margin-bottom:16px;">Please read and agree to the following before submitting your application.</p>
+
+      <div class="agreement-block">
+        <h4>IT Pricing Network Reseller Agreement — Key Terms</h4>
+        <p>By joining IT Pricing Network as an authorized reseller, you agree to the following terms and conditions:</p>
+        <p><strong>1. Authorization accuracy.</strong> You confirm that all vendor authorizations and partner tier statuses you have declared are accurate and current at the time of application. Providing false or outdated authorization information may result in immediate removal from the platform.</p>
+        <p><strong>2. Bid integrity.</strong> Any bid you submit on IT Pricing Network represents a firm commitment that you can deliver the specified products at the quoted price, within the specified timeline. Failure to honor an awarded bid without legitimate cause may result in a formal warning or account suspension.</p>
+        <p><strong>3. Platform conduct.</strong> You agree not to contact buyers outside of the IT Pricing Network platform during an active bid process without prior consent. Circumventing the platform to avoid fees or to gain unfair advantage is grounds for permanent removal.</p>
+        <p><strong>4. Ongoing verification.</strong> IT Pricing Network reserves the right to request updated authorization documentation at any time. You agree to provide updated certifications within 30 days of any request. Failure to do so may result in suspension of your account.</p>
+        <p><strong>5. Subscription terms.</strong> Access to IT Pricing Network's reseller marketplace is subject to a monthly subscription fee. Details are provided upon approval.</p>
+      </div>
+
+      <label class="check-item" id="check-1-label" onclick="toggleCheck('check-1', 'check-1-label')">
+        <input type="checkbox" id="check-1" onclick="event.stopPropagation(); toggleCheck('check-1','check-1-label')">
+        <span class="check-text">I confirm that all vendor authorizations and partner tier statuses I have declared are <strong>accurate and current</strong>. I understand that misrepresentation may result in removal from IT Pricing Network.</span>
+      </label>
+
+      <label class="check-item" id="check-2-label" onclick="toggleCheck('check-2', 'check-2-label')">
+        <input type="checkbox" id="check-2" onclick="event.stopPropagation(); toggleCheck('check-2','check-2-label')">
+        <span class="check-text">I understand that submitting a bid is a <strong>firm commitment</strong> to honor the price and delivery terms. Failure to honor an awarded bid may result in a formal warning or account suspension.</span>
+      </label>
+
+      <label class="check-item" id="check-3-label" onclick="toggleCheck('check-3', 'check-3-label')">
+        <input type="checkbox" id="check-3" onclick="event.stopPropagation(); toggleCheck('check-3','check-3-label')">
+        <span class="check-text">I agree to IT Pricing Network's <a href="#" onclick="event.stopPropagation();">Terms of Service</a>, <a href="#" onclick="event.stopPropagation();">Reseller Agreement</a>, and <a href="#" onclick="event.stopPropagation();">Privacy Policy</a>.</span>
+      </label>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="goToStep(2)">← Back</button>
+      <button class="btn-next" id="submit-btn" onclick="submitApplication()" disabled>Submit application →</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-ring">✓</div>
+    <h2>Application submitted!</h2>
+    <p>Thank you for applying to join IT Pricing Network. Our admin team will review your documentation and respond within 1–2 business days.</p>
+    <div class="success-steps">
+      <div class="success-step">
+        <span class="success-step-icon">📧</span>
+        <div class="success-step-text">
+          <strong>Check your email</strong>
+          You'll receive a confirmation email shortly with your application reference number.
+        </div>
+      </div>
+      <div class="success-step">
+        <span class="success-step-icon">🔍</span>
+        <div class="success-step-text">
+          <strong>Admin review in progress</strong>
+          Our team will verify your vendor authorizations and partner tier certifications.
+        </div>
+      </div>
+      <div class="success-step">
+        <span class="success-step-icon">✅</span>
+        <div class="success-step-text">
+          <strong>Approval notification</strong>
+          Once approved, you'll receive login credentials and can start bidding on RFQs immediately.
+        </div>
+      </div>
+    </div>
+    <a href="index.html" class="btn-home">Back to homepage</a>
+  </div>
+
+</div><!-- /form-section -->
+
+<!-- FOOTER -->
+<footer>
+  <span>&copy; 2026 IT Pricing Network, Inc.</span>
+  <span><a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Reseller Agreement</a> · <a href="bidbridge-auth.html">Sign in</a></span>
+</footer>
+
+<script>
+  /* ═══════════════════════════════════════════════
+     STATE
+  ═══════════════════════════════════════════════ */
+  let currentStep = 1;
+  let vendorCount = 0;
+  let checks = { 'check-1': false, 'check-2': false, 'check-3': false };
+
+  const VENDORS = [
+    'Cisco','Fortinet','Palo Alto Networks','HPE / Aruba','Dell Technologies',
+    'Juniper Networks','Microsoft','VMware','NetApp','Rubrik','Zscaler',
+    'CrowdStrike','Pure Storage','Arista Networks','F5 Networks','Commvault',
+    'SentinelOne','Check Point','Extreme Networks','Nutanix','Veeam','Other'
+  ];
+
+  const TIERS = [
+    { value: 'authorized', label: 'Authorized', sub: 'Entry level' },
+    { value: 'silver', label: 'Silver', sub: 'Select / Silver' },
+    { value: 'gold', label: 'Gold', sub: 'Gold certified' },
+    { value: 'platinum', label: 'Platinum', sub: 'Diamond / Top tier' },
+  ];
+
+  /* ─── STEP NAVIGATION ─── */
+  function goToStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return;
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.step-item').forEach((s, i) => {
+      s.classList.remove('active', 'completed');
+      if (i + 1 < n) s.classList.add('completed');
+    });
+    currentStep = n;
+    document.getElementById('panel-' + n).classList.add('active');
+    document.getElementById('si-' + n).classList.add('active');
+    if (n === 2 && vendorCount === 0) addVendorAuth();
+    if (n === 3) buildReview();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ─── VALIDATION ─── */
+  function validateStep(step) {
+    let valid = true;
+    const required = {
+      1: [
+        ['company-name','company-name-error', v => v.trim().length > 0],
+        ['company-founded','company-founded-error', v => v.trim().length > 0],
+        ['company-size','company-size-error', v => v !== ''],
+        ['company-city','company-city-error', v => v.trim().length > 0],
+        ['company-state','company-state-error', v => v.trim().length > 0],
+        ['contact-first','contact-first-error', v => v.trim().length > 0],
+        ['contact-last','contact-last-error', v => v.trim().length > 0],
+        ['contact-title','contact-title-error', v => v.trim().length > 0],
+        ['contact-email','contact-email-error', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)],
+        ['contact-phone','contact-phone-error', v => v.trim().length > 0],
+        ['contact-password','contact-password-error', v => v.length >= 8],
+      ]
+    };
+    if (required[step]) {
+      required[step].forEach(([id, errId, fn]) => {
+        const el = document.getElementById(id);
+        const err = document.getElementById(errId);
+        if (!fn(el.value)) { el.classList.add('error'); if (err) err.classList.add('visible'); valid = false; }
+        else { el.classList.remove('error'); if (err) err.classList.remove('visible'); }
+      });
+    }
+    if (step === 2 && vendorCount === 0) { alert('Please add at least one vendor authorization.'); valid = false; }
+    return valid;
+  }
+
+  /* ─── ADD VENDOR AUTH ─── */
+  function addVendorAuth() {
+    vendorCount++;
+    const id = vendorCount;
+    const vendorOptions = VENDORS.map(v => `<option value="${v}">${v}</option>`).join('');
+    const tierOptions = TIERS.map(t => `
+      <label class="tier-option" id="tier-opt-${id}-${t.value}" onclick="selectTier(${id},'${t.value}')">
+        <input type="radio" name="tier-${id}" value="${t.value}">
+        <span class="tier-option-name">${t.label}</span>
+        <span class="tier-option-sub">${t.sub}</span>
+      </label>
+    `).join('');
+
+    const item = document.createElement('div');
+    item.className = 'vendor-auth-item';
+    item.id = 'vendor-auth-' + id;
+    item.innerHTML = `
+      <div class="vendor-auth-header">
+        <span class="vendor-auth-num">Vendor authorization ${id}</span>
+        ${id > 1 ? `<button class="btn-remove-vendor" onclick="removeVendorAuth(${id})">Remove</button>` : ''}
+      </div>
+      <div class="vendor-auth-grid">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Vendor / OEM <span class="required">*</span></label>
+          <div class="select-wrap">
+            <select id="va-vendor-${id}">
+              <option value="" disabled selected>Select vendor</option>
+              ${vendorOptions}
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Your partner tier <span class="required">*</span></label>
+          <div class="tier-selector" id="tier-selector-${id}">
+            ${tierOptions}
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px;margin-bottom:0;">
+        <label>Authorization certificate / partner letter <span class="required">*</span></label>
+        <div class="doc-upload-row" id="doc-row-${id}">
+          <input type="file" accept=".pdf,.jpg,.png,.docx" onchange="handleDocUpload(${id}, this)">
+          <span class="doc-upload-icon">📎</span>
+          <div>
+            <div class="doc-upload-text"><strong>Upload document</strong></div>
+            <div class="doc-upload-hint">PDF, image, or Word doc — max 10MB</div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('vendor-auth-list').appendChild(item);
+  }
+
+  function removeVendorAuth(id) {
+    document.getElementById('vendor-auth-' + id)?.remove();
+  }
+
+  function selectTier(vendorId, tier) {
+    TIERS.forEach(t => {
+      const el = document.getElementById(`tier-opt-${vendorId}-${t.value}`);
+      if (el) el.classList.toggle('selected', t.value === tier);
+    });
+  }
+
+  function handleDocUpload(vendorId, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const row = document.getElementById('doc-row-' + vendorId);
+    row.outerHTML = `
+      <div class="doc-uploaded" id="doc-row-${vendorId}">
+        📄 ${file.name}
+        <span style="font-size:11px;color:var(--slate);margin-left:4px;">(${(file.size/1024/1024).toFixed(1)} MB)</span>
+        <button onclick="clearDoc(${vendorId})">×</button>
+      </div>
+    `;
+    document.getElementById('vendor-auth-' + vendorId).classList.add('verified');
+  }
+
+  function clearDoc(vendorId) {
+    const el = document.getElementById('doc-row-' + vendorId);
+    el.outerHTML = `
+      <div class="doc-upload-row" id="doc-row-${vendorId}">
+        <input type="file" accept=".pdf,.jpg,.png,.docx" onchange="handleDocUpload(${vendorId}, this)">
+        <span class="doc-upload-icon">📎</span>
+        <div>
+          <div class="doc-upload-text"><strong>Upload document</strong></div>
+          <div class="doc-upload-hint">PDF, image, or Word doc — max 10MB</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('vendor-auth-' + vendorId).classList.remove('verified');
+  }
+
+  /* ─── AGREEMENTS ─── */
+  function toggleCheck(id, labelId) {
+    const cb = document.getElementById(id);
+    checks[id] = cb.checked;
+    document.getElementById(labelId).classList.toggle('checked', cb.checked);
+    updateSubmitBtn();
+  }
+
+  function updateSubmitBtn() {
+    const allChecked = Object.values(checks).every(Boolean);
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = !allChecked;
+    btn.style.opacity = allChecked ? '1' : '0.5';
+  }
+
+  /* ─── BUILD REVIEW ─── */
+  function buildReview() {
+    const company = document.getElementById('company-name').value;
+    const city = document.getElementById('company-city').value;
+    const state = document.getElementById('company-state').value;
+    const size = document.getElementById('company-size').value;
+    const website = document.getElementById('company-website').value;
+    const founded = document.getElementById('company-founded').value;
+    const firstName = document.getElementById('contact-first').value;
+    const lastName = document.getElementById('contact-last').value;
+    const email = document.getElementById('contact-email').value;
+    const title = document.getElementById('contact-title').value;
+    const phone = document.getElementById('contact-phone').value;
+
+    const vendorItems = document.querySelectorAll('.vendor-auth-item');
+    let vendorReview = '';
+    vendorItems.forEach((item) => {
+      const id = item.id.replace('vendor-auth-','');
+      const vendor = document.getElementById('va-vendor-' + id)?.value || '—';
+      const selectedTier = item.querySelector('.tier-option.selected .tier-option-name')?.textContent || '—';
+      const hasDoc = item.classList.contains('verified') ? '✓ Uploaded' : '✗ Not uploaded';
+      vendorReview += `
+        <div style="padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:8px;">
+          <div style="font-weight:500;margin-bottom:4px;">${vendor}</div>
+          <div style="font-size:12px;color:var(--slate-light);">Tier: ${selectedTier} &nbsp;·&nbsp; Documentation: ${hasDoc}</div>
+        </div>
+      `;
+    });
+
+    document.getElementById('review-content').innerHTML = `
+      <div class="review-section">
+        <div class="review-section-title">Company information</div>
+        <div class="review-row"><span class="review-label">Company</span><span class="review-value">${company}</span></div>
+        <div class="review-row"><span class="review-label">Location</span><span class="review-value">${city}, ${state}</span></div>
+        <div class="review-row"><span class="review-label">Size</span><span class="review-value">${size}</span></div>
+        <div class="review-row"><span class="review-label">Founded</span><span class="review-value">${founded}</span></div>
+        ${website ? `<div class="review-row"><span class="review-label">Website</span><span class="review-value">${website}</span></div>` : ''}
+      </div>
+      <div class="review-section">
+        <div class="review-section-title">Primary contact</div>
+        <div class="review-row"><span class="review-label">Name</span><span class="review-value">${firstName} ${lastName}</span></div>
+        <div class="review-row"><span class="review-label">Title</span><span class="review-value">${title}</span></div>
+        <div class="review-row"><span class="review-label">Email</span><span class="review-value">${email}</span></div>
+        <div class="review-row"><span class="review-label">Phone</span><span class="review-value">${phone}</span></div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-title">Vendor authorizations (${vendorItems.length})</div>
+        ${vendorReview}
+      </div>
+    `;
+  }
+
+  /* ─── SUBMIT ─── */
+  function submitApplication() {
+    const btn = document.getElementById('submit-btn');
+    if (btn.disabled) return;
+    btn.textContent = 'Submitting...';
+    btn.disabled = true;
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Reseller Application Submission
+     *
+     * Use FormData to handle file uploads:
+     *
+     * const formData = new FormData();
+     *
+     * formData.append('company', JSON.stringify({
+     *   name: document.getElementById('company-name').value,
+     *   website: document.getElementById('company-website').value,
+     *   founded: document.getElementById('company-founded').value,
+     *   size: document.getElementById('company-size').value,
+     *   city: document.getElementById('company-city').value,
+     *   state: document.getElementById('company-state').value,
+     *   description: document.getElementById('company-desc').value,
+     * }));
+     *
+     * formData.append('contact', JSON.stringify({
+     *   firstName: document.getElementById('contact-first').value,
+     *   lastName: document.getElementById('contact-last').value,
+     *   title: document.getElementById('contact-title').value,
+     *   email: document.getElementById('contact-email').value,
+     *   phone: document.getElementById('contact-phone').value,
+     *   password: document.getElementById('contact-password').value,
+     * }));
+     *
+     * // Vendor authorizations + file uploads
+     * const vendorItems = document.querySelectorAll('.vendor-auth-item');
+     * const vendors = [];
+     * vendorItems.forEach(item => {
+     *   const id = item.id.replace('vendor-auth-','');
+     *   const fileInput = item.querySelector('input[type="file"]');
+     *   vendors.push({
+     *     vendor: document.getElementById('va-vendor-' + id).value,
+     *     tier: item.querySelector('.tier-option.selected input')?.value,
+     *   });
+     *   if (fileInput?.files[0]) formData.append('cert-' + id, fileInput.files[0]);
+     * });
+     * formData.append('vendors', JSON.stringify(vendors));
+     *
+     * formData.append('references', JSON.stringify([
+     *   { name: ref1Name, company: ref1Company, email: ref1Email, phone: ref1Phone, project: ref1Project },
+     *   { name: ref2Name, company: ref2Company, email: ref2Email, phone: ref2Phone, project: ref2Project },
+     * ]));
+     *
+     * const response = await fetch('/api/reseller/apply', {
+     *   method: 'POST',
+     *   body: formData
+     * });
+     *
+     * // On success: create pending account, notify admin, send confirmation email
+     * ─────────────────────────────────────────────────────────────
+     */
+    setTimeout(() => {
+      document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('step-indicator').style.display = 'none';
+      document.getElementById('success-screen').classList.add('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 1800);
+  }
+
+  /* ─── LIVE VALIDATION CLEAR ─── */
+  ['company-name','company-founded','company-city','company-state','contact-first','contact-last','contact-title','contact-email','contact-phone','contact-password'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+      el.classList.remove('error');
+      const err = document.getElementById(id + '-error');
+      if (err) err.classList.remove('visible');
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — My RFQs</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 36px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 24px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
+
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; }
+
+  /* ─── TOPBAR ─── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; gap: 16px; }
+  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 14px; pointer-events: none; }
+  .search-input { padding: 9px 14px 9px 36px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--white); font-family: var(--font-body); font-size: 13px; outline: none; width: 240px; transition: border-color .2s; }
+  .search-input::placeholder { color: var(--slate); }
+  .search-input:focus { border-color: var(--accent); }
+  .btn-new { display: flex; align-items: center; gap: 7px; background: var(--accent); color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 500; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; text-decoration: none; transition: background .2s; white-space: nowrap; }
+  .btn-new:hover { background: var(--accent-dim); }
+
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 32px 40px; flex: 1; }
+
+  /* ─── STATS ─── */
+  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 18px; cursor: pointer; transition: border-color .2s; }
+  .stat-card:hover { border-color: rgba(255,255,255,0.15); }
+  .stat-card.active-filter { border-color: var(--accent); background: rgba(0,200,150,0.05); }
+  .stat-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .stat-value { font-family: var(--font-head); font-size: 26px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.error { color: var(--error); }
+
+  /* ─── FILTERS ─── */
+  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-pill { padding: 7px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--slate-light); cursor: pointer; transition: all .2s; user-select: none; }
+  .filter-pill:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+  .filter-pill.active { background: rgba(0,200,150,0.1); border-color: rgba(0,200,150,0.35); color: var(--accent); }
+  .filter-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .sort-wrap { position: relative; }
+  .sort-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+  .sort-select { padding: 7px 28px 7px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; outline: none; cursor: pointer; appearance: none; }
+  .sort-select option { background: var(--navy-mid); }
+
+  /* ─── RFQ CARDS ─── */
+  .rfq-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .rfq-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .rfq-card:hover { border-color: rgba(255,255,255,0.14); }
+  .rfq-card.has-new { border-left: 3px solid var(--accent); }
+
+  .rfq-card-main { padding: 22px 26px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
+
+  .rfq-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+  .rfq-id { font-size: 12px; color: var(--slate); margin-bottom: 4px; }
+  .rfq-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; }
+
+  .rfq-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+  .tag { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; }
+  .tag-vendor { background: rgba(0,200,150,0.07); color: var(--accent); border: 1px solid rgba(0,200,150,0.15); }
+  .tag-strategy { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245,200,66,0.15); }
+  .tag-tier { background: rgba(168,184,204,0.07); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.14); }
+
+  .rfq-meta { display: flex; flex-wrap: wrap; gap: 20px; }
+  .rfq-meta-item { font-size: 13px; color: var(--slate-light); display: flex; align-items: center; gap: 5px; }
+  .rfq-meta-item strong { color: var(--white); font-weight: 500; }
+
+  /* ─── BID PROGRESS ─── */
+  .bid-progress { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 180px; }
+
+  .bid-count-wrap { text-align: right; }
+  .bid-count-num { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: -1px; line-height: 1; }
+  .bid-count-label { font-size: 11px; color: var(--slate); margin-top: 2px; }
+
+  .bid-bar { width: 100%; height: 5px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+  .bid-bar-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .4s; }
+
+  .new-bids-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(0,200,150,0.1); border: 1px solid rgba(0,200,150,0.2); color: var(--accent); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+
+  /* ─── STATUS BADGE ─── */
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+  .s-active { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .s-active::before { background: var(--accent); animation: pulse 2s infinite; }
+  .s-review { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .s-review::before { background: var(--gold); }
+  .s-awarded { background: rgba(0,200,150,0.08); color: var(--accent); border: 1px solid rgba(0,200,150,0.15); }
+  .s-awarded::before { background: var(--accent); }
+  .s-closed { background: rgba(136,150,169,0.1); color: var(--slate-light); border: 1px solid rgba(136,150,169,0.15); }
+  .s-closed::before { background: var(--slate); }
+  .s-draft { background: rgba(255,255,255,0.05); color: var(--slate); border: 1px solid rgba(255,255,255,0.08); }
+  .s-draft::before { background: var(--slate); }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+
+  /* ─── CARD FOOTER ─── */
+  .rfq-card-footer { padding: 12px 26px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .footer-left { display: flex; align-items: center; gap: 10px; }
+  .footer-right { display: flex; align-items: center; gap: 8px; }
+
+  .btn-action { padding: 7px 16px; border-radius: 8px; font-family: var(--font-body); font-size: 12px; font-weight: 500; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-compare { background: var(--accent); border: none; color: var(--navy); }
+  .btn-compare:hover { background: var(--accent-dim); }
+  .btn-secondary-action { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--slate-light); }
+  .btn-secondary-action:hover { border-color: rgba(255,255,255,0.25); color: var(--white); }
+  .btn-danger-sm { background: transparent; border: 1px solid rgba(255,107,107,0.2); color: var(--error); }
+  .btn-danger-sm:hover { background: rgba(255,107,107,0.08); }
+
+  .deadline-label { font-size: 12px; font-weight: 500; }
+  .dl-urgent { color: var(--error); }
+  .dl-soon { color: var(--gold); }
+  .dl-ok { color: var(--slate-light); }
+  .dl-closed { color: var(--slate); }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state { text-align: center; padding: 80px 32px; }
+  .empty-state h3 { font-family: var(--font-head); font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; color: var(--slate-light); max-width: 400px; margin: 0 auto 28px; line-height: 1.7; }
+
+  /* ─── PAGINATION ─── */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; font-size: 13px; color: var(--slate); margin-top: 8px; }
+  .page-btns { display: flex; gap: 6px; }
+  .page-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid rgba(255,255,255,0.09); color: var(--slate-light); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .page-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .page-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); font-weight: 600; }
+
+  @media (max-width: 1024px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .page-body { padding: 20px 16px; }
+    .topbar { padding: 14px 16px; }
+    .rfq-card-main { grid-template-columns: 1fr; }
+    .bid-progress { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item" href="buyer-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="bidbridge-submit-rfq.html"><span class="nav-icon">＋</span> New RFQ</a>
+    <a class="nav-item active" href="#"><span class="nav-icon">📋</span> My RFQs <span class="nav-badge">6</span></a>
+    <a class="nav-item" href="bidbridge-compare-bids.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge">2</span></a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item" href="bidbridge-notifications.html"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge">6</span></a>
+    <a class="nav-item" href="bidbridge-settings.html"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="bidbridge-profile.html"><span class="nav-icon">👤</span> Profile</a>
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar">JM</div>
+        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>My RFQs</h1>
+        <p>All your requests for quote in one place</p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="search-input" placeholder="Search by name, vendor, RFQ #..." oninput="applyFilters()">
+        </div>
+        <a href="bidbridge-submit-rfq.html" class="btn-new">＋ New RFQ</a>
+      </div>
+    </div>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- STAT CARDS -->
+      <div class="stats-row">
+        <div class="stat-card" onclick="filterByStatus('all', this)">
+          <div class="stat-label">Total RFQs</div>
+          <div class="stat-value">9</div>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('active', this)">
+          <div class="stat-label">Active</div>
+          <div class="stat-value accent">4</div>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('review', this)">
+          <div class="stat-label">Ready to review</div>
+          <div class="stat-value gold">2</div>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('awarded', this)">
+          <div class="stat-label">Awarded</div>
+          <div class="stat-value">3</div>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('draft', this)">
+          <div class="stat-label">Drafts</div>
+          <div class="stat-value error">1</div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-pill active" id="pill-all" onclick="setFilter('all', this)">All RFQs</div>
+        <div class="filter-pill" id="pill-active" onclick="setFilter('active', this)">Active</div>
+        <div class="filter-pill" id="pill-review" onclick="setFilter('review', this)">Ready to review</div>
+        <div class="filter-pill" id="pill-awarded" onclick="setFilter('awarded', this)">Awarded</div>
+        <div class="filter-pill" id="pill-closed" onclick="setFilter('closed', this)">Closed</div>
+        <div class="filter-pill" id="pill-draft" onclick="setFilter('draft', this)">Draft</div>
+        <div class="filter-right">
+          <div class="sort-wrap">
+            <select class="sort-select" onchange="applyFilters()">
+              <option value="newest">Newest first</option>
+              <option value="deadline">Deadline soonest</option>
+              <option value="bids-desc">Most bids</option>
+              <option value="bids-asc">Fewest bids</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- RFQ LIST -->
+      <div class="rfq-list" id="rfq-list"></div>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="empty-state" style="display:none;">
+        <div style="font-size:48px;margin-bottom:16px;">📋</div>
+        <h3>No RFQs found</h3>
+        <p>Try adjusting your search or filter. Or post your first RFQ to start getting competitive bids.</p>
+        <a href="bidbridge-submit-rfq.html" class="btn-new" style="display:inline-flex;margin:0 auto;">＋ Post a new RFQ</a>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination" id="pagination">
+        <span id="pagination-label">Showing 1–9 of 9 RFQs</span>
+        <div class="page-btns">
+          <button class="page-btn">‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div>
+</div>
+
+<script>
+  /*
+   * ─────────────────────────────────────────────────────────────
+   * BACKEND INTEGRATION POINT — Buyer RFQ list
+   *
+   * const response = await fetch('/api/buyer/rfqs', {
+   *   headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
+   * });
+   * const { rfqs } = await response.json();
+   * allRFQs = rfqs;
+   * applyFilters();
+   * ─────────────────────────────────────────────────────────────
+   */
+  const RFQS = [
+    { id: 4831, title: 'Palo Alto NGFW refresh — 3 sites', vendors: ['Palo Alto Networks'], strategy: 'sole', tierMin: 'Gold', status: 'review', bids: 5, maxBids: 8, deadline: '2026-03-27', posted: '2026-03-20', budget: 195000, hasNew: true, newCount: 3 },
+    { id: 4821, title: 'Network infrastructure refresh — Austin HQ', vendors: ['Cisco', 'Aruba'], strategy: 'split', tierMin: 'Gold', status: 'review', bids: 7, maxBids: 10, deadline: '2026-03-29', posted: '2026-03-20', budget: 165000, hasNew: true, newCount: 3 },
+    { id: 4822, title: 'Fortinet SD-WAN — 12 branch offices', vendors: ['Fortinet'], strategy: 'sole', tierMin: 'Gold', status: 'active', bids: 4, maxBids: 8, deadline: '2026-03-29', posted: '2026-03-25', budget: 280000, hasNew: false, newCount: 0 },
+    { id: 4797, title: 'HPE Aruba wireless refresh — warehouse', vendors: ['HPE / Aruba'], strategy: 'sole', tierMin: null, status: 'active', bids: 3, maxBids: 8, deadline: '2026-04-05', posted: '2026-03-25', budget: null, hasNew: false, newCount: 0 },
+    { id: 4808, title: 'CrowdStrike endpoint — global rollout', vendors: ['CrowdStrike'], strategy: 'sole', tierMin: null, status: 'active', bids: 2, maxBids: 8, deadline: '2026-04-10', posted: '2026-03-24', budget: null, hasNew: false, newCount: 0 },
+    { id: 4799, title: 'NetApp storage expansion — Q2', vendors: ['NetApp'], strategy: 'sole', tierMin: 'Silver', status: 'active', bids: 1, maxBids: 8, deadline: '2026-04-12', posted: '2026-03-13', budget: 380000, hasNew: false, newCount: 0 },
+    { id: 4761, title: 'Fortinet firewall refresh — all sites', vendors: ['Fortinet'], strategy: 'sole', tierMin: 'Platinum', status: 'awarded', bids: 6, maxBids: 6, deadline: '2026-03-10', posted: '2026-03-01', budget: 310000, hasNew: false, newCount: 0 },
+    { id: 4744, title: 'NetApp storage expansion — Q1', vendors: ['NetApp', 'Cisco'], strategy: 'split', tierMin: null, status: 'closed', bids: 4, maxBids: 4, deadline: '2026-02-28', posted: '2026-02-14', budget: null, hasNew: false, newCount: 0 },
+    { id: 4711, title: 'Cisco Meraki — retail locations', vendors: ['Cisco'], strategy: 'sole', tierMin: null, status: 'draft', bids: 0, maxBids: 8, deadline: null, posted: '2026-03-26', budget: 85000, hasNew: false, newCount: 0 },
+  ];
+
+  let activeFilter = 'all';
+  let allRFQs = [...RFQS];
+
+  /* ─── RENDER ─── */
+  function renderRFQs(data) {
+    const list = document.getElementById('rfq-list');
+    const empty = document.getElementById('empty-state');
+    const pagination = document.getElementById('pagination');
+
+    if (!data.length) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      pagination.style.display = 'none';
+      return;
+    }
+
+    empty.style.display = 'none';
+    pagination.style.display = 'flex';
+    document.getElementById('pagination-label').textContent = `Showing 1–${data.length} of ${data.length} RFQ${data.length !== 1 ? 's' : ''}`;
+
+    list.innerHTML = data.map(rfq => {
+      const statusMap = {
+        active: ['s-active', 'Accepting bids'],
+        review: ['s-review', 'Ready to review'],
+        awarded: ['s-awarded', 'Awarded'],
+        closed: ['s-closed', 'Closed'],
+        draft: ['s-draft', 'Draft'],
+      };
+      const [statusCls, statusLabel] = statusMap[rfq.status] || ['s-draft', 'Draft'];
+      const fillPct = Math.round((rfq.bids / rfq.maxBids) * 100);
+      const days = rfq.deadline ? daysUntil(rfq.deadline) : null;
+      const dlClass = !days && days !== 0 ? 'dl-closed' : days <= 1 ? 'dl-urgent' : days <= 3 ? 'dl-soon' : 'dl-ok';
+      const dlText = rfq.status === 'draft' ? 'Not posted yet'
+        : !rfq.deadline ? '—'
+        : rfq.status === 'awarded' || rfq.status === 'closed' ? `Closed ${formatDate(rfq.deadline)}`
+        : days <= 0 ? 'Deadline passed'
+        : days === 1 ? 'Closes tomorrow'
+        : days === 0 ? 'Closes today'
+        : `${days} days remaining`;
+
+      const primaryAction = rfq.status === 'review'
+        ? `<button class="btn-action btn-compare" onclick="window.location='bidbridge-compare-bids.html'">Compare bids →</button>`
+        : rfq.status === 'draft'
+        ? `<button class="btn-action btn-compare" onclick="window.location='bidbridge-submit-rfq.html'">Continue editing →</button>`
+        : rfq.status === 'active'
+        ? `<button class="btn-action btn-compare" onclick="window.location='bidbridge-compare-bids.html'">View bids →</button>`
+        : `<button class="btn-action btn-secondary-action">View results</button>`;
+
+      return `
+        <div class="rfq-card${rfq.hasNew ? ' has-new' : ''}">
+          <div class="rfq-card-main">
+            <div>
+              <div class="rfq-id">RFQ #${rfq.id} · Posted ${formatDate(rfq.posted)}</div>
+              <div class="rfq-title">${rfq.title}</div>
+              <div class="rfq-tags" style="margin-top:10px;">
+                ${rfq.vendors.map(v => `<span class="tag tag-vendor">${v}</span>`).join('')}
+                <span class="tag tag-strategy">${rfq.strategy === 'split' ? 'Split bid' : 'Sole source'}</span>
+                ${rfq.tierMin ? `<span class="tag tag-tier">Min: ${rfq.tierMin}</span>` : ''}
+                <span class="status-badge ${statusCls}">${statusLabel}</span>
+              </div>
+              <div class="rfq-meta" style="margin-top:12px;">
+                <div class="rfq-meta-item">💰 <strong>${rfq.budget ? '$' + rfq.budget.toLocaleString() : 'Budget not disclosed'}</strong></div>
+                <div class="rfq-meta-item">📅 <strong class="${dlClass}">${dlText}</strong></div>
+              </div>
+            </div>
+            <div class="bid-progress">
+              <div class="bid-count-wrap">
+                <div class="bid-count-num">${rfq.bids}</div>
+                <div class="bid-count-label">bid${rfq.bids !== 1 ? 's' : ''} received</div>
+              </div>
+              <div style="width:100%;">
+                <div class="bid-bar"><div class="bid-bar-fill" style="width:${fillPct}%"></div></div>
+                <div style="font-size:11px;color:var(--slate);margin-top:4px;text-align:right;">${rfq.bids} of ~${rfq.maxBids} expected</div>
+              </div>
+              ${rfq.hasNew ? `<div class="new-bids-badge">+${rfq.newCount} new</div>` : ''}
+            </div>
+          </div>
+          <div class="rfq-card-footer">
+            <div class="footer-left">
+              ${rfq.status === 'active' || rfq.status === 'review'
+                ? `<button class="btn-action btn-secondary-action" onclick="extendDeadline(${rfq.id})">Extend deadline</button>
+                   <button class="btn-action btn-secondary-action" onclick="broadcastMessage(${rfq.id})">📢 Message all resellers</button>`
+                : rfq.status === 'draft'
+                ? `<button class="btn-action btn-danger-sm" onclick="deleteDraft(${rfq.id})">Delete draft</button>`
+                : `<button class="btn-action btn-secondary-action" onclick="duplicateRFQ(${rfq.id})">Duplicate RFQ</button>`
+              }
+            </div>
+            <div class="footer-right">
+              ${primaryAction}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* ─── FILTER + SEARCH ─── */
+  function setFilter(filter, el) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = filter;
+    applyFilters();
+  }
+
+  function filterByStatus(status, cardEl) {
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
+    cardEl.classList.add('active-filter');
+    const pillId = 'pill-' + status;
+    const pill = document.getElementById(pillId);
+    if (pill) {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    }
+    activeFilter = status;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const sort = document.querySelector('.sort-select').value;
+    let data = [...allRFQs];
+
+    if (activeFilter !== 'all') data = data.filter(r => r.status === activeFilter);
+    if (q) data = data.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      r.vendors.join(' ').toLowerCase().includes(q) ||
+      String(r.id).includes(q)
+    );
+
+    if (sort === 'newest') data.sort((a, b) => b.id - a.id);
+    else if (sort === 'deadline') data.sort((a, b) => {
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return new Date(a.deadline) - new Date(b.deadline);
+    });
+    else if (sort === 'bids-desc') data.sort((a, b) => b.bids - a.bids);
+    else if (sort === 'bids-asc') data.sort((a, b) => a.bids - b.bids);
+
+    renderRFQs(data);
+  }
+
+  /* ─── ACTIONS ─── */
+  function extendDeadline(id) {
+    const days = prompt(`Extend deadline for RFQ #${id} by how many days?`, '7');
+    if (days && !isNaN(days)) {
+      /*
+       * BACKEND INTEGRATION POINT — Extend RFQ deadline
+       * await fetch(`/api/rfq/${id}/extend`, {
+       *   method: 'PATCH',
+       *   headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+       *   body: JSON.stringify({ additionalDays: parseInt(days) })
+       * });
+       * All active resellers are notified of the extended deadline.
+       */
+      showToast(`Deadline extended by ${days} days. All resellers have been notified.`);
+    }
+  }
+
+  function broadcastMessage(id) {
+    const msg = prompt(`Send a message to all resellers bidding on RFQ #${id}:`);
+    if (msg && msg.trim()) {
+      /*
+       * BACKEND INTEGRATION POINT — Broadcast message to all bidders
+       * await fetch('/api/rfq/message', {
+       *   method: 'POST',
+       *   headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+       *   body: JSON.stringify({ rfqId: id, type: 'broadcast', message: msg })
+       * });
+       */
+      showToast('Message sent to all resellers on this RFQ.');
+    }
+  }
+
+  function duplicateRFQ(id) {
+    if (confirm(`Duplicate RFQ #${id}? A new draft will be created with the same details.`)) {
+      /*
+       * BACKEND INTEGRATION POINT — Duplicate RFQ
+       * const response = await fetch(`/api/rfq/${id}/duplicate`, { method: 'POST', headers: {...} });
+       * const { newRfqId } = await response.json();
+       * window.location = 'bidbridge-submit-rfq.html?draft=' + newRfqId;
+       */
+      showToast('RFQ duplicated as a new draft. Redirecting to editor...');
+    }
+  }
+
+  function deleteDraft(id) {
+    if (confirm(`Delete draft RFQ #${id}? This cannot be undone.`)) {
+      /*
+       * BACKEND INTEGRATION POINT — Delete draft RFQ
+       * await fetch(`/api/rfq/${id}`, { method: 'DELETE', headers: {...} });
+       */
+      allRFQs = allRFQs.filter(r => r.id !== id);
+      applyFilters();
+      showToast('Draft deleted.');
+    }
+  }
+
+  /* ─── DATE HELPERS ─── */
+  function formatDate(str) {
+    if (!str) return '—';
+    const d = new Date(str + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function daysUntil(str) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    return Math.ceil((new Date(str + 'T00:00:00') - now) / 86400000);
+  }
+
+  /* ─── TOAST ─── */
+  function showToast(msg) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:32px;right:32px;background:var(--accent);color:var(--navy);padding:12px 22px;border-radius:10px;font-family:var(--font-body);font-weight:600;font-size:14px;z-index:999;';
+    toast.textContent = '✓ ' + msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  /* ─── INIT ─── */
+  applyFilters();
+</script>
+
+</body>
+</html>

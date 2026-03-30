@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Notifications</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 36px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 24px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
+
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; gap: 16px; }
+  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-outline { padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 36px 40px; flex: 1; max-width: 860px; }
+
+  /* ─── FILTER BAR ─── */
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+  .filter-pill { padding: 7px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--slate-light); cursor: pointer; transition: all .2s; user-select: none; display: flex; align-items: center; gap: 6px; }
+  .filter-pill:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+  .filter-pill.active { background: rgba(0,200,150,0.1); border-color: rgba(0,200,150,0.35); color: var(--accent); }
+  .filter-count { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: rgba(255,255,255,0.1); }
+  .filter-pill.active .filter-count { background: rgba(0,200,150,0.2); }
+  .filter-bar-right { margin-left: auto; }
+
+  /* ─── DATE GROUP ─── */
+  .date-group { margin-bottom: 32px; }
+  .date-label { font-size: 12px; font-weight: 500; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+  /* ─── NOTIFICATION ITEM ─── */
+  .notif-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 18px 20px;
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+  }
+  .notif-item:hover { border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.02); }
+  .notif-item.unread { border-left: 3px solid var(--accent); }
+  .notif-item.unread-gold { border-left: 3px solid var(--gold); }
+  .notif-item.unread-error { border-left: 3px solid var(--error); }
+
+  /* notif icon */
+  .notif-icon-wrap {
+    width: 42px; height: 42px; min-width: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .icon-bid { background: rgba(0,200,150,0.1); border: 1px solid rgba(0,200,150,0.2); }
+  .icon-rank { background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); }
+  .icon-award { background: rgba(0,200,150,0.12); border: 1px solid rgba(0,200,150,0.25); }
+  .icon-deadline { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); }
+  .icon-message { background: rgba(168,184,204,0.08); border: 1px solid rgba(168,184,204,0.15); }
+  .icon-system { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.15); }
+  .icon-rfq { background: rgba(0,200,150,0.08); border: 1px solid rgba(0,200,150,0.15); }
+  .icon-info { background: rgba(168,184,204,0.07); border: 1px solid rgba(168,184,204,0.12); }
+
+  /* notif content */
+  .notif-content { flex: 1; min-width: 0; }
+  .notif-title { font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: 4px; line-height: 1.4; }
+  .notif-item.unread .notif-title, .notif-item.unread-gold .notif-title, .notif-item.unread-error .notif-title { font-weight: 600; }
+  .notif-body { font-size: 13px; color: var(--slate-light); line-height: 1.6; margin-bottom: 8px; }
+  .notif-meta { display: flex; align-items: center; gap: 14px; }
+  .notif-time { font-size: 11px; color: var(--slate); }
+  .notif-tag { font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 999px; }
+  .tag-bid { background: rgba(0,200,150,0.1); color: var(--accent); }
+  .tag-rank { background: rgba(245,200,66,0.1); color: var(--gold); }
+  .tag-award { background: rgba(0,200,150,0.1); color: var(--accent); }
+  .tag-deadline { background: rgba(255,107,107,0.08); color: var(--error); }
+  .tag-message { background: rgba(168,184,204,0.08); color: var(--slate-light); }
+  .tag-system { background: rgba(255,107,107,0.08); color: var(--error); }
+  .tag-rfq { background: rgba(0,200,150,0.08); color: var(--accent); }
+
+  /* unread dot */
+  .unread-dot { width: 8px; height: 8px; min-width: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
+  .unread-dot.gold { background: var(--gold); }
+  .unread-dot.error { background: var(--error); }
+  .unread-dot.read { background: transparent; border: 1.5px solid rgba(255,255,255,0.12); }
+
+  /* cta link */
+  .notif-cta { font-size: 12px; color: var(--accent); font-weight: 500; white-space: nowrap; margin-top: 2px; }
+  .notif-cta.gold { color: var(--gold); }
+  .notif-cta.error { color: var(--error); }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state { text-align: center; padding: 80px 32px; }
+  .empty-state h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .empty-state p { font-size: 14px; color: var(--slate-light); }
+
+  /* ─── NOTIFICATION PREFS ─── */
+  .prefs-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 22px 24px; margin-top: 32px; }
+  .prefs-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  .pref-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .pref-row:last-child { border-bottom: none; }
+  .pref-label { font-size: 14px; }
+  .pref-sub { font-size: 12px; color: var(--slate); margin-top: 2px; }
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; }
+  .toggle { position: relative; width: 38px; height: 21px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 999px; cursor: pointer; transition: background .2s; }
+  .toggle input:checked + .toggle-track { background: var(--accent); }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: var(--white); transition: transform .2s; pointer-events: none; }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(17px); }
+  .toggle-label { font-size: 12px; color: var(--slate); }
+
+  @media (max-width: 1024px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .page-body { padding: 20px 16px; }
+    .topbar { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item" href="buyer-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="bidbridge-submit-rfq.html"><span class="nav-icon">＋</span> New RFQ</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📋</span> My RFQs</a>
+    <a class="nav-item" href="bidbridge-compare-bids.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge">2</span></a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item active" href="#"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge">6</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="#"><span class="nav-icon">👤</span> Profile</a>
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar">JM</div>
+        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Notifications</h1>
+        <p id="unread-summary">6 unread notifications</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-outline" onclick="markAllRead()">Mark all as read</button>
+        <button class="btn-outline" onclick="togglePrefs()">⚙ Preferences</button>
+      </div>
+    </div>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-pill active" onclick="setFilter(this, 'all')">All <span class="filter-count" id="count-all">12</span></div>
+        <div class="filter-pill" onclick="setFilter(this, 'unread')">Unread <span class="filter-count" id="count-unread">6</span></div>
+        <div class="filter-pill" onclick="setFilter(this, 'bid')">Bids</div>
+        <div class="filter-pill" onclick="setFilter(this, 'rank')">Rank changes</div>
+        <div class="filter-pill" onclick="setFilter(this, 'award')">Awards</div>
+        <div class="filter-pill" onclick="setFilter(this, 'deadline')">Deadlines</div>
+        <div class="filter-pill" onclick="setFilter(this, 'message')">Messages</div>
+        <div class="filter-pill" onclick="setFilter(this, 'system')">System</div>
+      </div>
+
+      <!-- NOTIFICATION LIST -->
+      <div id="notif-list"></div>
+
+      <!-- NOTIFICATION PREFERENCES -->
+      <div class="prefs-card" id="prefs-card" style="display:none;">
+        <div class="prefs-title">Notification preferences</div>
+
+        <div class="pref-row">
+          <div>
+            <div class="pref-label">New bids on my RFQs</div>
+            <div class="pref-sub">Get notified when a reseller submits a bid on your RFQ</div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Email</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <span class="toggle-label">In-app</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <div class="pref-label">Bid deadline reminders</div>
+            <div class="pref-sub">Remind me 48 hours and 24 hours before a bid deadline closes</div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Email</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <span class="toggle-label">In-app</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <div class="pref-label">Rank changes (resellers)</div>
+            <div class="pref-sub">Alert me when my bid rank position changes on an active RFQ</div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Email</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <span class="toggle-label">In-app</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <div class="pref-label">Buyer messages</div>
+            <div class="pref-sub">Notify me when a buyer sends me a direct message or broadcast</div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Email</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <span class="toggle-label">In-app</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <div class="pref-label">Award notifications</div>
+            <div class="pref-sub">Notify me when a bid is awarded — win or loss</div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Email</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <span class="toggle-label">In-app</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <div class="pref-label">New RFQs matching my vendors</div>
+            <div class="pref-sub">Alert me when a new RFQ is posted for vendors I'm authorized to sell</div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Email</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <span class="toggle-label">In-app</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <div class="pref-label">System &amp; account alerts</div>
+            <div class="pref-sub">Important alerts about your account, certification expiry, and platform updates</div>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Email</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+            <span class="toggle-label">In-app</span>
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+
+      </div><!-- /prefs-card -->
+
+    </div><!-- /page-body -->
+  </div>
+</div>
+
+<script>
+  /*
+   * ─────────────────────────────────────────────────────────────
+   * BACKEND INTEGRATION POINT — Notifications
+   *
+   * const response = await fetch('/api/notifications', {
+   *   headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
+   * });
+   * const { notifications } = await response.json();
+   * renderNotifications(notifications);
+   *
+   * Mark all read:
+   * await fetch('/api/notifications/read-all', { method: 'PATCH', headers: {...} });
+   *
+   * Mark single read:
+   * await fetch(`/api/notifications/${id}/read`, { method: 'PATCH', headers: {...} });
+   *
+   * Notification preferences:
+   * await fetch('/api/notifications/preferences', {
+   *   method: 'PATCH',
+   *   body: JSON.stringify({ newBids: { email: true, inApp: true }, ... })
+   * });
+   * ─────────────────────────────────────────────────────────────
+   */
+
+  const NOTIFICATIONS = [
+    {
+      id: 1, type: 'bid', unread: true, unreadColor: 'accent',
+      icon: '📨', iconClass: 'icon-bid',
+      title: '3 new bids on your Cisco Catalyst RFQ',
+      body: 'NetStar Solutions, Apex Technology, and CorePath IT have all submitted bids on RFQ #4821. You now have 7 bids total. Deadline closes in 2 days.',
+      time: '35 minutes ago', tag: 'bid', tagLabel: 'New bids',
+      cta: 'Compare bids →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
+      date: 'today'
+    },
+    {
+      id: 2, type: 'message', unread: true, unreadColor: 'accent',
+      icon: '💬', iconClass: 'icon-message',
+      title: 'New message from NetStar Solutions',
+      body: 'NetStar Solutions has sent you a question about RFQ #4821: "Can you confirm your SmartNet coverage includes all 12 switches plus the 4 Aruba APs?"',
+      time: '1 hour ago', tag: 'message', tagLabel: 'Message',
+      cta: 'Reply →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
+      date: 'today'
+    },
+    {
+      id: 3, type: 'deadline', unread: true, unreadColor: 'error',
+      icon: '⏰', iconClass: 'icon-deadline',
+      title: 'Bid deadline closing soon — RFQ #4821',
+      body: 'Your Cisco Catalyst 9300 RFQ closes in 48 hours. You currently have 7 bids. If you want to extend the deadline, you can do so from the RFQ management page.',
+      time: '2 hours ago', tag: 'deadline', tagLabel: 'Deadline',
+      cta: 'View RFQ →', ctaColor: 'error', ctaLink: 'buyer-dashboard.html',
+      date: 'today'
+    },
+    {
+      id: 4, type: 'bid', unread: true, unreadColor: 'accent',
+      icon: '📨', iconClass: 'icon-bid',
+      title: '5 resellers have bid on your Palo Alto refresh RFQ',
+      body: 'RFQ #4809 (Palo Alto firewall refresh — all sites) now has 5 bids. The deadline is March 31. Your bids are ready to compare.',
+      time: '2 hours ago', tag: 'bid', tagLabel: 'New bids',
+      cta: 'Compare bids →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
+      date: 'today'
+    },
+    {
+      id: 5, type: 'rank', unread: true, unreadColor: 'gold',
+      icon: '📊', iconClass: 'icon-rank',
+      title: 'Your bid rank changed — RFQ #4818',
+      body: 'A new reseller has submitted a lower bid on RFQ #4818 (Fortinet SD-WAN — retail chain). You are now in 2nd place. The deadline is in 3 days — consider revising your bid.',
+      time: '4 hours ago', tag: 'rank', tagLabel: 'Rank change',
+      cta: 'Revise bid →', ctaColor: 'gold', ctaLink: 'bidbridge-reseller-dashboard.html',
+      date: 'today'
+    },
+    {
+      id: 6, type: 'rfq', unread: true, unreadColor: 'accent',
+      icon: '🔔', iconClass: 'icon-rfq',
+      title: 'New RFQ matches your vendor authorizations',
+      body: 'A new RFQ has been posted for Fortinet SD-WAN across 12 branch offices (RFQ #4822, Dallas TX, $280k budget). You are authorized to bid as a Fortinet Platinum partner.',
+      time: '6 hours ago', tag: 'rfq', tagLabel: 'New RFQ',
+      cta: 'View RFQ →', ctaColor: '', ctaLink: 'bidbridge-rfq-detail.html',
+      date: 'today'
+    },
+    {
+      id: 7, type: 'award', unread: false, unreadColor: '',
+      icon: '🏆', iconClass: 'icon-award',
+      title: 'NetStar Solutions was awarded RFQ #4761',
+      body: 'You selected NetStar Solutions as the winner for your Fortinet firewall refresh RFQ. The deal has been marked as awarded. IT Pricing Network has notified all resellers of the outcome.',
+      time: 'Yesterday at 3:14 PM', tag: 'award', tagLabel: 'Award',
+      cta: 'View details →', ctaColor: '', ctaLink: 'buyer-dashboard.html',
+      date: 'yesterday'
+    },
+    {
+      id: 8, type: 'bid', unread: false, unreadColor: '',
+      icon: '📨', iconClass: 'icon-bid',
+      title: 'First bid received on HPE Aruba wireless RFQ',
+      body: 'Apex Technology Group has submitted the first bid on RFQ #4797 (HPE Aruba wireless refresh — warehouse). 7 other resellers have been notified.',
+      time: 'Yesterday at 11:22 AM', tag: 'bid', tagLabel: 'New bid',
+      cta: 'View bid →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
+      date: 'yesterday'
+    },
+    {
+      id: 9, type: 'message', unread: false, unreadColor: '',
+      icon: '💬', iconClass: 'icon-message',
+      title: 'Buyer responded to your question — RFQ #4821',
+      body: 'Buyer #4821 replied: "Standard delivery entrance is fine. Please coordinate with our facilities team upon arrival."',
+      time: 'Yesterday at 9:45 AM', tag: 'message', tagLabel: 'Message',
+      cta: 'View thread →', ctaColor: '', ctaLink: 'bidbridge-reseller-dashboard.html',
+      date: 'yesterday'
+    },
+    {
+      id: 10, type: 'rfq', unread: false, unreadColor: '',
+      icon: '✅', iconClass: 'icon-rfq',
+      title: 'Your RFQ #4797 went live',
+      body: 'HPE Aruba wireless refresh RFQ has been published. 8 authorized resellers have been notified and can now submit bids. Deadline: April 5, 2026.',
+      time: '2 days ago', tag: 'rfq', tagLabel: 'RFQ live',
+      cta: 'View RFQ →', ctaColor: '', ctaLink: 'buyer-dashboard.html',
+      date: 'earlier'
+    },
+    {
+      id: 11, type: 'system', unread: false, unreadColor: '',
+      icon: '⚠️', iconClass: 'icon-system',
+      title: 'Fortinet partner certification expiring soon',
+      body: 'Your Fortinet Gold partner certification expires in 30 days (April 26, 2026). Please upload your renewed certification to maintain your eligibility to bid on Fortinet RFQs.',
+      time: '3 days ago', tag: 'system', tagLabel: 'System alert',
+      cta: 'Update certification →', ctaColor: 'error', ctaLink: '#',
+      date: 'earlier'
+    },
+    {
+      id: 12, type: 'award', unread: false, unreadColor: '',
+      icon: '📋', iconClass: 'icon-info',
+      title: 'Your bid on RFQ #4744 was not selected',
+      body: 'The buyer has selected another reseller for the NetApp storage expansion RFQ. Thank you for bidding. Your win rate this quarter is 37% — keep it up.',
+      time: '5 days ago', tag: 'award', tagLabel: 'Not selected',
+      cta: 'View outcome →', ctaColor: '', ctaLink: 'bidbridge-reseller-dashboard.html',
+      date: 'earlier'
+    },
+  ];
+
+  let activeFilter = 'all';
+  let notifications = NOTIFICATIONS.map(n => ({ ...n }));
+
+  /* ─── RENDER ─── */
+  function renderNotifications() {
+    const container = document.getElementById('notif-list');
+    let filtered = notifications;
+
+    if (activeFilter === 'unread') filtered = notifications.filter(n => n.unread);
+    else if (activeFilter !== 'all') filtered = notifications.filter(n => n.type === activeFilter);
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:16px;">🔔</div><h3>All caught up</h3><p>No notifications match this filter.</p></div>`;
+      return;
+    }
+
+    const groups = { today: [], yesterday: [], earlier: [] };
+    filtered.forEach(n => { if (groups[n.date]) groups[n.date].push(n); });
+
+    const labels = { today: 'Today', yesterday: 'Yesterday', earlier: 'Earlier' };
+    let html = '';
+
+    Object.entries(groups).forEach(([key, items]) => {
+      if (!items.length) return;
+      html += `<div class="date-group"><div class="date-label">${labels[key]}</div>`;
+      items.forEach(n => {
+        const borderClass = n.unread
+          ? n.unreadColor === 'gold' ? 'unread-gold' : n.unreadColor === 'error' ? 'unread-error' : 'unread'
+          : '';
+        const dotClass = n.unread
+          ? n.unreadColor === 'gold' ? 'gold' : n.unreadColor === 'error' ? 'error' : ''
+          : 'read';
+        const tagClass = `tag-${n.type}`;
+
+        html += `
+          <div class="notif-item ${borderClass}" onclick="markRead(${n.id})" id="notif-${n.id}">
+            <div class="notif-icon-wrap ${n.iconClass}">${n.icon}</div>
+            <div class="notif-content">
+              <div class="notif-title">${n.title}</div>
+              <div class="notif-body">${n.body}</div>
+              <div class="notif-meta">
+                <span class="notif-time">${n.time}</span>
+                <span class="notif-tag ${tagClass}">${n.tagLabel}</span>
+                ${n.cta ? `<a class="notif-cta ${n.ctaColor}" href="${n.ctaLink}" onclick="event.stopPropagation();">${n.cta}</a>` : ''}
+              </div>
+            </div>
+            <div class="unread-dot ${dotClass}"></div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    });
+
+    container.innerHTML = html;
+    updateCounts();
+  }
+
+  /* ─── MARK READ ─── */
+  function markRead(id) {
+    const n = notifications.find(n => n.id === id);
+    if (n) n.unread = false;
+    renderNotifications();
+  }
+
+  function markAllRead() {
+    notifications.forEach(n => n.unread = false);
+    renderNotifications();
+  }
+
+  /* ─── FILTER ─── */
+  function setFilter(el, filter) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = filter;
+    renderNotifications();
+  }
+
+  /* ─── COUNTS ─── */
+  function updateCounts() {
+    const unread = notifications.filter(n => n.unread).length;
+    document.getElementById('count-all').textContent = notifications.length;
+    document.getElementById('count-unread').textContent = unread;
+    document.getElementById('unread-summary').textContent = unread > 0
+      ? `${unread} unread notification${unread !== 1 ? 's' : ''}`
+      : 'All caught up';
+  }
+
+  /* ─── PREFS TOGGLE ─── */
+  function togglePrefs() {
+    const card = document.getElementById('prefs-card');
+    card.style.display = card.style.display === 'none' ? 'block' : 'none';
+    if (card.style.display === 'block') card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ─── INIT ─── */
+  renderNotifications();
+</script>
+
+</body>
+</html>

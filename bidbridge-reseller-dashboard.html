@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Reseller Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  .app-shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 28px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+
+  /* Partner profile block in sidebar */
+  .sidebar-profile {
+    margin: 0 16px 28px;
+    padding: 18px;
+    background: rgba(0,200,150,0.06);
+    border: 1px solid rgba(0,200,150,0.15);
+    border-radius: 12px;
+  }
+  .profile-company { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .profile-tiers { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .profile-tier-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .profile-tier-vendor { color: var(--slate-light); }
+  .tier-chip { font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+  .tier-chip.gold { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+  .tier-chip.platinum { background: rgba(168,184,204,0.12); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.25); }
+  .tier-chip.silver { background: rgba(136,150,169,0.1); color: var(--slate); border: 1px solid rgba(136,150,169,0.2); }
+
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 20px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; cursor: pointer; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .nav-badge.gold { background: var(--gold); }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
+
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; }
+
+  /* ─── TOPBAR ─── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; gap: 16px; }
+  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+  .search-wrap { flex: 1; max-width: 400px; position: relative; }
+  .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 15px; pointer-events: none; }
+  .search-input { width: 100%; padding: 10px 16px 10px 42px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color .2s; }
+  .search-input::placeholder { color: var(--slate); }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* ─── TABS ─── */
+  .tab-bar { display: flex; gap: 2px; padding: 0 40px; background: var(--navy-mid); border-bottom: 1px solid var(--card-border); }
+  .tab-btn { padding: 16px 24px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--slate); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; transition: color .2s, border-color .2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; margin-bottom: -1px; }
+  .tab-btn:hover { color: var(--slate-light); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-count { background: rgba(255,255,255,0.08); color: var(--slate-light); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .tab-btn.active .tab-count { background: rgba(0,200,150,0.15); color: var(--accent); }
+
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 32px 40px; flex: 1; }
+
+  /* ─── STAT CARDS ─── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+  .stat-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px 22px; transition: border-color .2s; }
+  .stat-card:hover { border-color: rgba(255,255,255,0.14); }
+  .stat-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .stat-value { font-family: var(--font-head); font-size: 30px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-sub { font-size: 12px; color: var(--slate); margin-top: 6px; }
+  .stat-sub.up { color: var(--accent); }
+  .stat-sub.warn { color: var(--gold); }
+
+  /* ─── ALERT BANNER ─── */
+  .alert-banner {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px;
+    background: rgba(245,200,66,0.07);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .alert-banner:hover { border-color: rgba(245,200,66,0.4); }
+  .alert-icon { font-size: 20px; }
+  .alert-text { flex: 1; font-size: 13px; color: var(--slate-light); }
+  .alert-text strong { color: var(--gold); }
+  .alert-cta { font-size: 12px; color: var(--gold); font-weight: 500; white-space: nowrap; }
+
+  /* ─── FILTERS ─── */
+  .filters-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-pill { padding: 7px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--slate-light); cursor: pointer; transition: all .2s; user-select: none; }
+  .filter-pill:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+  .filter-pill.active { background: rgba(0,200,150,0.1); border-color: rgba(0,200,150,0.35); color: var(--accent); }
+  .filters-right { margin-left: auto; }
+  .sort-wrap { position: relative; }
+  .sort-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+  .sort-select { padding: 7px 30px 7px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; outline: none; cursor: pointer; appearance: none; }
+  .sort-select option { background: var(--navy-mid); }
+
+  /* ─── RFQ CARDS (Open marketplace) ─── */
+  .rfq-grid { display: flex; flex-direction: column; gap: 14px; }
+
+  .rfq-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 24px 28px;
+    transition: border-color .2s, background .2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .rfq-card:hover { border-color: rgba(0,200,150,0.25); background: rgba(0,200,150,0.02); }
+  .rfq-card.new-rfq { border-left: 3px solid var(--accent); }
+
+  .new-tag { position: absolute; top: 16px; right: 20px; background: var(--accent); color: var(--navy); font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em; }
+
+  .rfq-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+  .rfq-card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .rfq-card-sub { font-size: 13px; color: var(--slate-light); }
+
+  .rfq-card-meta { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 16px; }
+  .rfq-meta-item { font-size: 13px; color: var(--slate-light); display: flex; align-items: center; gap: 6px; }
+  .rfq-meta-item strong { color: var(--white); font-weight: 500; }
+
+  .rfq-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+  .rfq-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .rfq-tag { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 999px; }
+  .rfq-tag.vendor { background: rgba(0,200,150,0.08); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .rfq-tag.strategy { background: rgba(245,200,66,0.08); color: var(--gold); border: 1px solid rgba(245,200,66,0.15); }
+  .rfq-tag.tier-req { background: rgba(168,184,204,0.08); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.15); }
+
+  .deadline-label { font-size: 12px; font-weight: 500; }
+  .deadline-urgent { color: var(--error); }
+  .deadline-soon { color: var(--gold); }
+  .deadline-ok { color: var(--slate-light); }
+
+  .btn-bid { padding: 9px 22px; background: var(--accent); border: none; border-radius: 9px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s, transform .15s; white-space: nowrap; }
+  .btn-bid:hover { background: var(--accent-dim); transform: translateY(-1px); }
+  .btn-bid-count { font-size: 12px; color: var(--slate); }
+
+  /* ─── ACTIVE BIDS (My bids tab) ─── */
+  .active-bid-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    transition: border-color .2s;
+  }
+  .active-bid-card:hover { border-color: rgba(255,255,255,0.14); }
+
+  .active-bid-header { padding: 20px 26px; display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; }
+
+  .active-bid-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .active-bid-sub { font-size: 13px; color: var(--slate-light); }
+
+  /* ─── RANK INDICATOR ─── */
+  .rank-block {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+  }
+
+  .rank-badge {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 10px;
+    font-family: var(--font-head); font-size: 14px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .rank-badge.first { background: rgba(0,200,150,0.12); border: 1px solid rgba(0,200,150,0.3); color: var(--accent); }
+  .rank-badge.second { background: rgba(245,200,66,0.10); border: 1px solid rgba(245,200,66,0.25); color: var(--gold); }
+  .rank-badge.third { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); color: var(--error); }
+
+  .rank-sub { font-size: 11px; color: var(--slate); text-align: right; }
+  .rank-nudge { font-size: 11px; color: var(--gold); text-align: right; }
+
+  /* ─── BID DETAILS ROW ─── */
+  .active-bid-details { display: flex; flex-wrap: wrap; gap: 24px; padding: 0 26px 16px; }
+  .bid-detail { }
+  .bid-detail-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .bid-detail-value { font-size: 14px; font-weight: 500; color: var(--white); }
+  .bid-detail-value.price { font-family: var(--font-head); font-size: 17px; font-weight: 700; color: var(--accent); }
+
+  /* ─── BID FOOTER ─── */
+  .active-bid-footer { padding: 12px 26px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+  .bid-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+  .bid-status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .status-pending { background: rgba(136,150,169,0.1); color: var(--slate-light); border: 1px solid rgba(136,150,169,0.2); }
+  .status-pending::before { background: var(--slate); }
+  .status-leading { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .status-leading::before { background: var(--accent); animation: pulse 2s infinite; }
+  .status-won { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.25); }
+  .status-won::before { background: var(--accent); }
+  .status-lost { background: rgba(255,107,107,0.08); color: var(--error); border: 1px solid rgba(255,107,107,0.2); }
+  .status-lost::before { background: var(--error); }
+
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+
+  .bid-footer-actions { display: flex; gap: 8px; }
+  .btn-revise { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 12px; cursor: pointer; transition: all .2s; }
+  .btn-revise:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-msg-small { padding: 7px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 12px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 5px; }
+  .btn-msg-small:hover { border-color: var(--accent); color: var(--accent); }
+  .unread-badge { background: var(--accent); color: var(--navy); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+
+  /* ─── RANK CHANGE ALERT ─── */
+  .rank-change-alert {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: rgba(245,200,66,0.07);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 13px;
+  }
+  .rank-change-alert strong { color: var(--gold); }
+
+  /* ─── MSG OVERLAY ─── */
+  .msg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .msg-overlay.open { display: flex; }
+  .msg-panel { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; width: 100%; max-width: 520px; max-height: 75vh; display: flex; flex-direction: column; overflow: hidden; animation: slideUp .25s ease; }
+  @keyframes slideUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+  .msg-header { padding: 18px 22px 14px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: flex-start; justify-content: space-between; }
+  .msg-header-info h3 { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+  .msg-header-info p { font-size: 12px; color: var(--slate-light); }
+  .msg-close { background: none; border: none; color: var(--slate); font-size: 20px; cursor: pointer; }
+  .msg-close:hover { color: var(--white); }
+  .msg-thread { flex: 1; overflow-y: auto; padding: 16px 22px; display: flex; flex-direction: column; gap: 12px; min-height: 160px; }
+  .msg-bubble { max-width: 85%; padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; }
+  .msg-bubble.reseller { align-self: flex-end; background: rgba(0,200,150,0.12); border: 1px solid rgba(0,200,150,0.2); }
+  .msg-bubble.buyer { align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+  .msg-bubble.broadcast { align-self: center; background: rgba(245,200,66,0.07); border: 1px solid rgba(245,200,66,0.15); color: var(--gold); font-size: 12px; max-width: 95%; text-align: center; border-radius: 8px; padding: 8px 16px; }
+  .msg-sender { font-size: 11px; color: var(--slate); margin-bottom: 3px; }
+  .msg-time { font-size: 11px; color: var(--slate); margin-top: 3px; text-align: right; }
+  .msg-compose { padding: 14px 22px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; gap: 8px; }
+  .msg-textarea { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 14px; outline: none; resize: none; min-height: 72px; }
+  .msg-textarea:focus { border-color: var(--accent); }
+  .msg-textarea::placeholder { color: var(--slate); }
+  .msg-compose-row { display: flex; justify-content: space-between; align-items: center; }
+  .msg-hint { font-size: 12px; color: var(--slate); }
+  .btn-send { padding: 9px 22px; background: var(--accent); border: none; border-radius: 9px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-send:hover { background: var(--accent-dim); }
+
+  /* ─── REVISE BID MODAL ─── */
+  .revise-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .revise-overlay.open { display: flex; }
+  .revise-modal { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 36px; width: 100%; max-width: 480px; animation: slideUp .25s ease; }
+  .revise-modal h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .revise-modal p { font-size: 13px; color: var(--slate-light); margin-bottom: 24px; line-height: 1.6; }
+  .revise-form-group { margin-bottom: 18px; }
+  .revise-label { display: block; font-size: 13px; font-weight: 500; color: var(--slate-light); margin-bottom: 8px; }
+  .revise-input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 15px; outline: none; transition: border-color .2s; }
+  .revise-input:focus { border-color: var(--accent); }
+  .revise-textarea { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 14px; outline: none; resize: none; min-height: 80px; }
+  .revise-textarea:focus { border-color: var(--accent); }
+  .revise-textarea::placeholder, .revise-input::placeholder { color: var(--slate); }
+  .revise-rank-note { padding: 12px 16px; background: rgba(245,200,66,0.07); border: 1px solid rgba(245,200,66,0.15); border-radius: 10px; font-size: 13px; color: var(--gold); margin-bottom: 20px; line-height: 1.6; }
+  .revise-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-revise-submit { padding: 11px 26px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; }
+  .btn-revise-submit:hover { background: var(--accent-dim); }
+  .btn-revise-cancel { padding: 11px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; }
+  .btn-revise-cancel:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state { text-align: center; padding: 60px 32px; }
+  .empty-state h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .empty-state p { font-size: 14px; color: var(--slate-light); max-width: 360px; margin: 0 auto; }
+
+  @media (max-width: 1024px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-body { padding: 20px 16px; }
+    .topbar { padding: 14px 16px; }
+    .active-bid-header { grid-template-columns: 1fr; }
+    .rank-block { align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+
+    <!-- Partner profile -->
+    <div class="sidebar-profile">
+      <div class="profile-company">NetStar Solutions</div>
+      <div style="font-size:11px;color:var(--slate);margin-bottom:2px;">Authorized reseller · Verified ✓</div>
+      <div class="profile-tiers">
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Cisco</span><span class="tier-chip gold">⭐ Gold</span></div>
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Fortinet</span><span class="tier-chip platinum">💠 Platinum</span></div>
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Palo Alto</span><span class="tier-chip gold">⭐ Gold</span></div>
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Aruba</span><span class="tier-chip silver">◈ Silver</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item active" href="#"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🔍</span> Browse RFQs <span class="nav-badge">12</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">📨</span> My bids <span class="nav-badge">5</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">🏆</span> Won deals</a>
+
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge gold">3</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">⭐</span> My profile</a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
+
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar">MR</div>
+        <div><div class="user-name">Mike Reynolds</div><div class="user-role">Reseller · NetStar Solutions</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Reseller Dashboard</h1>
+        <p>Friday, March 27, 2026</p>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" placeholder="Search RFQs by vendor, product, or location..." oninput="handleSearch()">
+      </div>
+    </div>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('open', this)">Open RFQs <span class="tab-count">12</span></button>
+      <button class="tab-btn" onclick="switchTab('mybids', this)">My active bids <span class="tab-count">5</span></button>
+      <button class="tab-btn" onclick="switchTab('won', this)">Won <span class="tab-count">3</span></button>
+      <button class="tab-btn" onclick="switchTab('lost', this)">Lost <span class="tab-count">8</span></button>
+    </div>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Open RFQs available</div>
+          <div class="stat-value accent">12</div>
+          <div class="stat-sub up">↑ 3 new today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active bids submitted</div>
+          <div class="stat-value">5</div>
+          <div class="stat-sub warn">2 need attention</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Win rate this quarter</div>
+          <div class="stat-value gold">37%</div>
+          <div class="stat-sub">3 of 8 bids won</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Revenue won (Q1)</div>
+          <div class="stat-value">$412k</div>
+          <div class="stat-sub up">↑ 18% vs last quarter</div>
+        </div>
+      </div>
+
+      <!-- RANK CHANGE ALERT -->
+      <div class="rank-change-alert" id="rank-alert">
+        <span style="font-size:18px;">⚠️</span>
+        <div style="flex:1;">
+          <strong>Your rank changed on 2 RFQs.</strong> A new reseller has outbid you on the Cisco Austin HQ project. You are now in 2nd place. Bid deadline is in 2 days.
+        </div>
+        <button class="btn-revise" onclick="switchTab('mybids', document.querySelectorAll('.tab-btn')[1]); document.getElementById('rank-alert').style.display='none';" style="white-space:nowrap;">Review bids →</button>
+      </div>
+
+      <!-- ── OPEN RFQs TAB ── -->
+      <div id="tab-open">
+        <div class="filters-row">
+          <div class="filter-pill active" onclick="setFilter(this,'all')">All vendors</div>
+          <div class="filter-pill" onclick="setFilter(this,'cisco')">Cisco</div>
+          <div class="filter-pill" onclick="setFilter(this,'fortinet')">Fortinet</div>
+          <div class="filter-pill" onclick="setFilter(this,'palo')">Palo Alto</div>
+          <div class="filter-pill" onclick="setFilter(this,'aruba')">Aruba</div>
+          <div class="filters-right">
+            <div class="sort-wrap">
+              <select class="sort-select" onchange="sortOpenRFQs(this.value)">
+                <option value="newest">Newest first</option>
+                <option value="deadline">Deadline soonest</option>
+                <option value="budget-desc">Largest budget</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="rfq-grid" id="open-rfq-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ── MY BIDS TAB ── -->
+      <div id="tab-mybids" style="display:none;">
+        <div id="my-bids-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ── WON TAB ── -->
+      <div id="tab-won" style="display:none;">
+        <div class="empty-state" style="padding:40px 0;">
+          <div style="font-size:48px;margin-bottom:16px;">🏆</div>
+          <h3>3 deals won this quarter</h3>
+          <p style="color:var(--slate-light);margin-top:8px;">Total value: <strong style="color:var(--accent);">$412,400</strong></p>
+        </div>
+      </div>
+
+      <!-- ── LOST TAB ── -->
+      <div id="tab-lost" style="display:none;">
+        <div class="empty-state" style="padding:40px 0;">
+          <div style="font-size:48px;margin-bottom:16px;">📊</div>
+          <h3>8 bids not selected</h3>
+          <p>Keep refining your pricing. Your win rate is trending up — 37% this quarter vs 28% last quarter.</p>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div>
+</div>
+
+<!-- ─── MESSAGE OVERLAY ─── -->
+<div class="msg-overlay" id="msg-overlay" onclick="closeMsgIfOutside(event)">
+  <div class="msg-panel">
+    <div class="msg-header">
+      <div class="msg-header-info">
+        <h3 id="msg-title">Message buyer</h3>
+        <p id="msg-sub">Buyer is anonymous — shown as Buyer #4821</p>
+      </div>
+      <button class="msg-close" onclick="closeMsg()">×</button>
+    </div>
+    <div class="msg-thread" id="msg-thread"></div>
+    <div class="msg-compose">
+      <textarea class="msg-textarea" id="msg-input" placeholder="Ask a question or clarify something about this RFQ..."></textarea>
+      <div class="msg-compose-row">
+        <span class="msg-hint">The buyer will see your company name but not your personal contact details</span>
+        <button class="btn-send" onclick="sendMsg()">Send →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── REVISE BID MODAL ─── -->
+<div class="revise-overlay" id="revise-overlay" onclick="closeReviseIfOutside(event)">
+  <div class="revise-modal">
+    <h3>Revise your bid</h3>
+    <p id="revise-rfq-name" style="color:var(--accent);font-weight:500;margin-bottom:12px;"></p>
+    <div class="revise-rank-note" id="revise-rank-note"></div>
+    <div class="revise-form-group">
+      <label class="revise-label">Revised total price ($)</label>
+      <input type="number" class="revise-input" id="revise-price" placeholder="Enter your revised bid amount">
+    </div>
+    <div class="revise-form-group">
+      <label class="revise-label">Updated notes <span style="font-weight:400;color:var(--slate);">(optional)</span></label>
+      <textarea class="revise-textarea" id="revise-notes" placeholder="Add context to support your revised bid..."></textarea>
+    </div>
+    <div class="revise-actions">
+      <button class="btn-revise-cancel" onclick="closeRevise()">Cancel</button>
+      <button class="btn-revise-submit" onclick="submitRevision()">Submit revision →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ═══════════════════════════════════════════════
+     MOCK DATA
+     ─────────────────────────────────────────────
+     BACKEND INTEGRATION POINT — Open RFQs for reseller
+     Replace with:
+
+     const response = await fetch('/api/reseller/rfqs/available', {
+       headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
+     });
+     const { rfqs } = await response.json();
+
+     Server filters RFQs based on:
+     - Reseller's authorized vendors
+     - Reseller's partner tier vs RFQ minimum tier requirement
+     - RFQ is still open (deadline not passed)
+     - Reseller has not already been disqualified
+  ═══════════════════════════════════════════════ */
+  const OPEN_RFQS = [
+    { id: 4822, title: 'Fortinet SD-WAN — 12 branch offices', vendor: 'Fortinet', strategy: 'sole', tierReq: 'Gold', budget: 280000, deadline: '2026-03-29', location: 'Dallas, TX', bids: 4, isNew: true, description: 'Full SD-WAN rollout for 12 branch offices. Includes FortiGate 100F units, FortiManager, and 3-year support.' },
+    { id: 4819, title: 'Cisco data center refresh — Phoenix', vendor: 'Cisco', strategy: 'split', tierReq: 'Gold', budget: 540000, deadline: '2026-04-02', location: 'Phoenix, AZ', bids: 6, isNew: true, description: 'Nexus 9000 series core switches and UCS server refresh. Multi-vendor RFQ — Cisco lot only.' },
+    { id: 4815, title: 'Palo Alto NGFW — financial services', vendor: 'Palo Alto Networks', strategy: 'sole', tierReq: 'Platinum', budget: 195000, deadline: '2026-04-05', location: 'New York, NY', bids: 3, isNew: false, description: 'PA-5250 series deployment across 3 data centers. Panorama management and Cortex XDR required.' },
+    { id: 4810, title: 'Aruba wireless — university campus', vendor: 'Aruba', strategy: 'sole', tierReq: 'Silver', budget: 120000, deadline: '2026-04-08', location: 'Austin, TX', bids: 5, isNew: false, description: 'AP-635 access points across 8 campus buildings. ClearPass policy manager required.' },
+    { id: 4806, title: 'Fortinet firewall refresh — healthcare', vendor: 'Fortinet', strategy: 'sole', tierReq: 'Platinum', budget: 310000, deadline: '2026-04-12', location: 'Chicago, IL', bids: 2, isNew: false, description: 'HIPAA-compliant firewall refresh. FortiGate 600F series. Must include FortiAnalyzer.' },
+  ];
+
+  /*
+   * ─────────────────────────────────────────────────────────────
+   * BACKEND INTEGRATION POINT — Reseller's active bids
+   * Replace with:
+   *
+   * const response = await fetch('/api/reseller/bids/active', {
+   *   headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
+   * });
+   * const { bids } = await response.json();
+   *
+   * Each bid includes rank position — computed server-side:
+   * rank = position of this reseller's price among all submitted bids
+   * (1 = lowest price, 2 = second lowest, etc.)
+   * totalBids = total number of bids on this RFQ
+   * ─────────────────────────────────────────────────────────────
+   */
+  const MY_BIDS = [
+    { id: 1, rfqId: 4821, title: 'Network infrastructure refresh — Austin HQ', vendor: 'Cisco · Aruba', myPrice: 137200, myDelivery: '2026-04-18', rank: 1, totalBids: 7, status: 'leading', deadline: '2026-03-29', unreadMessages: 2, submittedAt: '2026-03-24' },
+    { id: 2, rfqId: 4818, title: 'Fortinet SD-WAN — retail chain', vendor: 'Fortinet', myPrice: 224500, myDelivery: '2026-04-25', rank: 2, totalBids: 5, status: 'pending', deadline: '2026-03-31', unreadMessages: 1, submittedAt: '2026-03-22' },
+    { id: 3, rfqId: 4812, title: 'Palo Alto refresh — law firm', vendor: 'Palo Alto Networks', myPrice: 88900, myDelivery: '2026-04-20', rank: 3, totalBids: 6, status: 'pending', deadline: '2026-04-03', unreadMessages: 0, submittedAt: '2026-03-21' },
+    { id: 4, rfqId: 4808, title: 'Cisco Meraki — retail rollout', vendor: 'Cisco', myPrice: 156000, myDelivery: '2026-05-01', rank: 1, totalBids: 4, status: 'leading', deadline: '2026-04-06', unreadMessages: 0, submittedAt: '2026-03-20' },
+    { id: 5, rfqId: 4801, title: 'Fortinet ZTNA — enterprise', vendor: 'Fortinet', myPrice: 412000, myDelivery: '2026-05-15', rank: 2, totalBids: 3, status: 'pending', deadline: '2026-04-10', unreadMessages: 0, submittedAt: '2026-03-18' },
+  ];
+
+  const MSG_THREADS = {
+    1: [
+      { sender: 'buyer', text: 'Can you confirm your SmartNet coverage includes all 12 switches plus the 4 Aruba APs?', time: '1 day ago' },
+      { sender: 'reseller', text: 'Yes — our bid covers 3-year SmartNet on all Cisco units and 1-year Aruba support. Happy to extend Aruba to 3 years for an additional $3,200.', time: '1 day ago' },
+      { sender: 'buyer', text: 'Great, please include that in your updated bid notes.', time: '18 hours ago' },
+    ],
+    2: [
+      { sender: 'buyer', text: 'Does your bid include on-site installation at all 8 locations?', time: '2 days ago' },
+    ],
+  };
+
+  let activeTab = 'open';
+  let activeMsgBid = null;
+  let activeReviseBid = null;
+
+  /* ─── TAB SWITCHING ─── */
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    ['open','mybids','won','lost'].forEach(t => {
+      document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    });
+    activeTab = tab;
+  }
+
+  /* ─── FILTER ─── */
+  function setFilter(el, vendor) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    renderOpenRFQs(vendor === 'all' ? OPEN_RFQS : OPEN_RFQS.filter(r => r.vendor.toLowerCase().includes(vendor)));
+  }
+
+  function handleSearch() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    renderOpenRFQs(q ? OPEN_RFQS.filter(r => r.title.toLowerCase().includes(q) || r.vendor.toLowerCase().includes(q) || r.location.toLowerCase().includes(q)) : OPEN_RFQS);
+  }
+
+  function sortOpenRFQs(val) {
+    let sorted = [...OPEN_RFQS];
+    if (val === 'newest') sorted.sort((a,b) => b.id - a.id);
+    else if (val === 'deadline') sorted.sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+    else if (val === 'budget-desc') sorted.sort((a,b) => b.budget - a.budget);
+    renderOpenRFQs(sorted);
+  }
+
+  /* ─── RENDER OPEN RFQs ─── */
+  function renderOpenRFQs(data) {
+    const grid = document.getElementById('open-rfq-grid');
+    if (!data.length) { grid.innerHTML = '<div class="empty-state"><h3>No RFQs match your filters</h3><p>Try adjusting your vendor filter or search.</p></div>'; return; }
+
+    grid.innerHTML = data.map(rfq => {
+      const days = daysUntil(rfq.deadline);
+      const dlClass = days <= 2 ? 'deadline-urgent' : days <= 5 ? 'deadline-soon' : 'deadline-ok';
+      const dlLabel = days <= 0 ? 'Deadline passed' : days === 1 ? 'Closes tomorrow' : `${days} days left`;
+      const budgetLabel = rfq.budget ? '$' + rfq.budget.toLocaleString() : 'Not disclosed';
+
+      return `
+        <div class="rfq-card ${rfq.isNew ? 'new-rfq' : ''}">
+          ${rfq.isNew ? '<div class="new-tag">NEW</div>' : ''}
+          <div class="rfq-card-top">
+            <div>
+              <div class="rfq-card-title">RFQ #${rfq.id} — ${rfq.title}</div>
+              <div class="rfq-card-sub">${rfq.description}</div>
+            </div>
+          </div>
+          <div class="rfq-card-meta">
+            <div class="rfq-meta-item">📍 <strong>${rfq.location}</strong></div>
+            <div class="rfq-meta-item">💰 Budget: <strong>${budgetLabel}</strong></div>
+            <div class="rfq-meta-item">👥 <strong>${rfq.bids}</strong> bids so far</div>
+            <div class="rfq-meta-item">⭐ Min. tier: <strong>${rfq.tierReq}</strong></div>
+          </div>
+          <div class="rfq-card-footer">
+            <div class="rfq-tags">
+              ${rfq.vendor.split(' · ').map(v => `<span class="rfq-tag vendor">${v}</span>`).join('')}
+              <span class="rfq-tag strategy">${rfq.strategy === 'split' ? 'Split bid' : 'Sole source'}</span>
+              <span class="rfq-tag tier-req">Min: ${rfq.tierReq}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <span class="deadline-label ${dlClass}">⏱ ${dlLabel}</span>
+              <button class="btn-bid" onclick="openBidForm(${rfq.id}, '${rfq.title}')">Submit bid →</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* ─── RENDER MY BIDS ─── */
+  function renderMyBids() {
+    const list = document.getElementById('my-bids-list');
+    list.innerHTML = MY_BIDS.map(bid => {
+      const rankConfig = bid.rank === 1
+        ? { cls: 'first', emoji: '🥇', label: '1st place', sub: `Lowest of ${bid.totalBids} bids`, nudge: null }
+        : bid.rank === 2
+        ? { cls: 'second', emoji: '🥈', label: '2nd place', sub: `${bid.totalBids - 1} others have bid`, nudge: 'One reseller is ahead of you. Consider revising.' }
+        : { cls: 'third', emoji: '🥉', label: `${bid.rank}${bid.rank===3?'rd':'th'} place`, sub: `${bid.totalBids} total bids`, nudge: 'You are not in the top 2. Consider revising your bid.' };
+
+      const statusMap = {
+        leading: ['status-leading', 'Leading'],
+        pending: ['status-pending', 'Bid submitted'],
+        won: ['status-won', 'Won ✓'],
+        lost: ['status-lost', 'Not selected'],
+      };
+      const [statusCls, statusLabel] = statusMap[bid.status] || ['status-pending','Submitted'];
+
+      const unread = bid.unreadMessages > 0
+        ? `<span class="unread-badge">${bid.unreadMessages}</span>` : '';
+
+      const days = daysUntil(bid.deadline);
+      const dlClass = days <= 2 ? 'deadline-urgent' : days <= 5 ? 'deadline-soon' : 'deadline-ok';
+
+      return `
+        <div class="active-bid-card">
+          <div class="active-bid-header">
+            <div>
+              <div class="active-bid-title">RFQ #${bid.rfqId} — ${bid.title}</div>
+              <div class="active-bid-sub">${bid.vendor}</div>
+            </div>
+            <div class="rank-block">
+              <div class="rank-badge ${rankConfig.cls}">${rankConfig.emoji} ${rankConfig.label}</div>
+              <div class="rank-sub">${rankConfig.sub}</div>
+              ${rankConfig.nudge ? `<div class="rank-nudge">⚠ ${rankConfig.nudge}</div>` : ''}
+            </div>
+          </div>
+          <div class="active-bid-details">
+            <div class="bid-detail">
+              <div class="bid-detail-label">Your bid</div>
+              <div class="bid-detail-value price">$${bid.myPrice.toLocaleString()}</div>
+            </div>
+            <div class="bid-detail">
+              <div class="bid-detail-label">Delivery</div>
+              <div class="bid-detail-value">${formatDate(bid.myDelivery)}</div>
+            </div>
+            <div class="bid-detail">
+              <div class="bid-detail-label">Submitted</div>
+              <div class="bid-detail-value">${formatDate(bid.submittedAt)}</div>
+            </div>
+            <div class="bid-detail">
+              <div class="bid-detail-label">Deadline</div>
+              <div class="bid-detail-value ${dlClass}">${days <= 1 ? 'Tomorrow' : days + ' days left'}</div>
+            </div>
+          </div>
+          <div class="active-bid-footer">
+            <span class="bid-status-badge ${statusCls}">${statusLabel}</span>
+            <div class="bid-footer-actions">
+              <button class="btn-msg-small" onclick="openMsg(${bid.id}, '${bid.title}')">💬 Message buyer ${unread}</button>
+              ${bid.status !== 'won' && bid.status !== 'lost' ? `<button class="btn-revise" onclick="openRevise(${bid.id}, '${bid.title}', ${bid.myPrice}, ${bid.rank})">Revise bid</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* ─── MESSAGING ─── */
+  function openMsg(bidId, rfqTitle) {
+    activeMsgBid = bidId;
+    document.getElementById('msg-title').textContent = 'Message buyer — ' + rfqTitle;
+    const thread = document.getElementById('msg-thread');
+    const msgs = MSG_THREADS[bidId] || [];
+    if (!msgs.length) {
+      thread.innerHTML = `<div style="text-align:center;padding:32px;color:var(--slate);font-size:13px;">No messages yet. Ask the buyer a question about this RFQ.</div>`;
+    } else {
+      thread.innerHTML = msgs.map(m => `
+        <div>
+          <div class="msg-sender">${m.sender === 'reseller' ? 'You (NetStar Solutions)' : 'Buyer #4821 (anonymous)'}</div>
+          <div class="msg-bubble ${m.sender}">${m.text}</div>
+          <div class="msg-time">${m.time}</div>
+        </div>
+      `).join('');
+    }
+    thread.scrollTop = thread.scrollHeight;
+    document.getElementById('msg-overlay').classList.add('open');
+  }
+
+  function closeMsg() { document.getElementById('msg-overlay').classList.remove('open'); }
+  function closeMsgIfOutside(e) { if (e.target === document.getElementById('msg-overlay')) closeMsg(); }
+
+  function sendMsg() {
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Reseller sends message
+     *
+     * await fetch('/api/rfq/message', {
+     *   method: 'POST',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
+     *   },
+     *   body: JSON.stringify({
+     *     rfqId: activeMsgBid,
+     *     type: 'direct',
+     *     message: text,
+     *     senderType: 'reseller'
+     *   })
+     * });
+     * ─────────────────────────────────────────────────────────────
+     */
+    const thread = document.getElementById('msg-thread');
+    const el = document.createElement('div');
+    el.innerHTML = `
+      <div class="msg-sender">You (NetStar Solutions)</div>
+      <div class="msg-bubble reseller">${text}</div>
+      <div class="msg-time">Just now</div>
+    `;
+    thread.appendChild(el);
+    thread.scrollTop = thread.scrollHeight;
+    input.value = '';
+  }
+
+  /* ─── REVISE BID ─── */
+  function openRevise(bidId, title, currentPrice, rank) {
+    activeReviseBid = bidId;
+    document.getElementById('revise-rfq-name').textContent = title;
+    document.getElementById('revise-price').value = currentPrice;
+    const rankMsg = rank === 1
+      ? '🥇 You are currently in 1st place with the lowest bid. Only revise if you want to add value — lowering price further may not be necessary.'
+      : rank === 2
+      ? '🥈 You are in 2nd place. One reseller has a lower bid. Consider whether adjusting your price or adding value-add services could move you to 1st.'
+      : `🥉 You are currently in ${rank}${rank===3?'rd':'th'} place. You are not in the top 2. A revision may significantly improve your chances.`;
+    document.getElementById('revise-rank-note').textContent = rankMsg;
+    document.getElementById('revise-overlay').classList.add('open');
+  }
+
+  function closeRevise() { document.getElementById('revise-overlay').classList.remove('open'); }
+  function closeReviseIfOutside(e) { if (e.target === document.getElementById('revise-overlay')) closeRevise(); }
+
+  function submitRevision() {
+    const price = document.getElementById('revise-price').value;
+    const notes = document.getElementById('revise-notes').value;
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Revise bid
+     *
+     * await fetch('/api/bid/revise', {
+     *   method: 'PATCH',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
+     *   },
+     *   body: JSON.stringify({
+     *     bidId: activeReviseBid,
+     *     revisedPrice: parseFloat(price),
+     *     updatedNotes: notes,
+     *   })
+     * });
+     *
+     * After saving:
+     * - Recalculate rank positions for all resellers on this RFQ
+     * - Notify affected resellers if their rank changed
+     * - Return updated rank to this reseller
+     * ─────────────────────────────────────────────────────────────
+     */
+    closeRevise();
+    renderMyBids();
+    alert('Bid revised successfully. Your rank will update as soon as the system processes your new bid.');
+  }
+
+  /* ─── BID FORM ─── */
+  function openBidForm(rfqId, title) {
+    alert(`Opening bid form for RFQ #${rfqId}: ${title}\n\nThis will link to the Submit Bid page (to be built next).`);
+  }
+
+  /* ─── DATE HELPERS ─── */
+  function formatDate(str) {
+    const d = new Date(str + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  function daysUntil(str) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    return Math.ceil((new Date(str + 'T00:00:00') - now) / 86400000);
+  }
+
+  /* ─── INIT ─── */
+  renderOpenRFQs(OPEN_RFQS);
+  renderMyBids();
+</script>
+
+</body>
+</html>

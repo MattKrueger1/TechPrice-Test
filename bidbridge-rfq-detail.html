@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — RFQ Detail & Submit Bid</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  .app-shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 28px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-profile { margin: 0 16px 28px; padding: 18px; background: rgba(0,200,150,0.06); border: 1px solid rgba(0,200,150,0.15); border-radius: 12px; }
+  .profile-company { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .profile-tiers { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+  .profile-tier-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .profile-tier-vendor { color: var(--slate-light); }
+  .tier-chip { font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+  .tier-chip.gold { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+  .tier-chip.platinum { background: rgba(168,184,204,0.12); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.25); }
+  .tier-chip.silver { background: rgba(136,150,169,0.1); color: var(--slate); border: 1px solid rgba(136,150,169,0.2); }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 20px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
+
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; }
+
+  /* ─── TOPBAR ─── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; gap: 16px; }
+  .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--slate); }
+  .breadcrumb a { color: var(--slate); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--white); }
+  .breadcrumb span { color: var(--slate); opacity: 0.5; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .btn-outline { padding: 9px 18px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ─── TWO-COL LAYOUT ─── */
+  .page-body { padding: 36px 40px; display: grid; grid-template-columns: 1fr 400px; gap: 28px; align-items: start; }
+
+  /* ─── LEFT: RFQ DETAIL ─── */
+  .rfq-detail { display: flex; flex-direction: column; gap: 20px; }
+
+  /* ─── CARD ─── */
+  .detail-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 28px 32px; }
+
+  .card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .card-title-icon { font-size: 18px; }
+
+  /* ─── RFQ HEADER ─── */
+  .rfq-main-title { font-family: var(--font-head); font-size: 26px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 8px; line-height: 1.2; }
+  .rfq-id-line { font-size: 13px; color: var(--slate); margin-bottom: 16px; }
+
+  .rfq-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .rfq-badge { font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 999px; }
+  .badge-active { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .badge-strategy { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .badge-tier { background: rgba(168,184,204,0.08); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.15); }
+  .badge-new { background: var(--accent); color: var(--navy); }
+
+  .rfq-description { font-size: 15px; color: var(--slate-light); line-height: 1.75; padding: 16px 20px; background: rgba(255,255,255,0.03); border-left: 3px solid rgba(0,200,150,0.3); border-radius: 0 8px 8px 0; margin-bottom: 20px; }
+
+  .rfq-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .meta-item { padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; }
+  .meta-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+  .meta-value { font-size: 14px; font-weight: 500; color: var(--white); }
+  .meta-value.accent { color: var(--accent); }
+  .meta-value.gold { color: var(--gold); }
+  .meta-value.urgent { color: var(--error); }
+
+  /* ─── BOM TABLE ─── */
+  .bom-table { width: 100%; border-collapse: collapse; }
+  .bom-table thead tr { border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .bom-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; }
+  .bom-table td { padding: 13px 14px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+  .bom-table tbody tr:last-child td { border-bottom: none; }
+  .bom-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .bom-sku { font-family: monospace; font-size: 12px; color: var(--accent); background: rgba(0,200,150,0.08); padding: 3px 8px; border-radius: 5px; }
+  .bom-vendor { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; background: rgba(0,200,150,0.07); color: var(--accent); border: 1px solid rgba(0,200,150,0.15); }
+  .bom-download { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--accent); cursor: pointer; padding: 8px 0; text-decoration: none; transition: opacity .2s; }
+  .bom-download:hover { opacity: 0.75; }
+
+  /* ─── BUYER INFO ─── */
+  .buyer-info-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: rgba(245,200,66,0.05); border: 1px solid rgba(245,200,66,0.12); border-radius: 10px; }
+  .buyer-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .buyer-detail h4 { font-size: 14px; font-weight: 500; color: var(--gold); margin-bottom: 2px; }
+  .buyer-detail p { font-size: 12px; color: var(--slate); }
+
+  /* ─── DOCUMENTS ─── */
+  .doc-list { display: flex; flex-direction: column; gap: 8px; }
+  .doc-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; cursor: pointer; transition: border-color .2s; }
+  .doc-item:hover { border-color: rgba(0,200,150,0.3); }
+  .doc-icon { font-size: 20px; }
+  .doc-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .doc-size { font-size: 11px; color: var(--slate); }
+  .doc-download { font-size: 12px; color: var(--accent); }
+
+  /* ─── BROADCAST MESSAGES ─── */
+  .broadcast-item { padding: 12px 16px; background: rgba(245,200,66,0.05); border: 1px solid rgba(245,200,66,0.12); border-radius: 10px; margin-bottom: 10px; }
+  .broadcast-text { font-size: 13px; color: var(--slate-light); line-height: 1.6; }
+  .broadcast-time { font-size: 11px; color: var(--slate); margin-top: 4px; }
+
+  /* ─── RIGHT: BID FORM ─── */
+  .bid-form-wrap { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px; }
+
+  .bid-form-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; }
+
+  .bid-form-header { padding: 20px 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .bid-form-header h2 { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .bid-form-header p { font-size: 13px; color: var(--slate-light); }
+
+  .bid-form-body { padding: 22px 24px; }
+
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--slate-light); margin-bottom: 8px; }
+  label .required { color: var(--accent); margin-left: 3px; }
+  label .optional { color: var(--slate); font-weight: 400; font-size: 11px; margin-left: 6px; }
+
+  .input-prefix-wrap { position: relative; }
+  .input-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--slate); font-weight: 500; pointer-events: none; }
+
+  input[type="number"],
+  input[type="text"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 15px; outline: none; transition: border-color .2s, background .2s; appearance: none;
+  }
+  input[type="number"] { padding-left: 30px; }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; font-size: 14px; }
+  input::placeholder, textarea::placeholder { color: var(--slate); }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); background: rgba(0,200,150,0.04); }
+  input.error { border-color: var(--error); }
+  .field-error { font-size: 12px; color: var(--error); margin-top: 5px; display: none; }
+  .field-error.visible { display: block; }
+  .field-hint { font-size: 12px; color: var(--slate); margin-top: 5px; }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+  select option { background: var(--navy-mid); }
+
+  /* Value add checkboxes */
+  .value-adds { display: flex; flex-direction: column; gap: 8px; }
+  .value-add-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; cursor: pointer; transition: border-color .2s; }
+  .value-add-item:hover { border-color: rgba(0,200,150,0.25); }
+  .value-add-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  .value-add-label { font-size: 13px; color: var(--slate-light); }
+
+  /* Eligibility check */
+  .eligibility-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: rgba(0,200,150,0.07); border: 1px solid rgba(0,200,150,0.15); border-radius: 10px; margin-bottom: 18px; font-size: 13px; }
+  .eligibility-icon { font-size: 16px; }
+  .eligibility-text { color: var(--slate-light); }
+  .eligibility-text strong { color: var(--accent); }
+
+  /* Submit button */
+  .btn-submit-bid { width: 100%; padding: 15px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 15px; font-weight: 500; cursor: pointer; transition: background .2s, transform .15s, box-shadow .2s; position: relative; margin-top: 4px; }
+  .btn-submit-bid:hover { background: var(--accent-dim); transform: translateY(-1px); box-shadow: 0 8px 28px rgba(0,200,150,0.25); }
+  .btn-submit-bid.loading { color: transparent; pointer-events: none; }
+  .btn-submit-bid.loading::after { content: ''; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border: 2px solid rgba(11,27,51,0.3); border-top-color: var(--navy); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .bid-terms { font-size: 11px; color: var(--slate); text-align: center; margin-top: 12px; line-height: 1.6; }
+  .bid-terms a { color: var(--slate-light); }
+
+  /* ─── COMPETITION SNAPSHOT ─── */
+  .competition-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px 22px; }
+  .competition-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .competition-rows { display: flex; flex-direction: column; gap: 10px; }
+  .competition-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .competition-label { color: var(--slate); }
+  .competition-value { font-weight: 500; color: var(--white); }
+  .competition-value.accent { color: var(--accent); }
+  .competition-value.gold { color: var(--gold); }
+
+  .bid-bar-wrap { margin-top: 14px; }
+  .bid-bar-label { font-size: 11px; color: var(--slate); margin-bottom: 6px; }
+  .bid-bar { height: 6px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+  .bid-bar-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .5s; }
+
+  /* ─── ASK BUYER ─── */
+  .ask-buyer-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px 22px; }
+  .ask-buyer-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .ask-buyer-sub { font-size: 13px; color: var(--slate-light); margin-bottom: 14px; line-height: 1.6; }
+  .ask-input { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 13px; outline: none; resize: none; min-height: 70px; }
+  .ask-input:focus { border-color: var(--accent); }
+  .ask-input::placeholder { color: var(--slate); }
+  .btn-ask { width: 100%; padding: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; margin-top: 8px; transition: all .2s; }
+  .btn-ask:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── SUCCESS STATE ─── */
+  .success-screen { display: none; text-align: center; padding: 60px 32px; animation: fadeUp .4s ease; }
+  .success-screen.visible { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+  .success-ring { width: 72px; height: 72px; border-radius: 50%; background: rgba(0,200,150,0.1); border: 2px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 32px; }
+  .success-screen h2 { font-family: var(--font-head); font-size: 26px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 10px; }
+  .success-screen p { font-size: 14px; color: var(--slate-light); line-height: 1.7; max-width: 340px; margin: 0 auto 28px; }
+  .rank-reveal { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: rgba(0,200,150,0.1); border: 1px solid rgba(0,200,150,0.25); border-radius: 12px; font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 24px; }
+  .btn-back-dash { display: inline-block; padding: 12px 28px; background: var(--accent); color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 500; border-radius: 10px; text-decoration: none; transition: background .2s; cursor: pointer; border: none; }
+  .btn-back-dash:hover { background: var(--accent-dim); }
+
+  @media (max-width: 1100px) {
+    .page-body { grid-template-columns: 1fr; }
+    .bid-form-wrap { position: static; }
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .topbar { padding: 14px 16px; }
+    .page-body { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+    <div class="sidebar-profile">
+      <div class="profile-company">NetStar Solutions</div>
+      <div style="font-size:11px;color:var(--slate);margin-bottom:2px;">Authorized reseller · Verified ✓</div>
+      <div class="profile-tiers">
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Cisco</span><span class="tier-chip gold">⭐ Gold</span></div>
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Fortinet</span><span class="tier-chip platinum">💠 Platinum</span></div>
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Palo Alto</span><span class="tier-chip gold">⭐ Gold</span></div>
+        <div class="profile-tier-row"><span class="profile-tier-vendor">Aruba</span><span class="tier-chip silver">◈ Silver</span></div>
+      </div>
+    </div>
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item active" href="#"><span class="nav-icon">🔍</span> Browse RFQs <span class="nav-badge">12</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">📨</span> My bids <span class="nav-badge">5</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">🏆</span> Won deals</a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge">3</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">⭐</span> My profile</a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar">MR</div>
+        <div><div class="user-name">Mike Reynolds</div><div class="user-role">Reseller · NetStar Solutions</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="breadcrumb">
+        <a href="bidbridge-reseller-dashboard.html">Dashboard</a>
+        <span>›</span>
+        <a href="#">Browse RFQs</a>
+        <span>›</span>
+        <span style="color:var(--white);">RFQ #4822</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-outline" onclick="window.print()">Download PDF</button>
+        <button class="btn-outline" onclick="document.getElementById('ask-section').scrollIntoView({behavior:'smooth'})">💬 Ask buyer a question</button>
+      </div>
+    </div>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- ── LEFT: RFQ DETAIL ── -->
+      <div class="rfq-detail">
+
+        <!-- RFQ HEADER -->
+        <div class="detail-card">
+          <div class="rfq-id-line">RFQ #4822 · Posted March 25, 2026 · 4 bids received</div>
+          <div class="rfq-main-title">Fortinet SD-WAN — 12 branch office rollout</div>
+          <div class="rfq-badges">
+            <span class="rfq-badge badge-active">● Accepting bids</span>
+            <span class="rfq-badge badge-new">NEW</span>
+            <span class="rfq-badge badge-strategy">⚖️ Sole source</span>
+            <span class="rfq-badge badge-tier">⭐ Min: Gold partner</span>
+          </div>
+          <div class="rfq-description">
+            Full SD-WAN rollout across 12 branch offices for a regional logistics company. Scope includes FortiGate 100F units at each location, centralized FortiManager for policy management, FortiAnalyzer for logging and reporting, and 3-year FortiCare support on all hardware. Installation and configuration are expected to be part of the bid. The buyer has an existing Fortinet environment at HQ and expects seamless integration.
+          </div>
+          <div class="rfq-meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">Delivery location</div>
+              <div class="meta-value">Dallas, TX (12 sites)</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Budget</div>
+              <div class="meta-value accent">$280,000</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Bid deadline</div>
+              <div class="meta-value urgent">March 29, 2026 — 2 days left</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Expected delivery</div>
+              <div class="meta-value">April 30, 2026</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Sourcing strategy</div>
+              <div class="meta-value">Sole source — all-in bid</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Minimum partner tier</div>
+              <div class="meta-value gold">⭐ Gold (you qualify)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BILL OF MATERIALS -->
+        <div class="detail-card">
+          <div class="card-title"><span class="card-title-icon">📦</span> Bill of materials (BoM)</div>
+          <table class="bom-table">
+            <thead>
+              <tr>
+                <th>SKU / Part number</th>
+                <th>Description</th>
+                <th>Vendor</th>
+                <th style="text-align:right;">Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="bom-sku">FG-100F</span></td>
+                <td>FortiGate 100F Next-Gen Firewall</td>
+                <td><span class="bom-vendor">Fortinet</span></td>
+                <td style="text-align:right;font-weight:600;">12</td>
+              </tr>
+              <tr>
+                <td><span class="bom-sku">FC-10-0100F-247-02-36</span></td>
+                <td>FortiCare 24x7 support — 3 year (per unit)</td>
+                <td><span class="bom-vendor">Fortinet</span></td>
+                <td style="text-align:right;font-weight:600;">12</td>
+              </tr>
+              <tr>
+                <td><span class="bom-sku">FMG-VM-BASE</span></td>
+                <td>FortiManager VM — Base license</td>
+                <td><span class="bom-vendor">Fortinet</span></td>
+                <td style="text-align:right;font-weight:600;">1</td>
+              </tr>
+              <tr>
+                <td><span class="bom-sku">FAZ-VM-BASE</span></td>
+                <td>FortiAnalyzer VM — Base license</td>
+                <td><span class="bom-vendor">Fortinet</span></td>
+                <td style="text-align:right;font-weight:600;">1</td>
+              </tr>
+              <tr>
+                <td><span class="bom-sku">FC-10-FMGVM-248-02-36</span></td>
+                <td>FortiManager VM FortiCare — 3 year</td>
+                <td><span class="bom-vendor">Fortinet</span></td>
+                <td style="text-align:right;font-weight:600;">1</td>
+              </tr>
+              <tr>
+                <td><span class="bom-sku">SP-FG100F-PS</span></td>
+                <td>Spare PSU for FortiGate 100F</td>
+                <td><span class="bom-vendor">Fortinet</span></td>
+                <td style="text-align:right;font-weight:600;">4</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--slate);">6 line items · Buyer uploaded this BoM</span>
+            <a class="bom-download" href="#">⬇ Download BoM (.xlsx)</a>
+          </div>
+        </div>
+
+        <!-- BUYER INFO -->
+        <div class="detail-card">
+          <div class="card-title"><span class="card-title-icon">👤</span> About the buyer</div>
+          <div class="buyer-info-row">
+            <div class="buyer-avatar">🔒</div>
+            <div class="buyer-detail">
+              <h4>Buyer #4822 — Anonymous</h4>
+              <p>Logistics &amp; transportation industry · Dallas–Fort Worth area · Identity protected until award</p>
+            </div>
+          </div>
+          <div style="margin-top:14px;font-size:13px;color:var(--slate-light);line-height:1.7;">
+            The buyer has an existing Fortinet environment and is looking for an experienced Fortinet Gold or Platinum partner with SD-WAN deployment experience. They have indicated a preference for resellers who can provide on-site configuration support at branch locations.
+          </div>
+        </div>
+
+        <!-- BUYER BROADCAST MESSAGES -->
+        <div class="detail-card">
+          <div class="card-title"><span class="card-title-icon">📢</span> Buyer updates</div>
+          <div class="broadcast-item">
+            <div class="broadcast-text">📢 <strong>Buyer update:</strong> Installation services should be included in your bid price. On-site configuration at each of the 12 Dallas locations is required. Please also include rack and stack if applicable.</div>
+            <div class="broadcast-time">March 26, 2026 at 10:42 AM · Sent to all resellers</div>
+          </div>
+          <div style="font-size:12px;color:var(--slate);margin-top:4px;">These messages are sent to all bidders — other resellers can also see these updates.</div>
+        </div>
+
+        <!-- SUPPORTING DOCUMENTS -->
+        <div class="detail-card">
+          <div class="card-title"><span class="card-title-icon">📎</span> Supporting documents</div>
+          <div class="doc-list">
+            <div class="doc-item">
+              <span class="doc-icon">📄</span>
+              <span class="doc-name">Network_topology_diagram.pdf</span>
+              <span class="doc-size">2.4 MB</span>
+              <span class="doc-download">⬇ Download</span>
+            </div>
+            <div class="doc-item">
+              <span class="doc-icon">📊</span>
+              <span class="doc-name">Branch_site_locations.xlsx</span>
+              <span class="doc-size">148 KB</span>
+              <span class="doc-download">⬇ Download</span>
+            </div>
+            <div class="doc-item">
+              <span class="doc-icon">📋</span>
+              <span class="doc-name">Existing_environment_overview.docx</span>
+              <span class="doc-size">890 KB</span>
+              <span class="doc-download">⬇ Download</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /rfq-detail -->
+
+      <!-- ── RIGHT: BID FORM ── -->
+      <div class="bid-form-wrap">
+
+        <!-- COMPETITION SNAPSHOT -->
+        <div class="competition-card">
+          <div class="competition-title">📊 Competition snapshot</div>
+          <div class="competition-rows">
+            <div class="competition-row">
+              <span class="competition-label">Bids submitted</span>
+              <span class="competition-value">4 resellers</span>
+            </div>
+            <div class="competition-row">
+              <span class="competition-label">Your current rank</span>
+              <span class="competition-value accent">Not yet bid</span>
+            </div>
+            <div class="competition-row">
+              <span class="competition-label">Bid deadline</span>
+              <span class="competition-value" style="color:var(--error);">2 days left</span>
+            </div>
+            <div class="competition-row">
+              <span class="competition-label">Min. tier required</span>
+              <span class="competition-value gold">⭐ Gold — you qualify</span>
+            </div>
+          </div>
+          <div class="bid-bar-wrap">
+            <div class="bid-bar-label">Reseller participation (4 of ~8 estimated)</div>
+            <div class="bid-bar"><div class="bid-bar-fill" style="width:50%"></div></div>
+          </div>
+        </div>
+
+        <!-- BID FORM -->
+        <div class="bid-form-card">
+          <div class="bid-form-header">
+            <h2>Submit your bid</h2>
+            <p>RFQ #4822 · Fortinet SD-WAN rollout</p>
+          </div>
+          <div class="bid-form-body" id="bid-form-body">
+
+            <div class="eligibility-bar">
+              <span class="eligibility-icon">✓</span>
+              <span class="eligibility-text">You're eligible — <strong>Fortinet Platinum</strong> partner, min. Gold required</span>
+            </div>
+
+            <div class="form-group">
+              <label for="bid-price">Total bid price <span class="required">*</span></label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">$</span>
+                <input type="number" id="bid-price" placeholder="0.00" min="0" step="100" oninput="updateBidPreview()">
+              </div>
+              <div class="field-hint">Include all hardware, software, support, and services</div>
+              <div class="field-error" id="bid-price-error">Please enter your bid price</div>
+            </div>
+
+            <div class="form-group">
+              <label for="bid-delivery">Estimated delivery date <span class="required">*</span></label>
+              <input type="date" id="bid-delivery">
+              <div class="field-error" id="bid-delivery-error">Please enter an estimated delivery date</div>
+            </div>
+
+            <div class="form-group">
+              <label>Value-add services included <span class="optional">(select all that apply)</span></label>
+              <div class="value-adds">
+                <label class="value-add-item">
+                  <input type="checkbox" value="installation"> <span class="value-add-label">On-site installation &amp; configuration</span>
+                </label>
+                <label class="value-add-item">
+                  <input type="checkbox" value="training"> <span class="value-add-label">End-user training</span>
+                </label>
+                <label class="value-add-item">
+                  <input type="checkbox" value="project-mgmt"> <span class="value-add-label">Dedicated project manager</span>
+                </label>
+                <label class="value-add-item">
+                  <input type="checkbox" value="financing"> <span class="value-add-label">Financing available</span>
+                </label>
+                <label class="value-add-item">
+                  <input type="checkbox" value="extended-warranty"> <span class="value-add-label">Extended warranty beyond manufacturer</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="bid-notes">Bid notes <span class="optional">(optional but recommended)</span></label>
+              <textarea id="bid-notes" placeholder="Explain what makes your bid stand out — experience, service level, lead times, financing options, or anything else the buyer should know..."></textarea>
+              <div class="field-hint">Buyers read notes carefully. A strong note often wins deals even when price is close.</div>
+            </div>
+
+            <div id="bid-preview" style="display:none;padding:12px 14px;background:rgba(0,200,150,0.06);border:1px solid rgba(0,200,150,0.15);border-radius:10px;margin-bottom:16px;font-size:13px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="color:var(--slate);">Your bid</span>
+                <span style="font-family:var(--font-head);font-weight:700;color:var(--accent);" id="preview-price">$0</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;">
+                <span style="color:var(--slate);">vs. budget</span>
+                <span id="preview-vs-budget" style="font-size:12px;color:var(--slate-light);"></span>
+              </div>
+            </div>
+
+            <button class="btn-submit-bid" id="submit-bid-btn" onclick="submitBid()">Submit bid →</button>
+            <div class="bid-terms">By submitting you agree to IT Pricing Network's <a href="#">Reseller Terms</a>. Your company name will be visible to the buyer. Your bid price is not shared with other resellers.</div>
+          </div>
+
+          <!-- SUCCESS STATE -->
+          <div class="success-screen" id="success-screen">
+            <div class="success-ring">✓</div>
+            <h2>Bid submitted!</h2>
+            <p>Your bid is now live. The buyer will be notified. You'll receive an alert if your rank changes.</p>
+            <div class="rank-reveal">🥇 You are currently in 1st place</div>
+            <p style="font-size:12px;color:var(--slate);margin-bottom:20px;">Rank is based on price only. 4 total bids including yours. This may change as more resellers bid.</p>
+            <button class="btn-back-dash" onclick="window.location='bidbridge-reseller-dashboard.html'">Back to dashboard →</button>
+          </div>
+        </div>
+
+        <!-- ASK BUYER A QUESTION -->
+        <div class="ask-buyer-card" id="ask-section">
+          <div class="ask-buyer-title">💬 Ask the buyer a question</div>
+          <div class="ask-buyer-sub">The buyer is anonymous. Your question goes directly to them. Other resellers cannot see your questions.</div>
+          <textarea class="ask-input" id="ask-input" placeholder="e.g. Does the delivery address require loading dock access? Are there any site survey requirements before installation?"></textarea>
+          <button class="btn-ask" onclick="sendQuestion()">Send question →</button>
+        </div>
+
+      </div><!-- /bid-form-wrap -->
+    </div><!-- /page-body -->
+  </div>
+</div>
+
+<script>
+  /* ─── INIT ─── */
+  window.addEventListener('DOMContentLoaded', () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 21);
+    document.getElementById('bid-delivery').value = d.toISOString().split('T')[0];
+    document.getElementById('bid-delivery').min = new Date().toISOString().split('T')[0];
+  });
+
+  /* ─── BID PREVIEW ─── */
+  function updateBidPreview() {
+    const price = parseFloat(document.getElementById('bid-price').value);
+    const preview = document.getElementById('bid-preview');
+    if (!price || price <= 0) { preview.style.display = 'none'; return; }
+    preview.style.display = 'block';
+    document.getElementById('preview-price').textContent = '$' + price.toLocaleString();
+    const budget = 280000;
+    const diff = price - budget;
+    const vsEl = document.getElementById('preview-vs-budget');
+    if (diff < 0) vsEl.textContent = `$${Math.abs(diff).toLocaleString()} under budget`;
+    else if (diff === 0) vsEl.textContent = 'Exactly at budget';
+    else vsEl.textContent = `$${diff.toLocaleString()} over budget`;
+    vsEl.style.color = diff > 0 ? 'var(--error)' : 'var(--accent)';
+  }
+
+  /* ─── SUBMIT BID ─── */
+  function submitBid() {
+    const price = document.getElementById('bid-price').value;
+    const delivery = document.getElementById('bid-delivery').value;
+    let valid = true;
+
+    document.getElementById('bid-price').classList.remove('error');
+    document.getElementById('bid-price-error').classList.remove('visible');
+    document.getElementById('bid-delivery').classList.remove('error');
+    document.getElementById('bid-delivery-error').classList.remove('visible');
+
+    if (!price || parseFloat(price) <= 0) {
+      document.getElementById('bid-price').classList.add('error');
+      document.getElementById('bid-price-error').classList.add('visible');
+      valid = false;
+    }
+    if (!delivery) {
+      document.getElementById('bid-delivery').classList.add('error');
+      document.getElementById('bid-delivery-error').classList.add('visible');
+      valid = false;
+    }
+    if (!valid) return;
+
+    const btn = document.getElementById('submit-bid-btn');
+    btn.classList.add('loading');
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Submit Bid
+     *
+     * const valueAdds = Array.from(
+     *   document.querySelectorAll('.value-add-item input:checked')
+     * ).map(cb => cb.value);
+     *
+     * const payload = {
+     *   rfqId: 4822,
+     *   totalPrice: parseFloat(price),
+     *   estimatedDelivery: delivery,
+     *   valueAddServices: valueAdds,
+     *   notes: document.getElementById('bid-notes').value,
+     * };
+     *
+     * const response = await fetch('/api/bid/submit', {
+     *   method: 'POST',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
+     *   },
+     *   body: JSON.stringify(payload)
+     * });
+     *
+     * const data = await response.json();
+     *
+     * if (response.ok) {
+     *   // data.rank = reseller's current rank position
+     *   // data.totalBids = total bids including this one
+     *   // Notify buyer that a new bid has been received
+     *   showSuccess(data.rank);
+     * }
+     * ─────────────────────────────────────────────────────────────
+     */
+    setTimeout(() => {
+      btn.classList.remove('loading');
+      document.getElementById('bid-form-body').style.display = 'none';
+      document.getElementById('success-screen').classList.add('visible');
+    }, 1800);
+  }
+
+  /* ─── ASK BUYER ─── */
+  function sendQuestion() {
+    const input = document.getElementById('ask-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Reseller question to buyer
+     *
+     * await fetch('/api/rfq/message', {
+     *   method: 'POST',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
+     *   },
+     *   body: JSON.stringify({
+     *     rfqId: 4822,
+     *     type: 'direct',
+     *     message: text,
+     *     senderType: 'reseller'
+     *   })
+     * });
+     * ─────────────────────────────────────────────────────────────
+     */
+    input.value = '';
+    const btn = document.querySelector('.btn-ask');
+    btn.textContent = '✓ Question sent — the buyer will be notified';
+    btn.style.color = 'var(--accent)';
+    btn.style.borderColor = 'rgba(0,200,150,0.3)';
+    setTimeout(() => {
+      btn.textContent = 'Send question →';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 3000);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 36px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 24px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
+
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; }
+  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+
+  /* ─── PAGE LAYOUT ─── */
+  .page-body { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 36px 40px; align-items: start; }
+
+  /* ─── SETTINGS NAV ─── */
+  .settings-nav { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 2px; }
+  .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 9px; font-size: 14px; color: var(--slate-light); cursor: pointer; transition: all .2s; border: 1px solid transparent; }
+  .settings-nav-item:hover { background: rgba(255,255,255,0.04); color: var(--white); }
+  .settings-nav-item.active { background: rgba(0,200,150,0.08); border-color: rgba(0,200,150,0.15); color: var(--accent); font-weight: 500; }
+  .settings-nav-icon { font-size: 15px; width: 18px; text-align: center; }
+  .settings-nav-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 14px 4px; margin-top: 8px; }
+
+  /* ─── SETTINGS CONTENT ─── */
+  .settings-content { display: flex; flex-direction: column; gap: 20px; max-width: 680px; }
+
+  .settings-section { display: none; }
+  .settings-section.active { display: flex; flex-direction: column; gap: 20px; }
+
+  .settings-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 28px 30px; }
+  .settings-card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .settings-card-sub { font-size: 13px; color: var(--slate); margin-bottom: 24px; line-height: 1.6; }
+
+  /* ─── TOGGLE ROWS ─── */
+  .toggle-section { display: flex; flex-direction: column; gap: 0; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 20px; }
+  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .toggle-row:first-child { padding-top: 0; }
+  .toggle-info { flex: 1; }
+  .toggle-label { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .toggle-sub { font-size: 12px; color: var(--slate); line-height: 1.5; }
+
+  .toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 999px; cursor: pointer; transition: background .2s; }
+  .toggle input:checked + .toggle-track { background: var(--accent); }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--white); transition: transform .2s; pointer-events: none; }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+  /* ─── SELECT ROWS ─── */
+  .select-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 20px; }
+  .select-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .select-row:first-child { padding-top: 0; }
+  .select-info { flex: 1; }
+  .select-label { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .select-sub { font-size: 12px; color: var(--slate); }
+
+  .inline-select { padding: 8px 32px 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--white); font-family: var(--font-body); font-size: 13px; outline: none; cursor: pointer; appearance: none; min-width: 160px; }
+  .inline-select:focus { border-color: var(--accent); }
+  .inline-select option { background: var(--navy-mid); }
+  .select-wrap-inline { position: relative; flex-shrink: 0; }
+  .select-wrap-inline::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+
+  /* ─── BILLING CARD ─── */
+  .plan-card { background: rgba(0,200,150,0.06); border: 1px solid rgba(0,200,150,0.15); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .plan-name { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .plan-detail { font-size: 13px; color: var(--slate-light); }
+  .btn-primary { padding: 10px 20px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s; white-space: nowrap; }
+  .btn-primary:hover { background: var(--accent-dim); }
+  .btn-outline-sm { padding: 9px 18px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-outline-sm:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  .invoice-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+  .invoice-row:last-child { border-bottom: none; }
+  .invoice-date { color: var(--slate-light); }
+  .invoice-amount { font-weight: 500; }
+  .invoice-status { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .btn-invoice { background: none; border: none; color: var(--accent); font-family: var(--font-body); font-size: 12px; cursor: pointer; }
+  .btn-invoice:hover { text-decoration: underline; }
+
+  /* ─── DANGER ZONE ─── */
+  .danger-zone { background: rgba(255,107,107,0.04); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; padding: 28px 30px; }
+  .danger-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--error); margin-bottom: 8px; }
+  .danger-sub { font-size: 13px; color: var(--slate-light); margin-bottom: 20px; line-height: 1.6; }
+  .danger-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,107,107,0.08); gap: 20px; }
+  .danger-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .danger-row-info h4 { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .danger-row-info p { font-size: 12px; color: var(--slate); }
+  .btn-danger { padding: 9px 18px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.25); border-radius: 10px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-danger:hover { background: rgba(255,107,107,0.18); }
+
+  /* ─── TOAST ─── */
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: var(--navy); padding: 12px 22px; border-radius: 10px; font-family: var(--font-body); font-weight: 600; font-size: 14px; z-index: 999; animation: slideUp .3s ease; }
+  @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  @media (max-width: 1024px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .page-body { grid-template-columns: 1fr; padding: 20px 16px; }
+    .settings-nav { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .settings-nav-label { display: none; }
+    .topbar { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item" href="buyer-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="bidbridge-submit-rfq.html"><span class="nav-icon">＋</span> New RFQ</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📋</span> My RFQs</a>
+    <a class="nav-item" href="bidbridge-compare-bids.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge">2</span></a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item" href="bidbridge-notifications.html"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge">6</span></a>
+    <a class="nav-item active" href="#"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="bidbridge-profile.html"><span class="nav-icon">👤</span> Profile</a>
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar">JM</div>
+        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Settings</h1>
+        <p>Manage your account preferences and platform settings</p>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- ── SETTINGS NAV ── -->
+      <nav class="settings-nav">
+        <div class="settings-nav-label">General</div>
+        <div class="settings-nav-item active" onclick="showSection('notifications', this)">
+          <span class="settings-nav-icon">🔔</span> Notifications
+        </div>
+        <div class="settings-nav-item" onclick="showSection('privacy', this)">
+          <span class="settings-nav-icon">🔒</span> Privacy
+        </div>
+        <div class="settings-nav-item" onclick="showSection('rfq', this)">
+          <span class="settings-nav-icon">📋</span> RFQ defaults
+        </div>
+        <div class="settings-nav-label">Account</div>
+        <div class="settings-nav-item" onclick="showSection('billing', this)">
+          <span class="settings-nav-icon">💳</span> Billing
+        </div>
+        <div class="settings-nav-item" onclick="showSection('integrations', this)">
+          <span class="settings-nav-icon">🔗</span> Integrations
+        </div>
+        <div class="settings-nav-item" onclick="showSection('danger', this)">
+          <span class="settings-nav-icon">⚠️</span> Danger zone
+        </div>
+      </nav>
+
+      <!-- ── SETTINGS CONTENT ── -->
+      <div class="settings-content">
+
+        <!-- NOTIFICATIONS -->
+        <div class="settings-section active" id="section-notifications">
+          <div class="settings-card">
+            <div class="settings-card-title">Email notifications</div>
+            <div class="settings-card-sub">Choose which events trigger an email to james.mitchell@acmecorp.com</div>
+            <div class="toggle-section">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">New bids on my RFQs</div>
+                  <div class="toggle-sub">Email me each time a reseller submits a bid</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Bid deadline reminders</div>
+                  <div class="toggle-sub">Remind me 48h and 24h before each deadline closes</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Messages from resellers</div>
+                  <div class="toggle-sub">Email me when a reseller sends a question about my RFQ</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Award confirmations</div>
+                  <div class="toggle-sub">Confirm when I award a bid and when the deal is closed</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Platform updates &amp; news</div>
+                  <div class="toggle-sub">New features, vendor additions, and platform announcements</div>
+                </div>
+                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-title">In-app notifications</div>
+            <div class="settings-card-sub">Control which alerts appear inside IT Pricing Network</div>
+            <div class="toggle-section">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Show notification badge</div>
+                  <div class="toggle-sub">Show the unread count badge on the notifications icon</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Desktop push notifications</div>
+                  <div class="toggle-sub">Allow IT Pricing Network to send browser push notifications</div>
+                </div>
+                <label class="toggle"><input type="checkbox" onchange="requestPush(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Digest summary</div>
+                  <div class="toggle-sub">Send a daily summary of activity instead of individual alerts</div>
+                </div>
+                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-title">Notification frequency</div>
+            <div class="settings-card-sub">Control how often you receive certain types of alerts</div>
+            <div class="toggle-section">
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Bid update frequency</div>
+                  <div class="select-sub">How often to bundle bid notifications for a single RFQ</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" onchange="savePref(this)">
+                    <option selected>Every new bid</option>
+                    <option>Every 3 bids</option>
+                    <option>Daily summary</option>
+                  </select>
+                </div>
+              </div>
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Message notification delay</div>
+                  <div class="select-sub">Wait before sending email for new messages</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" onchange="savePref(this)">
+                    <option selected>Immediately</option>
+                    <option>After 15 minutes</option>
+                    <option>After 1 hour</option>
+                    <option>Batched daily</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRIVACY -->
+        <div class="settings-section" id="section-privacy">
+          <div class="settings-card">
+            <div class="settings-card-title">Identity &amp; anonymity</div>
+            <div class="settings-card-sub">Control what resellers know about you during the bidding process</div>
+            <div class="toggle-section">
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Default anonymity on new RFQs</div>
+                  <div class="select-sub">Applied automatically when you post a new RFQ. Can be changed per RFQ.</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" onchange="savePref(this)">
+                    <option selected>Anonymous</option>
+                    <option>Partial — industry only</option>
+                    <option>Revealed</option>
+                  </select>
+                </div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Reveal identity after award</div>
+                  <div class="toggle-sub">Automatically reveal your name and company to the winning reseller after you award a bid</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Allow resellers to see your RFQ history count</div>
+                  <div class="toggle-sub">Show resellers that you are an active buyer (e.g. "6 RFQs posted") without revealing specifics</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-title">Data &amp; privacy</div>
+            <div class="settings-card-sub">Control how IT Pricing Network uses your data</div>
+            <div class="toggle-section">
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Analytics &amp; usage data</div>
+                  <div class="toggle-sub">Allow IT Pricing Network to collect anonymous usage data to improve the platform</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Appear in reseller search results</div>
+                  <div class="toggle-sub">Allow verified resellers to see that your company is an active IT Pricing Network buyer</div>
+                </div>
+                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RFQ DEFAULTS -->
+        <div class="settings-section" id="section-rfq">
+          <div class="settings-card">
+            <div class="settings-card-title">RFQ defaults</div>
+            <div class="settings-card-sub">These values pre-fill every new RFQ you post. You can always change them per RFQ.</div>
+            <div class="toggle-section">
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Default bid window</div>
+                  <div class="select-sub">How long resellers have to submit bids</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" onchange="savePref(this)">
+                    <option>3 days</option>
+                    <option selected>7 days</option>
+                    <option>14 days</option>
+                    <option>30 days</option>
+                  </select>
+                </div>
+              </div>
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Default sourcing strategy</div>
+                  <div class="select-sub">How multi-vendor RFQs are bid by default</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" onchange="savePref(this)">
+                    <option selected>Sole source</option>
+                    <option>Split bid per vendor</option>
+                  </select>
+                </div>
+              </div>
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Default minimum partner tier</div>
+                  <div class="select-sub">Minimum tier resellers must hold to bid on your RFQs</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" onchange="savePref(this)">
+                    <option selected>No minimum</option>
+                    <option>Authorized</option>
+                    <option>Silver / Select</option>
+                    <option>Gold</option>
+                    <option>Platinum / Top tier</option>
+                  </select>
+                </div>
+              </div>
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Default RFQ visibility</div>
+                  <div class="select-sub">Who can see and bid on your RFQs by default</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" onchange="savePref(this)">
+                    <option selected>All verified resellers</option>
+                    <option>Tier-filtered only</option>
+                  </select>
+                </div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Auto-close RFQ after deadline</div>
+                  <div class="toggle-sub">Automatically close bidding when the deadline passes. You can still review and award after closing.</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Show budget to resellers</div>
+                  <div class="toggle-sub">Reveal your budget on new RFQs by default. This can help resellers target their bids more accurately.</div>
+                </div>
+                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BILLING -->
+        <div class="settings-section" id="section-billing">
+          <div class="settings-card">
+            <div class="settings-card-title">Current plan</div>
+            <div class="settings-card-sub">Manage your IT Pricing Network subscription</div>
+
+            <div class="plan-card">
+              <div>
+                <div class="plan-name">Pro — Buyer</div>
+                <div class="plan-detail">$49/month · Renews April 12, 2026 · 4 of 10 RFQs used this month</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn-outline-sm" onclick="showToast('Redirecting to plan selection...')">Change plan</button>
+                <button class="btn-primary" onclick="showToast('Redirecting to billing portal...')">Manage billing</button>
+              </div>
+            </div>
+
+            <div class="settings-card-title" style="font-size:14px;margin-bottom:16px;">Payment method</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:20px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:26px;background:rgba(255,255,255,0.08);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--slate-light);">VISA</div>
+                <div>
+                  <div style="font-size:14px;font-weight:500;">Visa ending in 6411</div>
+                  <div style="font-size:12px;color:var(--slate);">Expires 09/27</div>
+                </div>
+              </div>
+              <button class="btn-outline-sm" onclick="showToast('Redirecting to payment update portal...')">Update card</button>
+            </div>
+
+            <div class="settings-card-title" style="font-size:14px;margin-bottom:14px;">Billing history</div>
+            <div class="invoice-row">
+              <span class="invoice-date">March 12, 2026</span>
+              <span class="invoice-amount">$49.00</span>
+              <span class="invoice-status">Paid</span>
+              <button class="btn-invoice" onclick="showToast('Downloading invoice...')">Download</button>
+            </div>
+            <div class="invoice-row">
+              <span class="invoice-date">February 12, 2026</span>
+              <span class="invoice-amount">$49.00</span>
+              <span class="invoice-status">Paid</span>
+              <button class="btn-invoice" onclick="showToast('Downloading invoice...')">Download</button>
+            </div>
+            <div class="invoice-row">
+              <span class="invoice-date">January 12, 2026</span>
+              <span class="invoice-amount">$49.00</span>
+              <span class="invoice-status">Paid</span>
+              <button class="btn-invoice" onclick="showToast('Downloading invoice...')">Download</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTEGRATIONS -->
+        <div class="settings-section" id="section-integrations">
+          <div class="settings-card">
+            <div class="settings-card-title">Integrations</div>
+            <div class="settings-card-sub">Connect IT Pricing Network to your existing tools and workflows</div>
+            <div class="toggle-section">
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Email — Microsoft Outlook / Gmail</div>
+                  <div class="toggle-sub">Forward bid notifications directly to your inbox as formatted emails</div>
+                </div>
+                <button class="btn-outline-sm" onclick="showToast('Email integration is always on — notifications go to your registered email')">Connected</button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Slack</div>
+                  <div class="toggle-sub">Send bid alerts and RFQ updates to a Slack channel</div>
+                </div>
+                <button class="btn-outline-sm" onclick="showToast('Slack integration coming soon')">Connect</button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Microsoft Teams</div>
+                  <div class="toggle-sub">Push notifications to a Teams channel when bids arrive</div>
+                </div>
+                <button class="btn-outline-sm" onclick="showToast('Teams integration coming soon')">Connect</button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Webhook</div>
+                  <div class="toggle-sub">Send real-time event data to your own systems via a custom webhook URL</div>
+                </div>
+                <button class="btn-outline-sm" onclick="showToast('Webhook configuration coming soon')">Configure</button>
+              </div>
+
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">API access</div>
+                  <div class="toggle-sub">Access your RFQs, bids, and platform data via the IT Pricing Network REST API</div>
+                </div>
+                <button class="btn-outline-sm" onclick="showToast('API key management coming soon')">Generate API key</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="settings-section" id="section-danger">
+          <div class="danger-zone">
+            <div class="danger-title">⚠️ Danger zone</div>
+            <div class="danger-sub">These actions are permanent and cannot be undone without contacting support. Please read each action carefully before proceeding.</div>
+
+            <div class="danger-row">
+              <div class="danger-row-info">
+                <h4>Export all my data</h4>
+                <p>Download a full copy of your account data including RFQs, bids, and messages in JSON format.</p>
+              </div>
+              <button class="btn-danger" onclick="showToast('Data export requested. You will receive an email within 24 hours.')">Export data</button>
+            </div>
+
+            <div class="danger-row">
+              <div class="danger-row-info">
+                <h4>Cancel subscription</h4>
+                <p>Cancel your Pro plan. You will retain access until the end of your current billing period.</p>
+              </div>
+              <button class="btn-danger" onclick="confirmCancel()">Cancel subscription</button>
+            </div>
+
+            <div class="danger-row">
+              <div class="danger-row-info">
+                <h4>Deactivate account</h4>
+                <p>Permanently deactivate your account. All active RFQs will be cancelled and resellers notified.</p>
+              </div>
+              <button class="btn-danger" onclick="confirmDeactivate()">Deactivate account</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /settings-content -->
+    </div><!-- /page-body -->
+  </div>
+</div>
+
+<script>
+  /* ─── SECTION NAVIGATION ─── */
+  function showSection(id, navEl) {
+    document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + id).classList.add('active');
+    navEl.classList.add('active');
+  }
+
+  /* ─── SAVE PREFERENCE ─── */
+  function savePref(el) {
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Save user preference
+     *
+     * const key = el.closest('.toggle-row, .select-row')
+     *   ?.querySelector('.toggle-label, .select-label')?.textContent;
+     * const value = el.type === 'checkbox' ? el.checked : el.value;
+     *
+     * await fetch('/api/settings/preference', {
+     *   method: 'PATCH',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
+     *   },
+     *   body: JSON.stringify({ key, value })
+     * });
+     * ─────────────────────────────────────────────────────────────
+     */
+    showToast('Preference saved');
+  }
+
+  /* ─── PUSH NOTIFICATIONS ─── */
+  function requestPush(el) {
+    if (el.checked && 'Notification' in window) {
+      Notification.requestPermission().then(perm => {
+        if (perm !== 'granted') { el.checked = false; showToast('Push notifications blocked in browser settings', true); }
+        else showToast('Push notifications enabled');
+      });
+    }
+  }
+
+  /* ─── CONFIRM ACTIONS ─── */
+  function confirmCancel() {
+    if (confirm('Are you sure you want to cancel your subscription? You will keep access until April 12, 2026.')) {
+      showToast('Subscription cancellation confirmed. Access continues until April 12, 2026.');
+    }
+  }
+
+  function confirmDeactivate() {
+    if (confirm('Are you sure? This will permanently deactivate your account and cancel all active RFQs.')) {
+      showToast('Deactivation request submitted. Our team will follow up within 24 hours.');
+    }
+  }
+
+  /* ─── TOAST ─── */
+  function showToast(msg, isError = false) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.background = isError ? 'var(--error)' : 'var(--accent)';
+    toast.style.color = isError ? 'var(--white)' : 'var(--navy)';
+    toast.textContent = (isError ? '✗ ' : '✓ ') + msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+</script>
+
+</body>
+</html>

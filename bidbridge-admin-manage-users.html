@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Admin · Manage Users</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 8px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+  .admin-badge { margin: 0 24px 28px; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2); color: var(--error); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 20px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; cursor: pointer; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .nav-badge.green { background: var(--accent); color: var(--navy); }
+  .nav-badge.red { background: var(--error); color: var(--white); }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.2); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--error); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--error); }
+
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; min-width: 0; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; gap: 16px; flex-wrap: wrap; }
+  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 14px; pointer-events: none; }
+  .search-input { padding: 9px 14px 9px 36px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--white); font-family: var(--font-body); font-size: 13px; outline: none; width: 280px; transition: border-color .2s; }
+  .search-input::placeholder { color: var(--slate); }
+  .search-input:focus { border-color: var(--accent); }
+  .btn-export { padding: 9px 18px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .btn-export:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 32px 40px; flex: 1; }
+
+  /* ─── STATS ─── */
+  .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 18px; cursor: pointer; transition: border-color .2s; }
+  .stat-card:hover { border-color: rgba(255,255,255,0.15); }
+  .stat-card.active-filter { border-color: var(--accent); background: rgba(0,200,150,0.05); }
+  .stat-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .stat-value { font-family: var(--font-head); font-size: 26px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.error { color: var(--error); }
+
+  /* ─── FILTERS ─── */
+  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-pill { padding: 7px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--slate-light); cursor: pointer; transition: all .2s; user-select: none; }
+  .filter-pill:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+  .filter-pill.active { background: rgba(0,200,150,0.1); border-color: rgba(0,200,150,0.35); color: var(--accent); }
+  .filter-right { margin-left: auto; display: flex; gap: 8px; }
+  .sort-wrap { position: relative; }
+  .sort-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+  .sort-select { padding: 7px 28px 7px 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; outline: none; cursor: pointer; appearance: none; }
+  .sort-select option { background: var(--navy-mid); }
+
+  /* ─── TABLE ─── */
+  .table-wrap { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; }
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table thead tr { border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .data-table th { padding: 13px 18px; text-align: left; font-size: 11px; font-weight: 500; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; cursor: pointer; user-select: none; }
+  .data-table th:hover { color: var(--white); }
+  .data-table td { padding: 16px 18px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+  .data-table tbody tr { transition: background .15s; cursor: pointer; }
+  .data-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+
+  /* ─── USER CELL ─── */
+  .user-cell { display: flex; align-items: center; gap: 12px; }
+  .user-initials { width: 36px; height: 36px; min-width: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .ui-buyer { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .ui-reseller { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .user-cell-name { font-weight: 500; font-size: 14px; }
+  .user-cell-email { font-size: 11px; color: var(--slate); margin-top: 1px; }
+
+  /* ─── TYPE BADGE ─── */
+  .type-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .type-buyer { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .type-reseller { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+
+  /* ─── STATUS BADGES ─── */
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+  .s-active { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .s-active::before { background: var(--accent); }
+  .s-pending { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .s-pending::before { background: var(--gold); }
+  .s-suspended { background: rgba(255,107,107,0.08); color: var(--error); border: 1px solid rgba(255,107,107,0.2); }
+  .s-suspended::before { background: var(--error); }
+  .s-flagged { background: rgba(255,107,107,0.1); color: var(--error); border: 1px solid rgba(255,107,107,0.25); }
+  .s-flagged::before { background: var(--error); }
+
+  /* ─── TIER BADGE ─── */
+  .tier-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .t-gold { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .t-platinum { background: rgba(168,184,204,0.1); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.2); }
+  .t-silver { background: rgba(136,150,169,0.08); color: var(--slate); border: 1px solid rgba(136,150,169,0.15); }
+
+  /* ─── ACTIONS ─── */
+  .action-group { display: flex; gap: 6px; }
+  .btn-sm { padding: 6px 12px; border-radius: 7px; font-family: var(--font-body); font-size: 12px; font-weight: 500; cursor: pointer; transition: all .2s; white-space: nowrap; border: none; }
+  .btn-view { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--slate-light); }
+  .btn-view:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-warn { background: var(--gold-glow); border: 1px solid rgba(245,200,66,0.2); color: var(--gold); }
+  .btn-warn:hover { background: rgba(245,200,66,0.15); }
+  .btn-suspend { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); color: var(--error); }
+  .btn-suspend:hover { background: rgba(255,107,107,0.15); }
+  .btn-reinstate { background: rgba(0,200,150,0.1); border: 1px solid rgba(0,200,150,0.2); color: var(--accent); }
+  .btn-reinstate:hover { background: rgba(0,200,150,0.18); }
+
+  /* ─── USER DETAIL DRAWER ─── */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; }
+  .drawer-overlay.open { display: block; }
+
+  .drawer {
+    position: fixed; top: 0; right: -500px; width: 480px; height: 100vh;
+    background: var(--navy-mid); border-left: 1px solid var(--card-border);
+    z-index: 101; overflow-y: auto;
+    transition: right .3s ease;
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { right: 0; }
+
+  .drawer-header { padding: 24px 28px; border-bottom: 1px solid var(--card-border); display: flex; align-items: flex-start; justify-content: space-between; }
+  .drawer-close { background: none; border: none; color: var(--slate); font-size: 22px; cursor: pointer; line-height: 1; }
+  .drawer-close:hover { color: var(--white); }
+
+  .drawer-body { padding: 28px; flex: 1; display: flex; flex-direction: column; gap: 24px; }
+
+  .drawer-user-header { display: flex; align-items: center; gap: 16px; }
+  .drawer-avatar { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 20px; font-weight: 700; flex-shrink: 0; }
+
+  .drawer-name { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 3px; }
+  .drawer-company { font-size: 14px; color: var(--slate-light); margin-bottom: 6px; }
+
+  .drawer-section-title { font-size: 11px; font-weight: 500; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .info-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 14px; }
+  .info-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .info-value { font-size: 14px; font-weight: 500; color: var(--white); }
+  .info-value.accent { color: var(--accent); }
+  .info-value.gold { color: var(--gold); }
+  .info-value.error { color: var(--error); }
+
+  .activity-list { display: flex; flex-direction: column; gap: 8px; }
+  .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px; }
+  .activity-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .activity-text { flex: 1; color: var(--slate-light); line-height: 1.5; }
+  .activity-text strong { color: var(--white); }
+  .activity-time { font-size: 11px; color: var(--slate); white-space: nowrap; }
+
+  .vendor-list { display: flex; flex-direction: column; gap: 8px; }
+  .vendor-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; }
+  .vendor-name { font-size: 13px; font-weight: 500; }
+  .vendor-expiry { font-size: 11px; color: var(--slate); margin-top: 2px; }
+  .vendor-expiry.warn { color: var(--gold); }
+  .vendor-expiry.error-text { color: var(--error); }
+
+  .warning-list { display: flex; flex-direction: column; gap: 8px; }
+  .warning-item { padding: 12px 14px; background: rgba(255,107,107,0.05); border: 1px solid rgba(255,107,107,0.12); border-radius: 9px; font-size: 13px; }
+  .warning-item-title { font-weight: 500; color: var(--error); margin-bottom: 3px; }
+  .warning-item-text { color: var(--slate-light); font-size: 12px; line-height: 1.5; }
+  .warning-item-date { font-size: 11px; color: var(--slate); margin-top: 4px; }
+
+  .drawer-actions { padding: 20px 28px; border-top: 1px solid var(--card-border); display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 36px; width: 100%; max-width: 480px; animation: slideUp .25s ease; }
+  @keyframes slideUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+  .modal h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .modal p { font-size: 13px; color: var(--slate-light); margin-bottom: 20px; line-height: 1.7; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-label { display: block; font-size: 13px; font-weight: 500; color: var(--slate-light); margin-bottom: 7px; }
+  .modal-select, .modal-textarea { width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 14px; outline: none; appearance: none; }
+  .modal-textarea { resize: none; min-height: 80px; }
+  .modal-select:focus, .modal-textarea:focus { border-color: var(--accent); }
+  .modal-select option { background: var(--navy-mid); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .btn-modal-confirm { padding: 11px 24px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; }
+  .btn-modal-confirm.danger { background: var(--error); color: var(--white); }
+  .btn-modal-confirm.warn { background: var(--gold); color: var(--navy); }
+  .btn-modal-cancel { padding: 11px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; }
+
+  /* ─── PAGINATION ─── */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 13px; color: var(--slate); }
+  .page-btns { display: flex; gap: 6px; }
+  .page-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid rgba(255,255,255,0.09); color: var(--slate-light); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .page-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .page-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); font-weight: 600; }
+
+  /* ─── TOAST ─── */
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: var(--navy); padding: 12px 22px; border-radius: 10px; font-family: var(--font-body); font-weight: 600; font-size: 14px; z-index: 999; animation: slideUp .3s ease; }
+
+  @media (max-width: 1024px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .page-body, .topbar { padding: 14px 16px; }
+    .drawer { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+    <div class="admin-badge">⚙ Admin portal</div>
+    <div class="sidebar-section-label">Overview</div>
+    <a class="nav-item" href="bidbridge-admin-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📊</span> Analytics</a>
+    <div class="sidebar-section-label">Resellers</div>
+    <a class="nav-item" href="#"><span class="nav-icon">✅</span> Approvals <span class="nav-badge red">7</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">🤝</span> All resellers</a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚠️</span> Reports <span class="nav-badge red">2</span></a>
+    <div class="sidebar-section-label">Marketplace</div>
+    <a class="nav-item" href="bidbridge-admin-manage-rfqs.html"><span class="nav-icon">📋</span> All RFQs <span class="nav-badge green">34</span></a>
+    <a class="nav-item active" href="#"><span class="nav-icon">👥</span> All users</a>
+    <div class="sidebar-section-label">System</div>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📧</span> Email templates</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🔒</span> Audit log</a>
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar">AD</div>
+        <div><div class="user-name">Admin</div><div class="user-role">Platform administrator</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>All users</h1>
+        <p>218 total users · 76 buyers · 142 resellers</p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="search-input" placeholder="Search by name, email, or company..." oninput="applyFilters()">
+        </div>
+        <button class="btn-export" onclick="showToast('Exporting user list as CSV...')">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card" onclick="filterStat('all', this)">
+          <div class="stat-label">Total users</div>
+          <div class="stat-value">218</div>
+        </div>
+        <div class="stat-card" onclick="filterStat('buyer', this)">
+          <div class="stat-label">Buyers</div>
+          <div class="stat-value accent">76</div>
+        </div>
+        <div class="stat-card" onclick="filterStat('reseller', this)">
+          <div class="stat-label">Resellers</div>
+          <div class="stat-value gold">142</div>
+        </div>
+        <div class="stat-card" onclick="filterStat('flagged', this)">
+          <div class="stat-label">Flagged</div>
+          <div class="stat-value error">2</div>
+        </div>
+        <div class="stat-card" onclick="filterStat('suspended', this)">
+          <div class="stat-label">Suspended</div>
+          <div class="stat-value error">1</div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="filter-bar">
+        <div class="filter-pill active" onclick="setFilter('all', this)">All users</div>
+        <div class="filter-pill" onclick="setFilter('buyer', this)">Buyers</div>
+        <div class="filter-pill" onclick="setFilter('reseller', this)">Resellers</div>
+        <div class="filter-pill" onclick="setFilter('active', this)">Active</div>
+        <div class="filter-pill" onclick="setFilter('pending', this)">Pending approval</div>
+        <div class="filter-pill" onclick="setFilter('flagged', this)">Flagged</div>
+        <div class="filter-pill" onclick="setFilter('suspended', this)">Suspended</div>
+        <div class="filter-right">
+          <div class="sort-wrap">
+            <select class="sort-select" onchange="applyFilters()">
+              <option value="newest">Newest first</option>
+              <option value="name">Name A–Z</option>
+              <option value="activity">Most active</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Type</th>
+              <th>Company</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Activity</th>
+              <th>Warnings</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="user-tbody"></tbody>
+        </table>
+        <div class="pagination">
+          <span id="pagination-label">Showing 1–10 of 218 users</span>
+          <div class="page-btns">
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ─── USER DETAIL DRAWER ─── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="user-drawer">
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-name" id="d-name">—</div>
+      <div class="drawer-company" id="d-company">—</div>
+      <div id="d-badges" style="display:flex;gap:6px;margin-top:6px;"></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body">
+
+    <div>
+      <div class="drawer-section-title">Account information</div>
+      <div class="info-grid" id="d-info-grid"></div>
+    </div>
+
+    <div id="d-vendors-section" style="display:none;">
+      <div class="drawer-section-title">Vendor authorizations</div>
+      <div class="vendor-list" id="d-vendors"></div>
+    </div>
+
+    <div id="d-warnings-section" style="display:none;">
+      <div class="drawer-section-title">Warning history</div>
+      <div class="warning-list" id="d-warnings"></div>
+    </div>
+
+    <div>
+      <div class="drawer-section-title">Recent activity</div>
+      <div class="activity-list" id="d-activity"></div>
+    </div>
+
+  </div>
+  <div class="drawer-actions" id="d-actions"></div>
+</div>
+
+<!-- ─── ACTION MODAL ─── -->
+<div class="modal-overlay" id="action-modal" onclick="closeModalIfOutside(event)">
+  <div class="modal">
+    <h3 id="modal-title">Action</h3>
+    <p id="modal-desc">Description</p>
+    <div class="modal-field" id="modal-reason-wrap">
+      <label class="modal-label" id="modal-reason-label">Reason</label>
+      <select class="modal-select" id="modal-reason">
+        <option>Select a reason</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Additional notes</label>
+      <textarea class="modal-textarea" id="modal-notes" placeholder="Add context for the audit log..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-modal-confirm" id="modal-confirm-btn" onclick="confirmModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /*
+   * ─────────────────────────────────────────────────────────────
+   * BACKEND INTEGRATION POINT — User management
+   *
+   * Fetch users:
+   * const response = await fetch('/api/admin/users?page=1&limit=10&filter=all', {
+   *   headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
+   * });
+   * const { users, total } = await response.json();
+   *
+   * Actions:
+   * POST /api/admin/user/warn    { userId, reason, notes }
+   * POST /api/admin/user/suspend { userId, reason, duration, notes }
+   * POST /api/admin/user/reinstate { userId, notes }
+   * DELETE /api/admin/user/:id   (permanent removal)
+   *
+   * All actions are logged to the audit trail automatically.
+   * ─────────────────────────────────────────────────────────────
+   */
+
+  const USERS = [
+    { id: 1, first: 'James', last: 'Mitchell', email: 'james@acmecorp.com', type: 'buyer', company: 'Acme Corp', status: 'active', joined: '2026-01-12', rfqs: 6, bids: 18, awarded: 3, warnings: 0, vendors: null, activity: [{ text: 'Posted RFQ #4831 — Palo Alto NGFW refresh', time: '35 min ago', color: 'var(--accent)' }, { text: 'Awarded RFQ #4761 to NetStar Solutions', time: 'Yesterday', color: 'var(--accent)' }, { text: 'Compared bids on RFQ #4821', time: '2 days ago', color: 'var(--slate)' }] },
+    { id: 2, first: 'Mike', last: 'Reynolds', email: 'm.reynolds@netstar.com', type: 'reseller', company: 'NetStar Solutions', status: 'active', joined: '2026-02-03', rfqs: null, bids: 23, awarded: 8, warnings: 0, vendors: [{ name: 'Cisco', tier: 'Gold', expiry: 'Dec 2026', status: 'ok' }, { name: 'Fortinet', tier: 'Platinum', expiry: 'Apr 26, 2026', status: 'warn' }, { name: 'Palo Alto', tier: 'Gold', expiry: 'Sep 2026', status: 'ok' }], activity: [{ text: 'Submitted bid on RFQ #4831', time: '1 hour ago', color: 'var(--gold)' }, { text: 'Won RFQ #4821 — $137,200', time: '1 day ago', color: 'var(--accent)' }, { text: 'Revised bid on RFQ #4818', time: '2 days ago', color: 'var(--slate)' }] },
+    { id: 3, first: 'Tom', last: 'Walsh', email: 't.walsh@corepath.com', type: 'reseller', company: 'CorePath IT', status: 'flagged', joined: '2026-01-28', rfqs: null, bids: 11, awarded: 2, warnings: 1, vendors: [{ name: 'Cisco', tier: 'Gold', expiry: 'Nov 2026', status: 'ok' }, { name: 'Aruba', tier: 'Silver', expiry: 'Jul 2026', status: 'ok' }], activity: [{ text: 'Reported by Buyer #4761 for bid price failure', time: '3 hours ago', color: 'var(--error)' }, { text: 'Submitted bid on RFQ #4822', time: '1 day ago', color: 'var(--gold)' }, { text: 'Bid not selected on RFQ #4815', time: '3 days ago', color: 'var(--slate)' }] },
+    { id: 4, first: 'Sarah', last: 'Chen', email: 's.chen@blueskytech.com', type: 'reseller', company: 'BlueSky Technology', status: 'pending', joined: '2026-03-24', rfqs: null, bids: 0, awarded: 0, warnings: 0, vendors: [{ name: 'Cisco', tier: 'Gold', expiry: 'Pending verification', status: 'warn' }, { name: 'Fortinet', tier: 'Gold', expiry: 'Pending verification', status: 'warn' }], activity: [{ text: 'Submitted reseller application', time: '3 days ago', color: 'var(--gold)' }] },
+    { id: 5, first: 'Rachel', last: 'Moore', email: 'r.moore@summitit.com', type: 'reseller', company: 'Summit IT Solutions', status: 'suspended', joined: '2025-11-15', rfqs: null, bids: 34, awarded: 5, warnings: 2, vendors: [{ name: 'Palo Alto', tier: 'Platinum', expiry: 'Aug 2026', status: 'ok' }], activity: [{ text: 'Account suspended by admin', time: '2 weeks ago', color: 'var(--error)' }, { text: 'Second warning issued', time: '3 weeks ago', color: 'var(--error)' }, { text: 'First warning issued', time: '5 weeks ago', color: 'var(--gold)' }] },
+    { id: 6, first: 'David', last: 'Park', email: 'd.park@meridiannet.com', type: 'reseller', company: 'Meridian Networks', status: 'pending', joined: '2026-03-26', rfqs: null, bids: 0, awarded: 0, warnings: 0, vendors: [{ name: 'Palo Alto', tier: 'Platinum', expiry: 'Pending verification', status: 'warn' }, { name: 'Fortinet', tier: 'Gold', expiry: 'Pending verification', status: 'warn' }], activity: [{ text: 'Submitted reseller application', time: '18 hours ago', color: 'var(--gold)' }] },
+    { id: 7, first: 'Lisa', last: 'Torres', email: 'l.torres@healthgroup.com', type: 'buyer', company: 'Regional Healthcare Group', status: 'active', joined: '2026-01-05', rfqs: 3, bids: 9, awarded: 2, warnings: 0, vendors: null, activity: [{ text: 'Posted RFQ #4799 — NetApp storage', time: '2 weeks ago', color: 'var(--accent)' }, { text: 'Awarded RFQ #4780 to Apex Technology', time: '1 month ago', color: 'var(--accent)' }] },
+    { id: 8, first: 'Chris', last: 'Adeyemi', email: 'c.adeyemi@apextech.com', type: 'reseller', company: 'Apex Technology Group', status: 'active', joined: '2026-01-20', rfqs: null, bids: 19, awarded: 6, warnings: 0, vendors: [{ name: 'Cisco', tier: 'Platinum', expiry: 'Oct 2026', status: 'ok' }, { name: 'Aruba', tier: 'Gold', expiry: 'Oct 2026', status: 'ok' }], activity: [{ text: 'Submitted bid on RFQ #4831', time: '2 hours ago', color: 'var(--gold)' }, { text: 'Won RFQ #4797 — $118,400', time: '3 days ago', color: 'var(--accent)' }] },
+    { id: 9, first: 'Jennifer', last: 'Wu', email: 'j.wu@techbridgepartners.com', type: 'reseller', company: 'TechBridge Partners', status: 'flagged', joined: '2026-01-10', rfqs: null, bids: 6, awarded: 1, warnings: 0, vendors: [{ name: 'Palo Alto', tier: 'Gold', expiry: 'Expired Dec 2025', status: 'error' }], activity: [{ text: 'System flag: expired Palo Alto certification', time: '2 days ago', color: 'var(--error)' }, { text: 'Submitted bid on RFQ #4818', time: '4 days ago', color: 'var(--gold)' }] },
+    { id: 10, first: 'Marcus', last: 'Johnson', email: 'm.johnson@blueridgecorp.com', type: 'buyer', company: 'Blue Ridge Corporation', status: 'active', joined: '2026-02-28', rfqs: 2, bids: 6, awarded: 1, warnings: 0, vendors: null, activity: [{ text: 'Awarded RFQ #4788 to CorePath IT', time: '1 week ago', color: 'var(--accent)' }, { text: 'Posted RFQ #4788', time: '2 weeks ago', color: 'var(--accent)' }] },
+  ];
+
+  let activeFilter = 'all';
+  let activeModalAction = null;
+  let activeDrawerUser = null;
+
+  /* ─── RENDER TABLE ─── */
+  function renderUsers(data) {
+    const tbody = document.getElementById('user-tbody');
+    document.getElementById('pagination-label').textContent = `Showing 1–${data.length} of 218 users`;
+
+    tbody.innerHTML = data.map(u => {
+      const statusMap = { active: ['s-active','Active'], pending: ['s-pending','Pending'], suspended: ['s-suspended','Suspended'], flagged: ['s-flagged','Flagged'] };
+      const [sCls, sLabel] = statusMap[u.status] || ['s-active','Active'];
+      const initials = u.first[0] + u.last[0];
+      const uiCls = u.type === 'buyer' ? 'ui-buyer' : 'ui-reseller';
+      const typeCls = u.type === 'buyer' ? 'type-buyer' : 'type-reseller';
+      const typeLabel = u.type === 'buyer' ? '🏢 Buyer' : '🤝 Reseller';
+      const activity = u.type === 'buyer'
+        ? `${u.rfqs} RFQs · ${u.awarded} awarded`
+        : `${u.bids} bids · ${u.awarded} won`;
+      const warnColor = u.warnings > 0 ? (u.warnings >= 2 ? 'var(--error)' : 'var(--gold)') : 'var(--slate)';
+
+      const actions = u.status === 'suspended'
+        ? `<button class="btn-sm btn-reinstate" onclick="event.stopPropagation();openModal('reinstate','${u.first} ${u.last}')">Reinstate</button>`
+        : u.status === 'flagged'
+        ? `<button class="btn-sm btn-warn" onclick="event.stopPropagation();openModal('warn','${u.first} ${u.last}')">Warn</button>
+           <button class="btn-sm btn-suspend" onclick="event.stopPropagation();openModal('suspend','${u.first} ${u.last}')">Suspend</button>`
+        : u.type === 'reseller' && u.status !== 'pending'
+        ? `<button class="btn-sm btn-warn" onclick="event.stopPropagation();openModal('warn','${u.first} ${u.last}')">Warn</button>`
+        : u.status === 'pending'
+        ? `<button class="btn-sm btn-reinstate" onclick="event.stopPropagation();window.location='bidbridge-admin-dashboard.html'">Review</button>`
+        : '';
+
+      return `
+        <tr onclick="openDrawer(${u.id})">
+          <td>
+            <div class="user-cell">
+              <div class="user-initials ${uiCls}">${initials}</div>
+              <div>
+                <div class="user-cell-name">${u.first} ${u.last}</div>
+                <div class="user-cell-email">${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="type-badge ${typeCls}">${typeLabel}</span></td>
+          <td style="color:var(--slate-light);">${u.company}</td>
+          <td><span class="status-badge ${sCls}">${sLabel}</span></td>
+          <td style="color:var(--slate);font-size:12px;">${formatDate(u.joined)}</td>
+          <td style="color:var(--slate-light);font-size:12px;">${activity}</td>
+          <td style="font-weight:600;color:${warnColor};">${u.warnings === 0 ? '—' : u.warnings}</td>
+          <td onclick="event.stopPropagation();">
+            <div class="action-group">${actions}</div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  /* ─── FILTER + SEARCH ─── */
+  function setFilter(filter, el) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = filter;
+    applyFilters();
+  }
+
+  function filterStat(filter, el) {
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
+    el.classList.add('active-filter');
+    activeFilter = filter;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    let data = [...USERS];
+    if (activeFilter !== 'all') data = data.filter(u => u.type === activeFilter || u.status === activeFilter);
+    if (q) data = data.filter(u =>
+      `${u.first} ${u.last}`.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.company.toLowerCase().includes(q)
+    );
+    renderUsers(data);
+  }
+
+  /* ─── DRAWER ─── */
+  function openDrawer(userId) {
+    const u = USERS.find(u => u.id === userId);
+    if (!u) return;
+    activeDrawerUser = u;
+
+    document.getElementById('d-name').textContent = `${u.first} ${u.last}`;
+    document.getElementById('d-company').textContent = u.company;
+
+    const statusMap = { active: ['s-active','Active'], pending: ['s-pending','Pending'], suspended: ['s-suspended','Suspended'], flagged: ['s-flagged','Flagged'] };
+    const [sCls, sLabel] = statusMap[u.status] || ['s-active','Active'];
+    const typeCls = u.type === 'buyer' ? 'type-buyer' : 'type-reseller';
+    document.getElementById('d-badges').innerHTML = `
+      <span class="type-badge ${typeCls}">${u.type === 'buyer' ? '🏢 Buyer' : '🤝 Reseller'}</span>
+      <span class="status-badge ${sCls}">${sLabel}</span>
+      ${u.warnings > 0 ? `<span class="status-badge s-flagged">${u.warnings} warning${u.warnings > 1 ? 's' : ''}</span>` : ''}
+    `;
+
+    document.getElementById('d-info-grid').innerHTML = `
+      <div class="info-item"><div class="info-label">Email</div><div class="info-value" style="font-size:12px;">${u.email}</div></div>
+      <div class="info-item"><div class="info-label">Member since</div><div class="info-value">${formatDate(u.joined)}</div></div>
+      ${u.type === 'buyer'
+        ? `<div class="info-item"><div class="info-label">RFQs posted</div><div class="info-value accent">${u.rfqs}</div></div>
+           <div class="info-item"><div class="info-label">Deals awarded</div><div class="info-value">${u.awarded}</div></div>`
+        : `<div class="info-item"><div class="info-label">Bids submitted</div><div class="info-value gold">${u.bids}</div></div>
+           <div class="info-item"><div class="info-label">Win rate</div><div class="info-value accent">${u.bids > 0 ? Math.round((u.awarded/u.bids)*100) + '%' : '—'}</div></div>`
+      }
+      <div class="info-item"><div class="info-label">Warnings</div><div class="info-value ${u.warnings > 0 ? 'error' : ''}">${u.warnings || '0'}</div></div>
+      <div class="info-item"><div class="info-label">Status</div><div class="info-value">${sLabel}</div></div>
+    `;
+
+    const vendorSection = document.getElementById('d-vendors-section');
+    if (u.vendors && u.vendors.length) {
+      vendorSection.style.display = 'block';
+      document.getElementById('d-vendors').innerHTML = u.vendors.map(v => `
+        <div class="vendor-row">
+          <div>
+            <div class="vendor-name">${v.name}</div>
+            <div class="vendor-expiry ${v.status === 'warn' ? 'warn' : v.status === 'error' ? 'error-text' : ''}">${v.expiry}</div>
+          </div>
+          <span class="tier-badge ${v.tier === 'Gold' ? 't-gold' : v.tier === 'Platinum' ? 't-platinum' : 't-silver'}">${v.tier === 'Gold' ? '⭐' : v.tier === 'Platinum' ? '💠' : '◈'} ${v.tier}</span>
+        </div>
+      `).join('');
+    } else { vendorSection.style.display = 'none'; }
+
+    const warnSection = document.getElementById('d-warnings-section');
+    if (u.warnings > 0) {
+      warnSection.style.display = 'block';
+      document.getElementById('d-warnings').innerHTML = `
+        <div class="warning-item">
+          <div class="warning-item-title">Formal warning #1</div>
+          <div class="warning-item-text">Failure to honor bid price on RFQ #4761. Buyer reported that reseller attempted to reprice after award.</div>
+          <div class="warning-item-date">Issued March 20, 2026</div>
+        </div>
+        ${u.warnings >= 2 ? `<div class="warning-item">
+          <div class="warning-item-title">Formal warning #2</div>
+          <div class="warning-item-text">Second violation: unauthorized vendor tier claim on RFQ #4788.</div>
+          <div class="warning-item-date">Issued March 25, 2026</div>
+        </div>` : ''}
+      `;
+    } else { warnSection.style.display = 'none'; }
+
+    document.getElementById('d-activity').innerHTML = u.activity.map(a => `
+      <div class="activity-item">
+        <div class="activity-dot" style="background:${a.color};"></div>
+        <div class="activity-text">${a.text}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    `).join('');
+
+    let actionsHTML = `<button class="btn-sm btn-view" onclick="showToast('Opening full user profile...')">View full profile</button>`;
+    if (u.status === 'suspended') {
+      actionsHTML += `<button class="btn-sm btn-reinstate" onclick="openModal('reinstate','${u.first} ${u.last}')">Reinstate account</button>`;
+    } else if (u.status !== 'pending') {
+      actionsHTML += `<button class="btn-sm btn-warn" onclick="openModal('warn','${u.first} ${u.last}')">Issue warning</button>`;
+      actionsHTML += `<button class="btn-sm btn-suspend" onclick="openModal('suspend','${u.first} ${u.last}')">Suspend account</button>`;
+    }
+    if (u.status === 'pending') {
+      actionsHTML += `<button class="btn-sm btn-reinstate" onclick="window.location='bidbridge-admin-dashboard.html'">Review application</button>`;
+    }
+    document.getElementById('d-actions').innerHTML = actionsHTML;
+
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('user-drawer').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('user-drawer').classList.remove('open');
+  }
+
+  /* ─── MODAL ─── */
+  function openModal(action, userName) {
+    activeModalAction = action;
+    const configs = {
+      warn: { title: 'Issue formal warning', desc: `Issue a formal warning to ${userName}. This will be recorded on their account. A second warning may result in suspension.`, reasons: ['Failure to honor bid price','Misrepresentation of partner tier','Expired vendor authorization','Unprofessional conduct','Other'], btnClass: 'warn', btnLabel: 'Issue warning' },
+      suspend: { title: 'Suspend account', desc: `Suspend ${userName}'s account. They will not be able to bid or post RFQs until reinstated. All active bids will be withdrawn.`, reasons: ['Multiple bid price failures','Fraudulent vendor claims','Repeated violations','Platform abuse','Pending investigation'], btnClass: 'danger', btnLabel: 'Suspend account' },
+      reinstate: { title: 'Reinstate account', desc: `Reinstate ${userName}'s account. They will regain full platform access immediately.`, reasons: ['Issue resolved','Sufficient time served','Documentation updated','Admin discretion'], btnClass: '', btnLabel: 'Reinstate account' },
+    };
+    const cfg = configs[action];
+    document.getElementById('modal-title').textContent = cfg.title;
+    document.getElementById('modal-desc').textContent = cfg.desc;
+    document.getElementById('modal-reason').innerHTML = cfg.reasons.map(r => `<option>${r}</option>`).join('');
+    const btn = document.getElementById('modal-confirm-btn');
+    btn.className = `btn-modal-confirm ${cfg.btnClass}`;
+    btn.textContent = cfg.btnLabel;
+    document.getElementById('action-modal').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('action-modal').classList.remove('open'); }
+  function closeModalIfOutside(e) { if (e.target === document.getElementById('action-modal')) closeModal(); }
+
+  function confirmModal() {
+    const msgs = { warn: 'Formal warning issued and recorded on the account.', suspend: 'Account suspended. The user has been notified.', reinstate: 'Account reinstated. The user has been notified.' };
+    closeModal();
+    showToast(msgs[activeModalAction] || 'Action completed.');
+  }
+
+  /* ─── HELPERS ─── */
+  function formatDate(str) {
+    if (!str) return '—';
+    const d = new Date(str + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function showToast(msg) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = '✓ ' + msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  /* ─── INIT ─── */
+  applyFilters();
+</script>
+
+</body>
+</html>

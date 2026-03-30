@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — My Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 36px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 24px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar-sm { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
+
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; }
+  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 36px 40px; display: grid; grid-template-columns: 280px 1fr; gap: 28px; align-items: start; }
+
+  /* ─── LEFT: PROFILE CARD ─── */
+  .profile-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
+
+  .profile-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 28px 24px; text-align: center; }
+
+  .avatar-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
+  .avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-glow); border: 2px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--accent); margin: 0 auto; }
+  .avatar-edit { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--navy-light); border: 2px solid var(--navy-mid); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; transition: background .2s; }
+  .avatar-edit:hover { background: var(--accent); }
+
+  .profile-name { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .profile-title { font-size: 13px; color: var(--slate-light); margin-bottom: 4px; }
+  .profile-company { font-size: 13px; color: var(--slate); margin-bottom: 16px; }
+
+  .account-type-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
+  .badge-buyer { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .badge-reseller { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+
+  .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .profile-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; }
+  .profile-stat-value { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  .profile-stat-label { font-size: 11px; color: var(--slate); margin-top: 2px; }
+
+  .btn-danger-outline { width: 100%; padding: 10px; background: transparent; border: 1px solid rgba(255,107,107,0.2); border-radius: 9px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .btn-danger-outline:hover { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.4); }
+
+  /* Tier badges on profile sidebar */
+  .tier-list { display: flex; flex-direction: column; gap: 6px; }
+  .tier-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .tier-vendor { color: var(--slate-light); }
+  .tier-chip { font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+  .tier-chip.gold { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+  .tier-chip.platinum { background: rgba(168,184,204,0.12); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.25); }
+  .tier-chip.silver { background: rgba(136,150,169,0.1); color: var(--slate); border: 1px solid rgba(136,150,169,0.2); }
+
+  .sidebar-mini-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px 22px; }
+  .sidebar-mini-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+
+  /* ─── RIGHT: FORM SECTIONS ─── */
+  .profile-forms { display: flex; flex-direction: column; gap: 20px; }
+
+  .section-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 28px 32px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .section-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  .section-sub { font-size: 13px; color: var(--slate); margin-top: 3px; }
+
+  .btn-edit { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .btn-edit:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-save { padding: 7px 16px; background: var(--accent); border: none; border-radius: 8px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s; display: none; }
+  .btn-save:hover { background: var(--accent-dim); }
+  .btn-cancel-edit { padding: 7px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; display: none; margin-right: 6px; }
+
+  /* ─── FORM FIELDS ─── */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--slate-light); margin-bottom: 8px; }
+
+  .field-view { font-size: 15px; color: var(--white); padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .field-empty { color: var(--slate); font-style: italic; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="password"],
+  textarea,
+  select {
+    width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 15px; outline: none; transition: border-color .2s, background .2s; appearance: none; display: none;
+  }
+  input.editing, textarea.editing, select.editing { display: block; }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); background: rgba(0,200,150,0.04); }
+  input::placeholder, textarea::placeholder { color: var(--slate); }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.6; font-size: 14px; }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+  select option { background: var(--navy-mid); }
+
+  .field-hint { font-size: 12px; color: var(--slate); margin-top: 5px; }
+
+  /* ─── PASSWORD SECTION ─── */
+  .pwd-group { margin-bottom: 16px; }
+  .pwd-toggle-btn { background: none; border: none; color: var(--accent); font-family: var(--font-body); font-size: 13px; cursor: pointer; padding: 0; }
+  .pwd-toggle-btn:hover { text-decoration: underline; }
+  .pwd-fields { display: none; margin-top: 16px; }
+  .pwd-fields.visible { display: block; }
+
+  /* ─── DANGER ZONE ─── */
+  .danger-zone { background: rgba(255,107,107,0.04); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; padding: 28px 32px; }
+  .danger-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; color: var(--error); margin-bottom: 8px; }
+  .danger-sub { font-size: 13px; color: var(--slate-light); margin-bottom: 20px; line-height: 1.6; }
+  .danger-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-danger { padding: 10px 20px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.25); border-radius: 9px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .btn-danger:hover { background: rgba(255,107,107,0.18); }
+
+  /* ─── TOAST ─── */
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: var(--navy); padding: 12px 22px; border-radius: 10px; font-family: var(--font-body); font-weight: 600; font-size: 14px; z-index: 999; animation: slideUp .3s ease; }
+  @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  @media (max-width: 1100px) {
+    .page-body { grid-template-columns: 1fr; }
+    .profile-sidebar { position: static; }
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .topbar, .page-body { padding: 14px 16px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item" href="buyer-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="bidbridge-submit-rfq.html"><span class="nav-icon">＋</span> New RFQ</a>
+    <a class="nav-item" href="#"><span class="nav-icon">📋</span> My RFQs</a>
+    <a class="nav-item" href="bidbridge-compare-bids.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge">2</span></a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item" href="bidbridge-notifications.html"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge">6</span></a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item active" href="#"><span class="nav-icon">👤</span> Profile</a>
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar-sm">JM</div>
+        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>My profile</h1>
+        <p>Manage your personal information and account settings</p>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- ── LEFT: PROFILE SIDEBAR ── -->
+      <div class="profile-sidebar">
+
+        <!-- PROFILE CARD -->
+        <div class="profile-card">
+          <div class="avatar-wrap">
+            <div class="avatar">JM</div>
+            <div class="avatar-edit" title="Change photo">✎</div>
+          </div>
+          <div class="profile-name">James Mitchell</div>
+          <div class="profile-title">IT Director</div>
+          <div class="profile-company">Acme Corporation</div>
+          <div class="account-type-badge badge-buyer">🏢 Buyer account</div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="profile-stat-value">6</div>
+              <div class="profile-stat-label">RFQs posted</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">3</div>
+              <div class="profile-stat-label">Deals awarded</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">18</div>
+              <div class="profile-stat-label">Bids received</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">$412k</div>
+              <div class="profile-stat-label">Total spend</div>
+            </div>
+          </div>
+          <button class="btn-danger-outline" onclick="confirmDeactivate()">Deactivate account</button>
+        </div>
+
+        <!-- MEMBER SINCE -->
+        <div class="sidebar-mini-card">
+          <div class="sidebar-mini-title">Account details</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--slate);">Member since</span>
+              <span>Jan 12, 2026</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--slate);">Plan</span>
+              <span style="color:var(--accent);">Pro — Active</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--slate);">RFQs remaining</span>
+              <span>4 of 10 this month</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--slate);">Next billing</span>
+              <span>April 12, 2026</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /profile-sidebar -->
+
+      <!-- ── RIGHT: FORMS ── -->
+      <div class="profile-forms">
+
+        <!-- PERSONAL INFO -->
+        <div class="section-card" id="section-personal">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Personal information</div>
+              <div class="section-sub">Your name, contact details, and job title</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn-cancel-edit" id="cancel-personal" onclick="cancelEdit('personal')">Cancel</button>
+              <button class="btn-save" id="save-personal" onclick="saveSection('personal')">Save changes</button>
+              <button class="btn-edit" id="edit-personal" onclick="enableEdit('personal')">Edit</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>First name</label>
+              <div class="field-view" id="view-first">James</div>
+              <input type="text" id="input-first" value="James" placeholder="First name">
+            </div>
+            <div class="form-group">
+              <label>Last name</label>
+              <div class="field-view" id="view-last">Mitchell</div>
+              <input type="text" id="input-last" value="Mitchell" placeholder="Last name">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Job title</label>
+              <div class="field-view" id="view-title">IT Director</div>
+              <input type="text" id="input-title" value="IT Director" placeholder="Your title">
+            </div>
+            <div class="form-group">
+              <label>Phone number</label>
+              <div class="field-view" id="view-phone">(214) 555-0182</div>
+              <input type="tel" id="input-phone" value="(214) 555-0182" placeholder="Phone number">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email address</label>
+            <div class="field-view" id="view-email">james.mitchell@acmecorp.com</div>
+            <input type="email" id="input-email" value="james.mitchell@acmecorp.com" placeholder="Email address">
+            <div class="field-hint" style="display:none;" id="hint-email">Changing your email will require re-verification.</div>
+          </div>
+        </div>
+
+        <!-- COMPANY INFO -->
+        <div class="section-card" id="section-company">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Company information</div>
+              <div class="section-sub">Your organization's details visible to resellers</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn-cancel-edit" id="cancel-company" onclick="cancelEdit('company')">Cancel</button>
+              <button class="btn-save" id="save-company" onclick="saveSection('company')">Save changes</button>
+              <button class="btn-edit" id="edit-company" onclick="enableEdit('company')">Edit</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Company name</label>
+              <div class="field-view" id="view-company">Acme Corporation</div>
+              <input type="text" id="input-company" value="Acme Corporation" placeholder="Company name">
+            </div>
+            <div class="form-group">
+              <label>Industry</label>
+              <div class="field-view" id="view-industry">Manufacturing</div>
+              <div class="select-wrap">
+                <select id="input-industry" class="">
+                  <option>Manufacturing</option>
+                  <option>Healthcare</option>
+                  <option>Financial services</option>
+                  <option>Retail</option>
+                  <option>Logistics &amp; transportation</option>
+                  <option>Education</option>
+                  <option>Government</option>
+                  <option>Technology</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>City</label>
+              <div class="field-view" id="view-city">Dallas</div>
+              <input type="text" id="input-city" value="Dallas" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <div class="field-view" id="view-state">TX</div>
+              <input type="text" id="input-state" value="TX" placeholder="State">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Company description <span style="color:var(--slate);font-weight:400;font-size:11px;margin-left:4px;">(optional — shown to resellers)</span></label>
+            <div class="field-view" id="view-desc">Regional manufacturing group with 1,200 employees across 4 facilities in the DFW area. IT infrastructure managed centrally.</div>
+            <textarea id="input-desc" placeholder="Brief description of your company...">Regional manufacturing group with 1,200 employees across 4 facilities in the DFW area. IT infrastructure managed centrally.</textarea>
+          </div>
+        </div>
+
+        <!-- PASSWORD & SECURITY -->
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Password &amp; security</div>
+              <div class="section-sub">Keep your account secure</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Current password</label>
+            <div class="field-view">••••••••••••</div>
+            <button class="pwd-toggle-btn" onclick="togglePasswordFields()">Change password</button>
+          </div>
+
+          <div class="pwd-fields" id="pwd-fields">
+            <div class="form-group">
+              <label>Current password</label>
+              <input type="password" class="editing" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+              <label>New password</label>
+              <input type="password" class="editing" id="new-pwd" placeholder="Min. 8 characters">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Confirm new password</label>
+              <input type="password" class="editing" id="confirm-pwd" placeholder="Repeat new password">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <button class="btn-save" style="display:inline-block;" onclick="savePassword()">Update password</button>
+              <button class="btn-cancel-edit" style="display:inline-block;" onclick="togglePasswordFields()">Cancel</button>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
+            <div style="font-size:14px;font-weight:500;margin-bottom:14px;">Two-factor authentication</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;">
+              <div>
+                <div style="font-size:14px;font-weight:500;">Authenticator app</div>
+                <div style="font-size:12px;color:var(--slate);margin-top:2px;">Add an extra layer of security to your account</div>
+              </div>
+              <button class="btn-edit" onclick="showToast('2FA setup coming soon')">Enable 2FA</button>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;">
+            <div style="font-size:13px;font-weight:500;margin-bottom:8px;">Active sessions</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+              <div>
+                <div style="color:var(--white);">Chrome · macOS · Dallas, TX</div>
+                <div style="font-size:11px;color:var(--accent);">Current session</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+              <div>
+                <div style="color:var(--white);">Safari · iPhone · Dallas, TX</div>
+                <div style="font-size:11px;color:var(--slate);">Last active 2 days ago</div>
+              </div>
+              <button class="btn-cancel-edit" style="display:inline-block;" onclick="showToast('Session revoked')">Revoke</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PREFERENCES -->
+        <div class="section-card" id="section-prefs">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Preferences</div>
+              <div class="section-sub">Default settings for your RFQs and bids</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="btn-cancel-edit" id="cancel-prefs" onclick="cancelEdit('prefs')">Cancel</button>
+              <button class="btn-save" id="save-prefs" onclick="saveSection('prefs')">Save changes</button>
+              <button class="btn-edit" id="edit-prefs" onclick="enableEdit('prefs')">Edit</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Default delivery location</label>
+              <div class="field-view" id="view-defloc">Dallas, TX 75201</div>
+              <input type="text" id="input-defloc" value="Dallas, TX 75201" placeholder="Default delivery address">
+            </div>
+            <div class="form-group">
+              <label>Default bid window</label>
+              <div class="field-view" id="view-bidwindow">7 days</div>
+              <div class="select-wrap">
+                <select id="input-bidwindow">
+                  <option>3 days</option>
+                  <option selected>7 days</option>
+                  <option>14 days</option>
+                  <option>30 days</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Default anonymity level</label>
+              <div class="field-view" id="view-anon">Anonymous — hide name &amp; company</div>
+              <div class="select-wrap">
+                <select id="input-anon">
+                  <option selected>Anonymous — hide name &amp; company</option>
+                  <option>Partial — show industry only</option>
+                  <option>Reveal — show full name</option>
+                </select>
+              </div>
+              <div class="field-hint">This sets your default anonymity on all new RFQs. You can always change it per RFQ.</div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Default sourcing strategy</label>
+              <div class="field-view" id="view-strategy">Sole source</div>
+              <div class="select-wrap">
+                <select id="input-strategy">
+                  <option selected>Sole source</option>
+                  <option>Split bid per vendor</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="danger-zone">
+          <div class="danger-title">⚠️ Danger zone</div>
+          <div class="danger-sub">These actions are irreversible. Please be certain before proceeding. Deactivating your account will cancel any active RFQs and notify all resellers with open bids.</div>
+          <div class="danger-actions">
+            <button class="btn-danger" onclick="showToast('A data export has been requested. You will receive an email within 24 hours.')">Export my data</button>
+            <button class="btn-danger" onclick="confirmDeactivate()">Deactivate account</button>
+          </div>
+        </div>
+
+      </div><!-- /profile-forms -->
+    </div><!-- /page-body -->
+  </div>
+</div>
+
+<script>
+  /* ─── EDIT MODE ─── */
+  const sections = {
+    personal: ['first','last','title','phone','email'],
+    company: ['company','industry','city','state','desc'],
+    prefs: ['defloc','bidwindow','anon','strategy'],
+  };
+
+  function enableEdit(section) {
+    sections[section].forEach(field => {
+      const view = document.getElementById('view-' + field);
+      const input = document.getElementById('input-' + field);
+      if (view) view.style.display = 'none';
+      if (input) { input.classList.add('editing'); input.style.display = 'block'; }
+      const hint = document.getElementById('hint-' + field);
+      if (hint) hint.style.display = 'block';
+    });
+    document.getElementById('edit-' + section).style.display = 'none';
+    document.getElementById('save-' + section).style.display = 'inline-block';
+    document.getElementById('cancel-' + section).style.display = 'inline-block';
+  }
+
+  function cancelEdit(section) {
+    sections[section].forEach(field => {
+      const view = document.getElementById('view-' + field);
+      const input = document.getElementById('input-' + field);
+      if (view) view.style.display = 'block';
+      if (input) { input.classList.remove('editing'); input.style.display = 'none'; }
+      const hint = document.getElementById('hint-' + field);
+      if (hint) hint.style.display = 'none';
+    });
+    document.getElementById('edit-' + section).style.display = 'inline-block';
+    document.getElementById('save-' + section).style.display = 'none';
+    document.getElementById('cancel-' + section).style.display = 'none';
+  }
+
+  function saveSection(section) {
+    sections[section].forEach(field => {
+      const view = document.getElementById('view-' + field);
+      const input = document.getElementById('input-' + field);
+      if (view && input) view.textContent = input.value || input.options?.[input.selectedIndex]?.text || '';
+    });
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Save profile section
+     *
+     * const payload = {};
+     * sections[section].forEach(field => {
+     *   const input = document.getElementById('input-' + field);
+     *   payload[field] = input.value || input.options?.[input.selectedIndex]?.value;
+     * });
+     *
+     * await fetch(`/api/profile/${section}`, {
+     *   method: 'PATCH',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
+     *   },
+     *   body: JSON.stringify(payload)
+     * });
+     * ─────────────────────────────────────────────────────────────
+     */
+    cancelEdit(section);
+    showToast('Changes saved successfully');
+  }
+
+  /* ─── PASSWORD ─── */
+  function togglePasswordFields() {
+    const fields = document.getElementById('pwd-fields');
+    fields.classList.toggle('visible');
+  }
+
+  function savePassword() {
+    const newPwd = document.getElementById('new-pwd').value;
+    const confirmPwd = document.getElementById('confirm-pwd').value;
+    if (newPwd.length < 8) { showToast('Password must be at least 8 characters', true); return; }
+    if (newPwd !== confirmPwd) { showToast('Passwords do not match', true); return; }
+
+    /*
+     * ─────────────────────────────────────────────────────────────
+     * BACKEND INTEGRATION POINT — Change password
+     *
+     * await fetch('/api/profile/password', {
+     *   method: 'PATCH',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
+     *   },
+     *   body: JSON.stringify({
+     *     currentPassword: document.querySelector('#pwd-fields input:first-of-type').value,
+     *     newPassword: newPwd,
+     *   })
+     * });
+     * ─────────────────────────────────────────────────────────────
+     */
+    togglePasswordFields();
+    showToast('Password updated successfully');
+  }
+
+  /* ─── DEACTIVATE ─── */
+  function confirmDeactivate() {
+    if (confirm('Are you sure you want to deactivate your account? This will cancel all active RFQs and cannot be undone without contacting support.')) {
+      showToast('Deactivation request submitted. Our team will follow up within 24 hours.');
+    }
+  }
+
+  /* ─── TOAST ─── */
+  function showToast(msg, isError = false) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.background = isError ? 'var(--error)' : 'var(--accent)';
+    toast.style.color = isError ? 'var(--white)' : 'var(--navy)';
+    toast.textContent = (isError ? '✗ ' : '✓ ') + msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+</script>
+
+</body>
+</html>

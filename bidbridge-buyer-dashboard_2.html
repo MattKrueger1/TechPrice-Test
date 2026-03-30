@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Buyer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.10);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  /* ─── LAYOUT ─── */
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    background: var(--navy-mid);
+    border-right: 1px solid var(--card-border);
+    display: flex; flex-direction: column;
+    padding: 28px 0;
+    position: sticky; top: 0; height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    font-family: var(--font-head); font-size: 20px; font-weight: 800;
+    color: var(--white); text-decoration: none; letter-spacing: -0.5px;
+    padding: 0 24px; margin-bottom: 36px; display: block;
+  }
+  .sidebar-logo span { color: var(--accent); }
+
+  .sidebar-section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--slate);
+    padding: 0 24px; margin-bottom: 8px; margin-top: 24px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 24px;
+    color: var(--slate-light); font-size: 14px; font-weight: 400;
+    text-decoration: none; cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: color .2s, background .2s, border-color .2s;
+  }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active {
+    color: var(--accent); background: rgba(0,200,150,0.07);
+    border-left-color: var(--accent); font-weight: 500;
+  }
+
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: var(--navy);
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    min-width: 20px; text-align: center;
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 20px 24px;
+    border-top: 1px solid var(--card-border);
+  }
+
+  .user-block {
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,200,150,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head); font-size: 13px; font-weight: 700;
+    color: var(--accent); flex-shrink: 0;
+  }
+
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
+
+  /* ─── MAIN CONTENT ─── */
+  .main-content { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ─── TOP BAR ─── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 40px;
+    background: rgba(11,27,51,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--card-border);
+    position: sticky; top: 0; z-index: 50;
+    gap: 20px;
+  }
+
+  .topbar-left h1 {
+    font-family: var(--font-head);
+    font-size: 22px; font-weight: 700; letter-spacing: -0.5px;
+  }
+
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+
+  /* ─── SEARCH BAR ─── */
+  .search-wrap {
+    flex: 1; max-width: 420px;
+    position: relative;
+  }
+
+  .search-icon {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate); font-size: 15px; pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 16px 10px 42px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 14px; outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .search-input::placeholder { color: var(--slate); }
+  .search-input:focus { border-color: var(--accent); background: rgba(0,200,150,0.04); }
+
+  .btn-new-rfq {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--accent); color: var(--navy);
+    font-family: var(--font-body); font-size: 14px; font-weight: 500;
+    padding: 10px 20px; border-radius: 10px; border: none;
+    cursor: pointer; text-decoration: none; white-space: nowrap;
+    transition: background .2s, transform .15s;
+  }
+  .btn-new-rfq:hover { background: var(--accent-dim); transform: translateY(-1px); }
+
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 36px 40px; flex: 1; }
+
+  /* ─── STAT CARDS ─── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 36px;
+  }
+
+  .stat-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 22px 24px;
+    transition: border-color .2s;
+  }
+  .stat-card:hover { border-color: rgba(255,255,255,0.15); }
+
+  .stat-label { font-size: 12px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 32px; font-weight: 700; letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.gold { color: var(--gold); }
+
+  .stat-sub { font-size: 12px; color: var(--slate); margin-top: 6px; }
+  .stat-sub.up { color: var(--accent); }
+
+  /* ─── FILTERS ─── */
+  .filters-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+
+  .filter-pill {
+    padding: 7px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 999px;
+    font-size: 13px; font-weight: 500; color: var(--slate-light);
+    cursor: pointer; transition: all .2s; user-select: none;
+  }
+  .filter-pill:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+  .filter-pill.active {
+    background: rgba(0,200,150,0.1);
+    border-color: rgba(0,200,150,0.35);
+    color: var(--accent);
+  }
+
+  .filters-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  .sort-select {
+    padding: 7px 32px 7px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 8px;
+    color: var(--slate-light); font-family: var(--font-body);
+    font-size: 13px; outline: none; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+  }
+  .sort-select:focus { border-color: var(--accent); }
+  .sort-wrap { position: relative; }
+  .sort-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
+  .sort-select option { background: var(--navy-mid); }
+
+  /* ─── RFQ TABLE ─── */
+  .rfq-table-wrap {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .rfq-table { width: 100%; border-collapse: collapse; }
+
+  .rfq-table thead tr {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .rfq-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 11px; font-weight: 500;
+    color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em;
+    white-space: nowrap;
+  }
+
+  .rfq-table td {
+    padding: 18px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+
+  .rfq-table tbody tr { transition: background .15s; cursor: pointer; }
+  .rfq-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+  .rfq-table tbody tr:last-child td { border-bottom: none; }
+
+  .rfq-title { font-weight: 500; color: var(--white); margin-bottom: 4px; }
+  .rfq-vendors { font-size: 12px; color: var(--slate); }
+
+  /* ─── STATUS BADGES ─── */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 500; white-space: nowrap;
+  }
+
+  .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+
+  .status-active { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .status-active::before { background: var(--accent); animation: pulse 2s infinite; }
+
+  .status-review { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .status-review::before { background: var(--gold); }
+
+  .status-closed { background: rgba(136,150,169,0.1); color: var(--slate-light); border: 1px solid rgba(136,150,169,0.2); }
+  .status-closed::before { background: var(--slate); }
+
+  .status-awarded { background: rgba(0,200,150,0.07); color: var(--accent); border: 1px solid rgba(0,200,150,0.15); }
+  .status-awarded::before { background: var(--accent); }
+
+  .status-draft { background: rgba(255,255,255,0.05); color: var(--slate); border: 1px solid rgba(255,255,255,0.08); }
+  .status-draft::before { background: var(--slate); }
+
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+
+  /* ─── BIDS COUNT ─── */
+  .bids-count {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 500;
+  }
+
+  .bids-bar {
+    width: 48px; height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px; overflow: hidden;
+  }
+
+  .bids-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .4s; }
+
+  /* ─── DEADLINE ─── */
+  .deadline-wrap { font-size: 13px; }
+  .deadline-urgent { color: var(--error); font-weight: 500; }
+  .deadline-soon { color: var(--gold); }
+  .deadline-ok { color: var(--slate-light); }
+
+  /* ─── STRATEGY TAG ─── */
+  .strategy-tag {
+    font-size: 11px; padding: 3px 10px; border-radius: 999px;
+    font-weight: 500;
+  }
+  .strategy-sole { background: rgba(0,200,150,0.08); color: var(--accent); border: 1px solid rgba(0,200,150,0.15); }
+  .strategy-split { background: rgba(245,200,66,0.08); color: var(--gold); border: 1px solid rgba(245,200,66,0.15); }
+
+  /* ─── ACTION BTN ─── */
+  .btn-view {
+    padding: 7px 16px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: var(--slate-light); font-family: var(--font-body);
+    font-size: 13px; cursor: pointer;
+    transition: border-color .2s, color .2s, background .2s;
+    white-space: nowrap;
+  }
+  .btn-view:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center; padding: 80px 32px;
+    display: none;
+  }
+  .empty-state.visible { display: block; }
+  .empty-icon { font-size: 48px; margin-bottom: 20px; display: block; }
+  .empty-state h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+  .empty-state p { font-size: 14px; color: var(--slate-light); max-width: 360px; margin: 0 auto 28px; }
+
+  /* ─── NOTIFICATION PANEL ─── */
+  .notif-section { margin-bottom: 32px; }
+
+  .notif-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .notif-title { font-family: var(--font-head); font-size: 16px; font-weight: 600; }
+  .notif-see-all { font-size: 13px; color: var(--accent); cursor: pointer; text-decoration: none; }
+  .notif-see-all:hover { text-decoration: underline; }
+
+  .notif-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .notif-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 18px;
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    transition: border-color .2s;
+    cursor: pointer;
+  }
+  .notif-item:hover { border-color: rgba(0,200,150,0.2); }
+  .notif-item.unread { border-left: 3px solid var(--accent); }
+
+  .notif-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); margin-top: 6px; flex-shrink: 0;
+  }
+  .notif-dot.read { background: transparent; border: 1px solid var(--slate); }
+
+  .notif-text { font-size: 13px; line-height: 1.6; }
+  .notif-text strong { color: var(--white); font-weight: 500; }
+  .notif-time { font-size: 11px; color: var(--slate); margin-top: 3px; }
+
+  /* ─── PAGINATION ─── */
+  .pagination {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px; color: var(--slate);
+  }
+
+  .page-btns { display: flex; gap: 6px; }
+
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: 1px solid rgba(255,255,255,0.09);
+    color: var(--slate-light); font-size: 13px; cursor: pointer;
+    transition: all .2s;
+  }
+  .page-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .page-btn.active { background: var(--accent); border-color: var(--accent); color: var(--navy); font-weight: 600; }
+
+  @media (max-width: 1024px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .page-body { padding: 24px 20px; }
+    .topbar { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item active" href="buyer-dashboard.html">
+      <span class="nav-icon">⊞</span> Dashboard
+    </a>
+    <a class="nav-item" href="bidbridge-submit-rfq.html">
+      <span class="nav-icon">＋</span> New RFQ
+    </a>
+    <a class="nav-item" href="buyer-rfqs.html">
+      <span class="nav-icon">📋</span> My RFQs
+      <span class="nav-badge">6</span>
+    </a>
+    <a class="nav-item" href="compare-bids.html">
+      <span class="nav-icon">⚖️</span> Compare bids
+      <span class="nav-badge">2</span>
+    </a>
+
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item" href="notifications.html">
+      <span class="nav-icon">🔔</span> Notifications
+      <span class="nav-badge">4</span>
+    </a>
+    <a class="nav-item" href="settings.html">
+      <span class="nav-icon">⚙</span> Settings
+    </a>
+    <a class="nav-item" href="profile.html">
+      <span class="nav-icon">👤</span> Profile
+    </a>
+
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar">JM</div>
+        <div>
+          <div class="user-name">James M.</div>
+          <div class="user-role">Buyer · Acme Corp</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── MAIN ─── -->
+  <div class="main-content">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Dashboard</h1>
+        <p>Friday, March 27, 2026</p>
+      </div>
+
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" placeholder="Search RFQs by name, vendor, or status..." oninput="filterRFQs()">
+      </div>
+
+      <a href="bidbridge-submit-rfq.html" class="btn-new-rfq">
+        <span>＋</span> New RFQ
+      </a>
+    </div>
+
+    <!-- PAGE BODY -->
+    <div class="page-body">
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Active RFQs</div>
+          <div class="stat-value accent">4</div>
+          <div class="stat-sub up">↑ 2 posted this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total bids received</div>
+          <div class="stat-value">18</div>
+          <div class="stat-sub">Across all open RFQs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Awaiting your review</div>
+          <div class="stat-value gold">2</div>
+          <div class="stat-sub">Bids ready to compare</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Deals awarded</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">This quarter</div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="notif-section">
+        <div class="notif-header">
+          <div class="notif-title">Recent activity</div>
+          <a class="notif-see-all" href="notifications.html">See all</a>
+        </div>
+        <div class="notif-list">
+          <div class="notif-item unread" onclick="window.location='compare-bids.html'">
+            <div class="notif-dot"></div>
+            <div>
+              <div class="notif-text"><strong>3 new bids</strong> received on your Cisco Catalyst 9300 RFQ. Bid deadline closes in 2 days.</div>
+              <div class="notif-time">35 minutes ago</div>
+            </div>
+          </div>
+          <div class="notif-item unread" onclick="window.location='compare-bids.html'">
+            <div class="notif-dot"></div>
+            <div>
+              <div class="notif-text"><strong>Palo Alto Networks refresh</strong> — 5 resellers have bid. Ready to compare.</div>
+              <div class="notif-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="notif-item" onclick="">
+            <div class="notif-dot read"></div>
+            <div>
+              <div class="notif-text"><strong>NetStar Solutions</strong> was awarded the Fortinet firewall RFQ. Deal closed successfully.</div>
+              <div class="notif-time">Yesterday at 3:14 PM</div>
+            </div>
+          </div>
+          <div class="notif-item" onclick="">
+            <div class="notif-dot read"></div>
+            <div>
+              <div class="notif-text">Your RFQ <strong>HPE Aruba wireless refresh</strong> went live. 8 resellers notified.</div>
+              <div class="notif-time">2 days ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="filters-row">
+        <div class="filter-pill active" onclick="setFilter(this, 'all')">All RFQs</div>
+        <div class="filter-pill" onclick="setFilter(this, 'active')">Active</div>
+        <div class="filter-pill" onclick="setFilter(this, 'review')">Ready to review</div>
+        <div class="filter-pill" onclick="setFilter(this, 'draft')">Drafts</div>
+        <div class="filter-pill" onclick="setFilter(this, 'closed')">Closed</div>
+        <div class="filter-pill" onclick="setFilter(this, 'awarded')">Awarded</div>
+
+        <div class="filters-right">
+          <div class="sort-wrap">
+            <select class="sort-select" onchange="sortRFQs(this.value)">
+              <option value="newest">Newest first</option>
+              <option value="deadline">Deadline soonest</option>
+              <option value="bids-desc">Most bids</option>
+              <option value="bids-asc">Fewest bids</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- RFQ TABLE -->
+      <div class="rfq-table-wrap">
+        <table class="rfq-table" id="rfq-table">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Status</th>
+              <th>Strategy</th>
+              <th>Bids</th>
+              <th>Deadline</th>
+              <th>Posted</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rfq-tbody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+
+        <div class="empty-state" id="empty-state">
+          <span class="empty-icon">📋</span>
+          <h3>No RFQs found</h3>
+          <p>Try adjusting your search or filter, or post your first RFQ to get competitive bids.</p>
+          <a href="bidbridge-submit-rfq.html" class="btn-new-rfq" style="display:inline-flex;">＋ Post your first RFQ</a>
+        </div>
+
+        <div class="pagination" id="pagination">
+          <span id="pagination-label">Showing 1–6 of 6 RFQs</span>
+          <div class="page-btns">
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<script>
+  /* ═══════════════════════════════════════════════
+     MOCK DATA
+     ─────────────────────────────────────────────
+     BACKEND INTEGRATION POINT — RFQ List
+     Replace this data with a real API call:
+
+     const response = await fetch('/api/buyer/rfqs', {
+       headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
+     });
+     const { rfqs } = await response.json();
+     renderRFQs(rfqs);
+
+     Each RFQ object should include:
+     { id, title, vendors, status, strategy, bidCount,
+       maxBids, deadline, postedDate, hasNewBids }
+  ═══════════════════════════════════════════════ */
+  const MOCK_RFQS = [
+    {
+      id: 4821,
+      title: 'Network infrastructure refresh — Austin HQ',
+      vendors: ['Cisco', 'Aruba'],
+      status: 'review',
+      strategy: 'split',
+      bidCount: 7,
+      maxBids: 10,
+      deadline: '2026-03-29',
+      postedDate: '2026-03-20',
+      hasNewBids: true,
+    },
+    {
+      id: 4809,
+      title: 'Palo Alto firewall refresh — all sites',
+      vendors: ['Palo Alto Networks'],
+      status: 'review',
+      strategy: 'sole',
+      bidCount: 5,
+      maxBids: 8,
+      deadline: '2026-03-31',
+      postedDate: '2026-03-18',
+      hasNewBids: true,
+    },
+    {
+      id: 4797,
+      title: 'HPE Aruba wireless refresh — warehouse',
+      vendors: ['HPE / Aruba'],
+      status: 'active',
+      strategy: 'sole',
+      bidCount: 3,
+      maxBids: 8,
+      deadline: '2026-04-05',
+      postedDate: '2026-03-25',
+      hasNewBids: false,
+    },
+    {
+      id: 4783,
+      title: 'CrowdStrike endpoint — global rollout',
+      vendors: ['CrowdStrike'],
+      status: 'active',
+      strategy: 'sole',
+      bidCount: 3,
+      maxBids: 8,
+      deadline: '2026-04-10',
+      postedDate: '2026-03-24',
+      hasNewBids: false,
+    },
+    {
+      id: 4761,
+      title: 'Fortinet SD-WAN — branch offices',
+      vendors: ['Fortinet'],
+      status: 'awarded',
+      strategy: 'sole',
+      bidCount: 6,
+      maxBids: 6,
+      deadline: '2026-03-10',
+      postedDate: '2026-03-01',
+      hasNewBids: false,
+    },
+    {
+      id: 4744,
+      title: 'NetApp storage expansion — Q1',
+      vendors: ['NetApp', 'Cisco'],
+      status: 'closed',
+      strategy: 'split',
+      bidCount: 4,
+      maxBids: 4,
+      deadline: '2026-02-28',
+      postedDate: '2026-02-14',
+      hasNewBids: false,
+    },
+  ];
+
+  let activeFilter = 'all';
+  let activeSearch = '';
+  let activeSort = 'newest';
+  let currentData = [...MOCK_RFQS];
+
+  /* ─── RENDER ─── */
+  function renderRFQs(data) {
+    const tbody = document.getElementById('rfq-tbody');
+    const empty = document.getElementById('empty-state');
+    const pagination = document.getElementById('pagination');
+
+    if (data.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.add('visible');
+      pagination.style.display = 'none';
+      return;
+    }
+
+    empty.classList.remove('visible');
+    pagination.style.display = 'flex';
+    document.getElementById('pagination-label').textContent =
+      `Showing 1–${data.length} of ${data.length} RFQ${data.length !== 1 ? 's' : ''}`;
+
+    tbody.innerHTML = data.map(rfq => {
+      const statusMap = {
+        active: ['status-active', 'Accepting bids'],
+        review: ['status-review', 'Ready to review'],
+        closed: ['status-closed', 'Closed'],
+        awarded: ['status-awarded', 'Awarded'],
+        draft: ['status-draft', 'Draft'],
+      };
+      const [statusClass, statusLabel] = statusMap[rfq.status] || ['status-draft', 'Draft'];
+      const strategyTag = rfq.strategy === 'split'
+        ? '<span class="strategy-tag strategy-split">Split bid</span>'
+        : '<span class="strategy-tag strategy-sole">Sole source</span>';
+
+      const fillPct = Math.round((rfq.bidCount / rfq.maxBids) * 100);
+      const deadlineClass = daysUntil(rfq.deadline) <= 2 ? 'deadline-urgent'
+        : daysUntil(rfq.deadline) <= 5 ? 'deadline-soon' : 'deadline-ok';
+      const deadlineText = rfq.status === 'awarded' || rfq.status === 'closed'
+        ? `<span class="deadline-ok">${formatDate(rfq.deadline)}</span>`
+        : `<span class="${deadlineClass}">${daysUntilLabel(rfq.deadline)}</span>`;
+
+      const newBadge = rfq.hasNewBids
+        ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:8px;vertical-align:middle;"></span>'
+        : '';
+
+      const actionLabel = rfq.status === 'review' ? 'Compare bids →'
+        : rfq.status === 'awarded' ? 'View award'
+        : rfq.status === 'closed' ? 'View results'
+        : 'View bids';
+
+      const actionHref = rfq.status === 'review' || rfq.status === 'active'
+        ? 'compare-bids.html' : '#';
+
+      return `
+        <tr onclick="window.location='${actionHref}'" data-status="${rfq.status}" data-title="${rfq.title.toLowerCase()}" data-vendors="${rfq.vendors.join(' ').toLowerCase()}">
+          <td>
+            <div class="rfq-title">RFQ #${rfq.id} — ${rfq.title}${newBadge}</div>
+            <div class="rfq-vendors">${rfq.vendors.join(' · ')}</div>
+          </td>
+          <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+          <td>${strategyTag}</td>
+          <td>
+            <div class="bids-count">
+              <span>${rfq.bidCount}</span>
+              <div class="bids-bar"><div class="bids-fill" style="width:${fillPct}%"></div></div>
+            </div>
+          </td>
+          <td>${deadlineText}</td>
+          <td style="color:var(--slate);font-size:13px;">${formatDate(rfq.postedDate)}</td>
+          <td><button class="btn-view" onclick="event.stopPropagation();window.location='${actionHref}'">${actionLabel}</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  /* ─── FILTER ─── */
+  function setFilter(el, filter) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeFilter = filter;
+    applyFilters();
+  }
+
+  function filterRFQs() {
+    activeSearch = document.getElementById('search-input').value.toLowerCase();
+    applyFilters();
+  }
+
+  function sortRFQs(val) {
+    activeSort = val;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    let data = [...MOCK_RFQS];
+
+    if (activeFilter !== 'all') {
+      data = data.filter(r => r.status === activeFilter);
+    }
+
+    if (activeSearch) {
+      data = data.filter(r =>
+        r.title.toLowerCase().includes(activeSearch) ||
+        r.vendors.join(' ').toLowerCase().includes(activeSearch) ||
+        String(r.id).includes(activeSearch)
+      );
+    }
+
+    if (activeSort === 'newest') data.sort((a, b) => b.id - a.id);
+    else if (activeSort === 'deadline') data.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+    else if (activeSort === 'bids-desc') data.sort((a, b) => b.bidCount - a.bidCount);
+    else if (activeSort === 'bids-asc') data.sort((a, b) => a.bidCount - b.bidCount);
+
+    currentData = data;
+    renderRFQs(data);
+  }
+
+  /* ─── DATE HELPERS ─── */
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function daysUntil(dateStr) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const d = new Date(dateStr + 'T00:00:00');
+    return Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+  }
+
+  function daysUntilLabel(dateStr) {
+    const days = daysUntil(dateStr);
+    if (days < 0) return 'Expired';
+    if (days === 0) return 'Closes today';
+    if (days === 1) return 'Closes tomorrow';
+    return `${days} days left`;
+  }
+
+  /* ─── INIT ─── */
+  renderRFQs(MOCK_RFQS);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Get Started</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --gold-glow: rgba(245,200,66,0.08);
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  /* ─── NAV ─── */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 64px; background: rgba(11,27,51,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; width: 100%; z-index: 100; }
+  .logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--white); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; }
+  .nav-links a { color: var(--slate-light); text-decoration: none; transition: color .2s; }
+  .nav-links a:hover { color: var(--white); }
+  .btn-signin { padding: 9px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; transition: all .2s; text-decoration: none; }
+  .btn-signin:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ─── PAGE ─── */
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 64px 80px;
+    text-align: center;
+  }
+
+  /* ─── WELCOME BANNER ─── */
+  .welcome-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,200,150,0.25);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 32px;
+    letter-spacing: 0.02em;
+  }
+
+  .welcome-title {
+    font-family: var(--font-head);
+    font-size: clamp(38px, 5vw, 68px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    max-width: 720px;
+    margin-bottom: 20px;
+  }
+  .welcome-title span { color: var(--accent); }
+
+  .welcome-subtitle {
+    font-size: 17px;
+    color: var(--slate-light);
+    max-width: 580px;
+    margin: 0 auto 56px;
+    line-height: 1.7;
+  }
+
+  /* ─── ROLE CARDS ─── */
+  .role-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 780px;
+    width: 100%;
+  }
+
+  .role-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 40px 36px;
+    text-align: left;
+    text-decoration: none;
+    color: var(--white);
+    transition: border-color .2s, transform .2s, background .2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .role-card:hover {
+    border-color: var(--accent);
+    background: rgba(0,200,150,0.06);
+    transform: translateY(-4px);
+  }
+
+  .role-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-glow);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .role-card h2 {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .role-card p {
+    font-size: 14px;
+    color: var(--slate-light);
+    line-height: 1.6;
+  }
+
+  .role-card .card-cta {
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .role-card .card-cta::after {
+    content: '→';
+    transition: transform .2s;
+  }
+  .role-card:hover .card-cta::after { transform: translateX(4px); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 40px 0 0;
+    color: var(--slate);
+    font-size: 14px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .signin-prompt {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--slate);
+  }
+  .signin-prompt a { color: var(--accent); text-decoration: none; }
+  .signin-prompt a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    nav { padding: 16px 24px; }
+    .page { padding: 100px 24px 60px; }
+    .role-cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">IT Pricing <span>Network</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="bidbridge-auth_1.html" class="btn-signin">Sign in</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="welcome-badge">✦ Welcome to IT Pricing Network</div>
+
+  <h1 class="welcome-title">
+    Thank you for your interest.<br>
+    <span>This is just the beginning.</span>
+  </h1>
+
+  <p class="welcome-subtitle">
+    We're excited to have you join a movement bringing real transparency to the IT buying and selling market. Tell us who you are so we can get you set up the right way.
+  </p>
+
+  <div class="role-cards">
+    <a href="bidbridge-reseller-apply_1.html" class="role-card">
+      <div class="role-icon">🤝</div>
+      <h2>I'm a Reseller</h2>
+      <p>You sell IT products and want access to qualified buyers submitting real RFQs. Apply to join our authorized reseller network.</p>
+      <span class="card-cta">Apply as a Reseller</span>
+    </a>
+
+    <a href="bidbridge-buyer-dashboard_2.html" class="role-card">
+      <div class="role-icon">🖥️</div>
+      <h2>I'm a Buyer</h2>
+      <p>You purchase IT equipment for your organization and want competitive, transparent pricing from verified resellers.</p>
+      <span class="card-cta">Start as a Buyer</span>
+    </a>
+  </div>
+
+  <div class="divider">already have an account?</div>
+  <p class="signin-prompt"><a href="bidbridge-auth_1.html">Sign in here</a></p>
+
+</div>
+
+</body>
+</html>

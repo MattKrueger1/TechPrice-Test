@@ -952,11 +952,12 @@
         <div class="form-group" style="margin-bottom:0">
           <label>Vendor / OEM <span class="required">*</span></label>
           <div class="select-wrap">
-            <select id="vendor-name-${id}">
+            <select id="vendor-name-${id}" onchange="handleVendorSelect(this, ${id})">
               <option value="" disabled selected>Select vendor</option>
               ${vendorOptions}
             </select>
           </div>
+          <input type="text" id="vendor-name-other-${id}" placeholder="Enter vendor name" style="display:none; margin-top:10px;">
         </div>
         <div class="form-group" style="margin-bottom:0">
           <label>Product line <span class="required">*</span></label>
@@ -981,6 +982,11 @@
 
     document.getElementById('vendor-list').appendChild(item);
     updateStrategyVisibility();
+  }
+
+  function handleVendorSelect(select, id) {
+    const otherInput = document.getElementById('vendor-name-other-' + id);
+    otherInput.style.display = select.value === 'Other' ? 'block' : 'none';
   }
 
   function removeVendor(id) {
@@ -1052,7 +1058,8 @@
     let vendorHTML = '';
     vendorItems.forEach((item, i) => {
       const id = item.id.replace('vendor-item-', '');
-      const name = document.getElementById('vendor-name-' + id)?.value || '—';
+      const nameSelect = document.getElementById('vendor-name-' + id)?.value || '—';
+      const name = nameSelect === 'Other' ? (document.getElementById('vendor-name-other-' + id)?.value || 'Other') : nameSelect;
       const product = document.getElementById('vendor-product-' + id)?.value || '—';
       const part = document.getElementById('vendor-part-' + id)?.value || '—';
       const qty = document.getElementById('vendor-qty-' + id)?.value || '—';

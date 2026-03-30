@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Technology Procurement, Reimagined</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1B33;
+    --navy-mid: #112240;
+    --navy-light: #1A3356;
+    --accent: #00C896;
+    --accent-dim: #00a87b;
+    --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842;
+    --slate: #8896A9;
+    --slate-light: #A8B8CC;
+    --white: #F0F4FA;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--navy);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 64px;
+    background: rgba(11,27,51,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .logo {
+    font-family: var(--font-head);
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-links { display: flex; align-items: center; gap: 36px; }
+  .nav-links a {
+    font-size: 14px; font-weight: 400;
+    color: var(--slate-light);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+
+  .nav-cta {
+    background: var(--accent);
+    color: var(--navy) !important;
+    font-weight: 500 !important;
+    padding: 10px 22px;
+    border-radius: 8px;
+    transition: background .2s, transform .15s !important;
+  }
+  .nav-cta:hover { background: var(--accent-dim) !important; transform: translateY(-1px); }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 140px 64px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,200,150,0.10) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(17,34,64,0.8) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,200,150,0.10);
+    border: 1px solid rgba(0,200,150,0.25);
+    color: var(--accent);
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 999px;
+    margin-bottom: 32px;
+  }
+  .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.75); }
+  }
+
+  .hero h1 {
+    font-family: var(--font-head);
+    font-size: clamp(38px, 5vw, 68px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+    max-width: 860px;
+    margin-bottom: 28px;
+  }
+
+  .hero h1 em { font-style: normal; color: var(--accent); }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 300;
+    color: var(--slate-light);
+    max-width: 620px;
+    margin-bottom: 52px;
+    line-height: 1.7;
+  }
+
+  .hero-ctas { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--navy);
+    font-family: var(--font-body);
+    font-size: 15px; font-weight: 500;
+    padding: 14px 32px; border-radius: 10px;
+    border: none; cursor: pointer;
+    text-decoration: none;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 0 0 0 rgba(0,200,150,0);
+  }
+  .btn-primary:hover {
+    background: var(--accent-dim);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,200,150,0.25);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--slate-light);
+    font-family: var(--font-body);
+    font-size: 15px; font-weight: 400;
+    padding: 14px 32px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.14);
+    cursor: pointer; text-decoration: none;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  /* ─── HERO STATS ─── */
+  .hero-stats {
+    display: flex; gap: 64px;
+    margin-top: 80px;
+    padding-top: 48px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 34px; font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+  }
+  .stat-num span { color: var(--accent); }
+  .stat-label { font-size: 13px; color: var(--slate); margin-top: 4px; }
+
+  /* ─── HOW IT WORKS ─── */
+  section { padding: 120px 64px; }
+
+  .section-label {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700; line-height: 1.1;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    max-width: 600px;
+  }
+
+  .section-sub {
+    font-size: 17px; font-weight: 300;
+    color: var(--slate-light);
+    max-width: 520px; line-height: 1.7;
+    margin-bottom: 64px;
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .how-card {
+    background: var(--navy-mid);
+    padding: 48px 40px;
+    position: relative;
+    transition: background .2s;
+  }
+  .how-card:hover { background: var(--navy-light); }
+
+  .step-num {
+    font-family: var(--font-head);
+    font-size: 72px; font-weight: 800;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    position: absolute; top: 24px; right: 32px;
+    user-select: none;
+  }
+
+  .step-icon {
+    width: 48px; height: 48px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,200,150,0.2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+    font-size: 22px;
+  }
+
+  .how-card h3 {
+    font-family: var(--font-head);
+    font-size: 20px; font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.3px;
+  }
+
+  .how-card p { font-size: 15px; color: var(--slate-light); line-height: 1.65; }
+
+  /* ─── FOR BUYERS / SELLERS ─── */
+  .split-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 20px; overflow: hidden;
+  }
+
+  .split-panel {
+    background: var(--navy-mid);
+    padding: 64px 56px;
+  }
+  .split-panel.accent-panel { background: rgba(0,200,150,0.07); border-left: 1px solid rgba(0,200,150,0.15); }
+
+  .split-panel h2 {
+    font-family: var(--font-head);
+    font-size: 32px; font-weight: 700;
+    letter-spacing: -0.8px; margin-bottom: 16px;
+  }
+
+  .split-panel p { font-size: 15px; color: var(--slate-light); line-height: 1.7; margin-bottom: 36px; }
+
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; }
+  .feature-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 15px; color: var(--slate-light);
+  }
+  .feature-list li::before {
+    content: '';
+    width: 18px; height: 18px; min-width: 18px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(0,200,150,0.35);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 5l2.5 2.5L8 3' stroke='%2300C896' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: center;
+    margin-top: 2px;
+  }
+
+  /* ─── VENDOR LOGOS ─── */
+  .vendors-section { background: var(--navy-mid); text-align: center; }
+  .vendors-section .section-title { margin: 0 auto 16px; text-align: center; }
+  .vendors-section .section-sub { margin: 0 auto 56px; text-align: center; }
+
+  .vendor-grid {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    justify-content: center; max-width: 900px; margin: 0 auto;
+  }
+
+  .vendor-pill {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--slate-light);
+    font-size: 13px; font-weight: 500;
+    padding: 10px 20px; border-radius: 999px;
+    transition: border-color .2s, color .2s, background .2s;
+  }
+  .vendor-pill:hover {
+    border-color: rgba(0,200,150,0.4);
+    color: var(--accent);
+    background: rgba(0,200,150,0.06);
+  }
+
+  /* ─── RFQ PREVIEW CARD ─── */
+  .rfq-section {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+
+  .rfq-text .section-title { max-width: 480px; }
+
+  .rfq-card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .rfq-card-header {
+    background: rgba(0,200,150,0.08);
+    border-bottom: 1px solid rgba(0,200,150,0.12);
+    padding: 20px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .rfq-card-header span {
+    font-family: var(--font-head);
+    font-size: 14px; font-weight: 600;
+    color: var(--accent);
+  }
+
+  .rfq-badge {
+    background: rgba(245,200,66,0.12);
+    border: 1px solid rgba(245,200,66,0.25);
+    color: var(--gold);
+    font-size: 11px; font-weight: 500;
+    padding: 4px 12px; border-radius: 999px;
+    letter-spacing: 0.05em;
+  }
+
+  .rfq-body { padding: 28px; }
+
+  .rfq-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+  }
+  .rfq-row:last-child { border-bottom: none; }
+  .rfq-row .label { color: var(--slate); }
+  .rfq-row .value { color: var(--white); font-weight: 500; text-align: right; }
+
+  .rfq-bids {
+    background: rgba(0,200,150,0.05);
+    border: 1px solid rgba(0,200,150,0.10);
+    border-radius: 12px; padding: 20px; margin-top: 20px;
+  }
+
+  .rfq-bids-label {
+    font-size: 12px; color: var(--slate); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 14px;
+  }
+
+  .bid-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+  }
+  .bid-row:last-child { border-bottom: none; }
+
+  .bid-reseller { display: flex; align-items: center; gap: 10px; }
+  .bid-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--navy-light);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: var(--slate-light);
+  }
+
+  .bid-price { color: var(--accent); font-weight: 600; }
+  .bid-winner { color: var(--gold); font-size: 11px; }
+
+  /* ─── TESTIMONIAL ─── */
+  .testimonial-section { text-align: center; background: var(--navy-mid); }
+
+  .testimonial-card {
+    max-width: 700px; margin: 0 auto;
+    background: var(--navy-light);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 56px 64px;
+  }
+
+  .testimonial-card blockquote {
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--white);
+    margin-bottom: 32px;
+  }
+  .testimonial-card blockquote::before { content: '\201C'; color: var(--accent); font-size: 48px; font-style: normal; line-height: 0; vertical-align: -18px; margin-right: 4px; }
+
+  .testimonial-author { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .testimonial-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(0,200,150,0.15);
+    border: 2px solid rgba(0,200,150,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head); font-weight: 700; font-size: 16px; color: var(--accent);
+  }
+  .testimonial-info { text-align: left; }
+  .testimonial-name { font-weight: 500; font-size: 15px; }
+  .testimonial-role { font-size: 13px; color: var(--slate); }
+
+  /* ─── CTA BANNER ─── */
+  .cta-section {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(0,200,150,0.08) 0%, transparent 60%);
+    border-top: 1px solid rgba(0,200,150,0.08);
+  }
+
+  .cta-section h2 {
+    font-family: var(--font-head);
+    font-size: clamp(30px, 4vw, 52px);
+    font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    max-width: 700px; margin-left: auto; margin-right: auto;
+  }
+
+  .cta-section p {
+    font-size: 17px; color: var(--slate-light);
+    max-width: 480px; margin: 0 auto 48px;
+  }
+
+  .cta-pair { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--navy-mid);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 56px 64px 40px;
+  }
+
+  .footer-top {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px; margin-bottom: 48px;
+  }
+
+  .footer-brand p { font-size: 14px; color: var(--slate); line-height: 1.7; margin-top: 12px; max-width: 280px; }
+
+  .footer-col h4 {
+    font-family: var(--font-head); font-size: 13px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--slate); margin-bottom: 16px;
+  }
+
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul a { font-size: 14px; color: var(--slate-light); text-decoration: none; transition: color .2s; }
+  .footer-col ul a:hover { color: var(--white); }
+
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 13px; color: var(--slate);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    section { padding: 80px 24px; }
+    .hero { padding: 120px 24px 60px; }
+    .hero-stats { gap: 32px; flex-wrap: wrap; justify-content: center; }
+    .how-grid { grid-template-columns: 1fr; }
+    .split-section { grid-template-columns: 1fr; }
+    .rfq-section { grid-template-columns: 1fr; gap: 48px; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">IT Pricing <span>Network</span></a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#buyers">Buyers</a>
+    <a href="#sellers">Resellers</a>
+    <a href="#vendors">Vendors</a>
+    <a href="#" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Now in beta &mdash; Join the waitlist</div>
+  <h1>The marketplace where the <em>market</em> sets the price — not personal relationships.</h1>
+  <p class="hero-sub">Post one RFQ. Every authorized reseller competes for your business. Real market pricing, full transparency, and one central place to communicate and negotiate with every qualified partner.</p>
+  <div class="hero-ctas">
+    <a href="#" class="btn-primary">Post your first RFQ &rarr;</a>
+    <a href="#how" class="btn-secondary">See how it works</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">3<span>x</span></div>
+      <div class="stat-label">More bids per RFQ</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">18<span>%</span></div>
+      <div class="stat-label">Avg. savings vs. direct quote</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">500<span>+</span></div>
+      <div class="stat-label">Verified resellers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">200<span>+</span></div>
+      <div class="stat-label">Vendors covered</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">The process</div>
+  <div class="section-title">Four steps to a better deal</div>
+  <p class="section-sub">No cold calls. No chasing three resellers for the same answer. One post reaches every authorized partner for the technology you need.</p>
+
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="step-num">01</div>
+      <div class="step-icon">📋</div>
+      <h3>Post your RFQ</h3>
+      <p>You already know what you need — just bring the vendor, SKUs, and quantities. Post in under 5 minutes and it instantly becomes your single point of communication with every reseller in the process.</p>
+    </div>
+    <div class="how-card">
+      <div class="step-num">02</div>
+      <div class="step-icon">🔔</div>
+      <h3>Resellers are notified</h3>
+      <p>IT Pricing Network instantly alerts only the highest qualified, authorized resellers for that vendor — verified partners with the credentials and tier status to deliver what you need.</p>
+    </div>
+    <div class="how-card">
+      <div class="step-num">03</div>
+      <div class="step-icon">⚖️</div>
+      <h3>The market sets the price</h3>
+      <p>Resellers compete for your business with their best pricing — no bias, no backroom deals. You see every bid ranked side by side and let true market competition determine what you pay.</p>
+    </div>
+    <div class="how-card">
+      <div class="step-num">04</div>
+      <div class="step-icon">🏆</div>
+      <h3>You choose the winner</h3>
+      <p>Review all bids in one place, compare by price, delivery, and partner tier, then select the winner. IT Pricing Network handles the introduction — you close the deal on your terms.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BUYERS / SELLERS -->
+<section id="buyers">
+  <div class="section-label">Built for both sides</div>
+  <div class="section-title">Whether you buy or sell</div>
+  <p class="section-sub">IT Pricing Network removes friction for buyers and opens new opportunity for resellers.</p>
+
+  <div class="split-section">
+    <div class="split-panel">
+      <h2>For technology buyers</h2>
+      <p>Stop calling around. Post once and let the market come to you — with real pricing from real authorized partners.</p>
+      <ul class="feature-list">
+        <li>One RFQ reaches all authorized resellers instantly</li>
+        <li>The market dictates the price — not vendor relationships or favoritism</li>
+        <li>One central place to communicate and negotiate with all resellers simultaneously</li>
+        <li>Compare bids side-by-side with full line-item transparency</li>
+        <li>Full audit trail for procurement compliance</li>
+      </ul>
+      <a href="#" class="btn-primary">Post an RFQ &rarr;</a>
+    </div>
+    <div class="split-panel accent-panel" id="sellers">
+      <h2>For authorized resellers</h2>
+      <p>Access qualified, high-intent buyers who are actively looking for what you sell — no cold prospecting required.</p>
+      <ul class="feature-list">
+        <li>Instant alerts when your vendors have live bids</li>
+        <li>Win new business from buyers you'd never have reached otherwise</li>
+        <li>Expand your customer base beyond your network</li>
+        <li>Structured bid format makes quoting fast</li>
+        <li>Admin verification builds buyer trust in your brand</li>
+      </ul>
+      <a href="#" class="btn-secondary">Apply as a reseller &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- RFQ PREVIEW -->
+<section>
+  <div class="rfq-section">
+    <div class="rfq-text">
+      <div class="section-label">Live example</div>
+      <div class="section-title">What a bid looks like</div>
+      <p class="section-sub">Buyers post structured RFQs. Resellers see exactly what's needed and respond with their best pricing. Everyone wins.</p>
+      <a href="#" class="btn-primary">Try it yourself &rarr;</a>
+    </div>
+    <div class="rfq-card">
+      <div class="rfq-card-header">
+        <span>RFQ #4821 &mdash; Active</span>
+        <div class="rfq-badge">⏱ 2d 14h remaining</div>
+      </div>
+      <div class="rfq-body">
+        <div class="rfq-row">
+          <span class="label">Vendor</span>
+          <span class="value">Cisco Systems</span>
+        </div>
+        <div class="rfq-row">
+          <span class="label">Part number / SKU</span>
+          <span class="value">C9300-48P-A</span>
+        </div>
+        <div class="rfq-row">
+          <span class="label">Quantity</span>
+          <span class="value">12 units</span>
+        </div>
+        <div class="rfq-row">
+          <span class="label">Delivery</span>
+          <span class="value">Within 30 days, Austin TX</span>
+        </div>
+        <div class="rfq-row">
+          <span class="label">Maintenance term</span>
+          <span class="value">3-year SMARTnet required</span>
+        </div>
+
+        <div class="rfq-bids">
+          <div class="rfq-bids-label">Bids received &mdash; 3 of 8 resellers</div>
+          <div class="bid-row">
+            <div class="bid-reseller">
+              <div class="bid-avatar">AT</div>
+              <span style="font-size:14px;color:var(--slate-light)">Apex Technology</span>
+            </div>
+            <div style="text-align:right">
+              <div class="bid-price">$142,800</div>
+            </div>
+          </div>
+          <div class="bid-row">
+            <div class="bid-reseller">
+              <div class="bid-avatar">NS</div>
+              <span style="font-size:14px;color:var(--slate-light)">NetStar Solutions</span>
+            </div>
+            <div style="text-align:right">
+              <div class="bid-price">$137,200</div>
+              <div class="bid-winner">★ Lowest bid</div>
+            </div>
+          </div>
+          <div class="bid-row">
+            <div class="bid-reseller">
+              <div class="bid-avatar">CP</div>
+              <span style="font-size:14px;color:var(--slate-light)">CorePath IT</span>
+            </div>
+            <div style="text-align:right">
+              <div class="bid-price">$149,500</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VENDORS -->
+<section class="vendors-section" id="vendors">
+  <div class="section-label">Coverage</div>
+  <div class="section-title">Every major vendor. Every category.</div>
+  <p class="section-sub">Our reseller network covers the full enterprise technology stack — from networking and security to cloud, storage, and beyond.</p>
+  <div class="vendor-grid">
+    <div class="vendor-pill">Cisco</div>
+    <div class="vendor-pill">Palo Alto Networks</div>
+    <div class="vendor-pill">Fortinet</div>
+    <div class="vendor-pill">HPE / Aruba</div>
+    <div class="vendor-pill">Dell Technologies</div>
+    <div class="vendor-pill">Juniper Networks</div>
+    <div class="vendor-pill">Microsoft</div>
+    <div class="vendor-pill">VMware</div>
+    <div class="vendor-pill">NetApp</div>
+    <div class="vendor-pill">Rubrik</div>
+    <div class="vendor-pill">Zscaler</div>
+    <div class="vendor-pill">CrowdStrike</div>
+    <div class="vendor-pill">Pure Storage</div>
+    <div class="vendor-pill">Arista Networks</div>
+    <div class="vendor-pill">F5 Networks</div>
+    <div class="vendor-pill">Commvault</div>
+    <div class="vendor-pill">SentinelOne</div>
+    <div class="vendor-pill">+ 180 more &rarr;</div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial-section">
+  <div class="section-label">From the community</div>
+  <div class="section-title" style="margin:0 auto 16px;text-align:center;">What buyers are saying</div>
+  <p class="section-sub" style="margin:0 auto 56px;text-align:center;">Real feedback from early adopters in enterprise IT procurement.</p>
+  <div class="testimonial-card">
+    <blockquote>We posted an RFQ for a Palo Alto refresh and had four bids within 48 hours. The spread was over $40,000. We never would have found that without IT Pricing Network.</blockquote>
+    <div class="testimonial-author">
+      <div class="testimonial-avatar">JM</div>
+      <div class="testimonial-info">
+        <div class="testimonial-name">James M.</div>
+        <div class="testimonial-role">IT Director, Regional Healthcare Group</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Stop overpaying for technology.</h2>
+  <p>Join the waitlist and be among the first buyers to post an RFQ when we launch.</p>
+  <div class="cta-pair">
+    <a href="#" class="btn-primary">Join as a buyer &rarr;</a>
+    <a href="#" class="btn-secondary">Apply as a reseller</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="logo">IT Pricing <span>Network</span></a>
+      <p>The reverse-auction marketplace for enterprise technology procurement. Market-driven pricing. Zero bias.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <ul>
+        <li><a href="#">Post an RFQ</a></li>
+        <li><a href="#">Browse vendors</a></li>
+        <li><a href="#">Reseller directory</a></li>
+        <li><a href="#">Pricing</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Press</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacy policy</a></li>
+        <li><a href="#">Terms of service</a></li>
+        <li><a href="#">Cookie policy</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 IT Pricing Network, Inc. All rights reserved.</span>
+    <span>Built for the IT channel.</span>
+  </div>
+</footer>
+
+</body>
+</html>

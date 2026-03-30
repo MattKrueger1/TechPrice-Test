@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — How It Works for Resellers</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1B33; --navy-mid: #112240; --navy-light: #1A3356;
+    --accent: #00C896; --accent-dim: #00a87b; --accent-glow: rgba(0,200,150,0.12);
+    --slate: #8896A9; --slate-light: #A8B8CC; --white: #F0F4FA;
+    --card-bg: rgba(255,255,255,0.04); --card-border: rgba(255,255,255,0.08);
+    --font-head: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 64px; background: rgba(11,27,51,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; width: 100%; z-index: 100; }
+  .logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--white); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; }
+  .nav-links a { color: var(--slate-light); text-decoration: none; transition: color .2s; }
+  .nav-links a:hover { color: var(--white); }
+  .btn-signin { padding: 9px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; text-decoration: none; transition: all .2s; }
+  .btn-signin:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+  .nav-cta { background: var(--accent); color: var(--navy) !important; font-weight: 500 !important; padding: 10px 22px; border-radius: 8px; transition: background .2s !important; }
+  .nav-cta:hover { background: var(--accent-dim) !important; }
+
+  .page-hero { padding: 160px 64px 64px; text-align: center; max-width: 800px; margin: 0 auto; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--slate); text-decoration: none; margin-bottom: 28px; transition: color .2s; }
+  .back-link:hover { color: var(--white); }
+  .section-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.25); border-radius: 100px; padding: 6px 16px; font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 28px; }
+  .page-hero h1 { font-family: var(--font-head); font-size: clamp(38px, 5vw, 68px); font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 20px; }
+  .page-hero h1 em { font-style: normal; color: var(--accent); }
+  .page-hero p { font-size: 18px; font-weight: 300; color: var(--slate-light); line-height: 1.7; max-width: 600px; margin: 0 auto; }
+
+  .content { max-width: 1100px; margin: 0 auto; padding: 64px 64px 120px; }
+
+  .steps { display: flex; flex-direction: column; gap: 2px; margin-bottom: 56px; }
+  .step { display: grid; grid-template-columns: 64px 1fr; gap: 32px; align-items: flex-start; background: var(--navy-mid); padding: 36px 40px; transition: background .2s; }
+  .step:first-child { border-radius: 16px 16px 0 0; }
+  .step:last-child { border-radius: 0 0 16px 16px; }
+  .step:hover { background: var(--navy-light); }
+  .step-number { width: 48px; height: 48px; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.25); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--accent); }
+  .step-content h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 8px; }
+  .step-content p { font-size: 15px; color: var(--slate-light); line-height: 1.65; }
+  .step-value { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.2); border-radius: 6px; padding: 5px 12px; font-size: 13px; color: var(--accent); font-weight: 500; }
+
+  .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 48px; }
+  .value-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 28px 24px; }
+  .value-card-icon { font-size: 24px; margin-bottom: 12px; }
+  .value-card h4 { font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 8px; }
+  .value-card p { font-size: 14px; color: var(--slate-light); line-height: 1.6; }
+
+  .section-label { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .section-title { font-family: var(--font-head); font-size: clamp(24px, 3vw, 36px); font-weight: 700; letter-spacing: -0.5px; margin-bottom: 40px; }
+
+  .view-cta { background: linear-gradient(135deg, rgba(0,200,150,0.08) 0%, transparent 60%); border: 1px solid rgba(0,200,150,0.12); border-radius: 16px; padding: 48px; text-align: center; }
+  .view-cta h3 { font-family: var(--font-head); font-size: 26px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; }
+  .view-cta p { font-size: 16px; color: var(--slate-light); margin-bottom: 28px; }
+  .btn-pair { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: var(--accent); color: var(--navy); font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 14px 32px; border-radius: 10px; border: none; cursor: pointer; text-decoration: none; transition: background .2s, transform .15s; display: inline-block; }
+  .btn-primary:hover { background: var(--accent-dim); transform: translateY(-2px); }
+  .btn-secondary { background: transparent; color: var(--slate-light); font-family: var(--font-body); font-size: 15px; padding: 14px 32px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); cursor: pointer; text-decoration: none; transition: border-color .2s, color .2s; display: inline-block; }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .page-hero { padding: 120px 24px 48px; }
+    .content { padding: 48px 24px 80px; }
+    .value-grid { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 1fr; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">IT Pricing <span>Network</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="bidbridge-auth_1.html" class="btn-signin">Log in</a>
+    <a href="bidbridge-get-started.html" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <a href="how-it-works.html" class="back-link">← Back to How It Works</a>
+  <div class="section-badge">🤝 For Resellers</div>
+  <h1>How selling on IT Pricing Network <em>works</em></h1>
+  <p>Stop cold prospecting. Get notified of buyers who are ready to purchase right now — and compete on a level playing field for every deal.</p>
+</div>
+
+<div class="content">
+  <div class="section-label">The process</div>
+  <div class="section-title">Five steps to winning new business</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-number">01</div>
+      <div class="step-content">
+        <h3>Apply and get verified</h3>
+        <p>Submit your reseller application with your vendor authorizations and tier certifications. Our admin team verifies your credentials so buyers know they're working with legitimate, qualified partners. This verification is what gives your bids credibility and sets you apart.</p>
+        <span class="step-value">✅ Verified status builds buyer confidence in your brand</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">02</div>
+      <div class="step-content">
+        <h3>Get notified of live RFQs</h3>
+        <p>The moment a buyer posts an RFQ for a vendor you're authorized to sell, you're instantly notified. No more missing opportunities because you didn't have the right contact at the right company. Every qualified RFQ lands directly in your dashboard — no cold calls, no prospecting required.</p>
+        <span class="step-value">🔔 Instant alerts for RFQs that match your vendor portfolio</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">03</div>
+      <div class="step-content">
+        <h3>Submit your best bid</h3>
+        <p>The structured bid format makes quoting fast and consistent. Every authorized reseller sees the same RFQ at the same time — no favoritism, no inside tracks. You compete purely on merit: your pricing, your service level, your expertise. A true fair shot at every deal.</p>
+        <span class="step-value">⚖️ A level playing field on every single bid</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">04</div>
+      <div class="step-content">
+        <h3>Communicate directly with the buyer</h3>
+        <p>Have questions about the RFQ? Need to clarify delivery requirements or offer an alternative configuration? Communicate directly with the buyer inside the platform — all within the structured RFQ thread so nothing gets lost and your responsiveness is on record.</p>
+        <span class="step-value">💬 Direct buyer communication in a structured format</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">05</div>
+      <div class="step-content">
+        <h3>Win new business and grow your reputation</h3>
+        <p>When the buyer selects your bid, IT Pricing Network makes the introduction and you close the deal. Win consistently and your platform reputation grows — buyers can see your win rate, response time, and partner tier, all factors that help you stand out on future bids.</p>
+        <span class="step-value">📈 Expand your customer base beyond your existing network</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Why it matters</div>
+  <div class="section-title">The value you get</div>
+
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="value-card-icon">🎯</div>
+      <h4>High-intent buyers only</h4>
+      <p>Every RFQ comes from a buyer who is actively looking to purchase. No wasted effort on leads that go cold — these are real opportunities with real budgets and real timelines.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-card-icon">⚖️</div>
+      <h4>A level playing field</h4>
+      <p>Every authorized reseller sees the same RFQ at the same time. Win on merit — your pricing, your service, your expertise — not on who you know or who called first.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-card-icon">🌐</div>
+      <h4>Reach beyond your network</h4>
+      <p>Access qualified buyers you'd never have found through cold outreach. IT Pricing Network connects you with organizations actively sourcing your vendors across the country.</p>
+    </div>
+  </div>
+
+  <div class="view-cta">
+    <h3>Ready to start competing?</h3>
+    <p>Apply as an authorized reseller and get access to live RFQs from qualified buyers.</p>
+    <div class="btn-pair">
+      <a href="bidbridge-reseller-apply_1.html" class="btn-primary">Apply as a reseller &rarr;</a>
+      <a href="how-it-works-buyer.html" class="btn-secondary">See the buyer view</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

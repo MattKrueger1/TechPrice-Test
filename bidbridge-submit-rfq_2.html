@@ -680,9 +680,9 @@
         <div class="field-hint">Sharing a budget can attract more targeted bids</div>
       </div>
       <div class="form-group">
-        <label for="project-location">Delivery location <span class="required">*</span></label>
+        <label for="project-location">HQ location <span class="required">*</span></label>
         <input type="text" id="project-location" placeholder="e.g. Austin, TX 78701">
-        <div class="field-error" id="project-location-error">Delivery location is required</div>
+        <div class="field-error" id="project-location-error">HQ location is required</div>
       </div>
     </div>
 
@@ -1130,7 +1130,7 @@
       <div class="review-row"><span class="review-label">Bid deadline</span><span class="review-value">${formatDate(deadline)}</span></div>
       <div class="review-row"><span class="review-label">Delivery date</span><span class="review-value">${delivery ? formatDate(delivery) : 'Not specified'}</span></div>
       <div class="review-row"><span class="review-label">Budget</span><span class="review-value">${budget ? '$' + Number(budget).toLocaleString() : 'Not disclosed'}</span></div>
-      <div class="review-row"><span class="review-label">Delivery location</span><span class="review-value">${location}</span></div>
+      <div class="review-row"><span class="review-label">HQ location</span><span class="review-value">${location}</span></div>
       <div class="review-row"><span class="review-label">Sourcing strategy</span><span class="review-value">${selectedStrategy === 'sole' ? '🤝 Sole source' : '⚖️ Split bid per vendor'}</span></div>
       <div class="review-row"><span class="review-label">Partner tier filter</span><span class="review-value">${tierLabel}</span></div>
       <div class="review-row"><span class="review-label">Visibility</span><span class="review-value">${visibilityText}</span></div>
@@ -1165,7 +1165,7 @@
     const notes = document.getElementById('project-desc').value.trim();
     const deadline = document.getElementById('project-deadline').value;
     const deliveryDate = document.getElementById('project-delivery').value || null;
-    const deliveryLocation = document.getElementById('project-location').value.trim() || null;
+    const hqLocation = document.getElementById('project-location').value.trim() || null;
     const budgetRaw = document.getElementById('project-budget').value;
     const budget = budgetRaw ? parseFloat(budgetRaw) : null;
     const visibilityEl = document.getElementById('rfq-visibility');
@@ -1181,7 +1181,7 @@
         notes,
         deadline,
         delivery_date: deliveryDate,
-        delivery_location: deliveryLocation,
+        hq_location: hqLocation,
         budget,
         strategy: selectedStrategy,
         tier_filter: tierFilter,

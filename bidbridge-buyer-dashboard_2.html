@@ -805,7 +805,7 @@
 
     const { data, error } = await _supabase
       .from('rfqs')
-      .select('id, title, status, deadline, created_at, notes, budget, delivery_date, delivery_location, strategy, tier_filter, visibility, rfq_items(vendor, sku, quantity, description)')
+      .select('id, title, status, deadline, created_at, notes, budget, delivery_date, hq_location, strategy, tier_filter, visibility, rfq_items(vendor, sku, quantity, description)')
       .eq('id', rfqId)
       .single();
 
@@ -869,8 +869,8 @@
             <div class="drawer-field-value">${data.budget ? '$' + Number(data.budget).toLocaleString('en-US', {minimumFractionDigits:2}) : 'Not disclosed'}</div>
           </div>
           <div class="drawer-field">
-            <div class="drawer-field-label">Delivery location</div>
-            <div class="drawer-field-value">${data.delivery_location || 'Not specified'}</div>
+            <div class="drawer-field-label">HQ location</div>
+            <div class="drawer-field-value">${data.hq_location || 'Not specified'}</div>
           </div>
         </div>
         <div class="drawer-row">

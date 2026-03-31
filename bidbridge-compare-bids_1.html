@@ -416,6 +416,7 @@
           </button>
         </div>
 
+        <select id="rfq-selector" style="display:none;padding:9px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:var(--font-body);font-size:13px;outline:none;cursor:pointer;max-width:220px;"></select>
         <button class="btn-outline" onclick="openBroadcast()">📢 Message all</button>
         <button class="btn-outline">Export PDF</button>
       </div>
@@ -427,18 +428,18 @@
       <!-- RFQ SUMMARY -->
       <div class="rfq-summary">
         <div>
-          <div style="font-size:12px;color:var(--slate);margin-bottom:6px;">RFQ #4821</div>
-          <div class="rfq-summary-title">Network infrastructure refresh — Austin HQ</div>
-          <div style="font-size:14px;color:var(--slate-light);">Vendors: Cisco · Aruba</div>
+          <div id="rfq-ref" style="font-size:12px;color:var(--slate);margin-bottom:6px;">Loading…</div>
+          <div class="rfq-summary-title" id="rfq-title">Loading RFQ…</div>
+          <div id="rfq-vendors" style="font-size:14px;color:var(--slate-light);"></div>
           <div class="rfq-meta">
-            <div class="rfq-meta-item">📦 <strong>Qty</strong> 12 units (Cisco C9300-48P-A)</div>
-            <div class="rfq-meta-item">📍 <strong>Delivery</strong> Austin, TX</div>
-            <div class="rfq-meta-item">⭐ <strong>Min. tier</strong> Gold and above</div>
+            <div class="rfq-meta-item">📦 <strong>Qty</strong> <span id="rfq-qty">—</span></div>
+            <div class="rfq-meta-item">📍 <strong>HQ Location</strong> <span id="rfq-location">—</span></div>
+            <div class="rfq-meta-item">⭐ <strong>Min. tier</strong> <span id="rfq-tier">—</span></div>
           </div>
         </div>
         <div class="rfq-summary-right">
-          <span class="deadline-badge">⏱ 2 days remaining</span>
-          <span class="strategy-badge strategy-split">Split bid</span>
+          <span class="deadline-badge" id="rfq-deadline">—</span>
+          <span class="strategy-badge" id="rfq-strategy"></span>
         </div>
       </div>
 
@@ -471,13 +472,13 @@
       </div>
 
       <!-- SORT BAR -->
-      <div class="sort-bar">
+      <div class="sort-bar" id="sort-bar">
         <span class="sort-bar-label">Sort by:</span>
         <div class="sort-pill active" onclick="sortBids('price-asc', this)">💰 Price: low to high</div>
         <div class="sort-pill" onclick="sortBids('price-desc', this)">Price: high to low</div>
         <div class="sort-pill" onclick="sortBids('tier', this)">Partner tier</div>
         <div class="sort-pill" onclick="sortBids('delivery', this)">Delivery date</div>
-        <div class="bid-count-label"><strong id="bid-count">7</strong> bids received</div>
+        <div class="bid-count-label" id="bids-count"></div>
       </div>
 
       <!-- ═══ CARD VIEW ═══ -->
@@ -558,45 +559,135 @@
       document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
     }
 
-    const { data: rfqs } = await _supabase
+    const { data: rfqsBadge } = await _supabase
       .from('rfqs').select('id, status').eq('buyer_id', session.user.id);
-    if (rfqs) {
-      const total = rfqs.length;
-      const review = rfqs.filter(r => r.status === 'review').length;
+    if (rfqsBadge) {
+      const total = rfqsBadge.length;
+      const review = rfqsBadge.filter(r => r.status === 'review').length;
       if (total > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = total; b.style.display = ''; }
       if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
     }
+
+    await loadData(session);
   })();
 
   /* ═══════════════════════════════════════════════
-     DATA
+     STATE
   ═══════════════════════════════════════════════ */
-  const MOCK_BIDS = [
-    { id:1, resellerName:'NetStar Solutions', initials:'NS', tier:'gold', vendor:'Cisco · Aruba', price:137200, delivery:'2026-04-18', submittedAt:'2026-03-24', notes:'Includes 3-year SmartNet on all Cisco units and 1-year Aruba support. Expedited delivery available for $2,400.', installIncluded:false, financeAvailable:false, hasMessage:true, unreadMessages:2, awarded:false },
-    { id:2, resellerName:'Apex Technology Group', initials:'AT', tier:'platinum', vendor:'Cisco · Aruba', price:142800, delivery:'2026-04-22', submittedAt:'2026-03-23', notes:'Platinum Cisco partner. Includes installation services and full configuration. Financing up to 36 months.', installIncluded:true, financeAvailable:true, hasMessage:false, unreadMessages:0, awarded:false },
-    { id:3, resellerName:'CorePath IT', initials:'CP', tier:'gold', vendor:'Cisco · Aruba', price:149500, delivery:'2026-04-15', submittedAt:'2026-03-25', notes:'Earliest delivery. Includes on-site installation at Austin HQ.', installIncluded:true, financeAvailable:false, hasMessage:true, unreadMessages:1, awarded:false },
-    { id:4, resellerName:'TechBridge Partners', initials:'TB', tier:'silver', vendor:'Cisco', price:151000, delivery:'2026-04-28', submittedAt:'2026-03-22', notes:'', installIncluded:false, financeAvailable:false, hasMessage:false, unreadMessages:0, awarded:false },
-    { id:5, resellerName:'Meridian Networks', initials:'MN', tier:'gold', vendor:'Cisco · Aruba', price:158750, delivery:'2026-05-01', submittedAt:'2026-03-21', notes:'Extended warranty and dedicated account manager included.', installIncluded:false, financeAvailable:true, hasMessage:false, unreadMessages:0, awarded:false },
-    { id:6, resellerName:'Summit IT Solutions', initials:'SI', tier:'platinum', vendor:'Cisco · Aruba', price:162000, delivery:'2026-04-20', submittedAt:'2026-03-20', notes:'Dual Platinum. Full managed deployment with SLA guarantees.', installIncluded:true, financeAvailable:true, hasMessage:false, unreadMessages:0, awarded:false },
-    { id:7, resellerName:'BlueSky Technology', initials:'BT', tier:'gold', vendor:'Aruba', price:168400, delivery:'2026-04-25', submittedAt:'2026-03-20', notes:'', installIncluded:false, financeAvailable:false, hasMessage:false, unreadMessages:0, awarded:false },
-  ];
-
-  const MOCK_MESSAGES = {
-    1: [
-      { sender:'reseller', text:'Quick question — does the delivery address require a loading dock?', time:'2 days ago' },
-      { sender:'buyer', text:'Standard delivery entrance is fine. Please coordinate with our facilities team.', time:'1 day ago' },
-      { sender:'reseller', text:'Perfect. We can also include a free site survey if helpful.', time:'18 hours ago' },
-    ],
-    3: [
-      { sender:'reseller', text:'Should SmartNet be co-termed with any existing Cisco contracts?', time:'1 day ago' },
-    ],
-  };
-
-  let bids = [...MOCK_BIDS];
+  let bids = [];
+  let currentRFQ = null;
   let currentView = 'card';
   let activeMsgReseller = null;
   let activeRecipient = 'direct';
   let pendingAward = null;
+
+  /* ═══════════════════════════════════════════════
+     LOAD DATA
+  ═══════════════════════════════════════════════ */
+  async function loadData(session) {
+    /* Get rfq_id from URL param, or default to first active RFQ */
+    const params = new URLSearchParams(window.location.search);
+    let rfqId = params.get('rfq');
+
+    /* Load buyer's RFQs */
+    const { data: rfqs } = await _supabase
+      .from('rfqs')
+      .select('id, title, status, deadline, strategy, tier_filter, hq_location, rfq_items(vendor, sku, quantity)')
+      .eq('buyer_id', session.user.id)
+      .in('status', ['active', 'review', 'awarded'])
+      .order('created_at', { ascending: false });
+
+    if (!rfqs || rfqs.length === 0) {
+      showEmptyState();
+      return;
+    }
+
+    /* Use URL param or first RFQ */
+    currentRFQ = rfqId ? rfqs.find(r => r.id === rfqId) : rfqs[0];
+    if (!currentRFQ) currentRFQ = rfqs[0];
+
+    /* Populate RFQ selector if multiple */
+    if (rfqs.length > 1) {
+      const sel = document.getElementById('rfq-selector');
+      if (sel) {
+        sel.innerHTML = rfqs.map(r => `<option value="${r.id}" ${r.id === currentRFQ.id ? 'selected' : ''}>${r.title.substring(0,40)}${r.title.length>40?'…':''}</option>`).join('');
+        sel.style.display = '';
+        sel.onchange = () => { window.location.href = '?rfq=' + sel.value; };
+      }
+    }
+
+    /* Update RFQ summary header */
+    const vendors = [...new Set((currentRFQ.rfq_items || []).map(i => i.vendor))];
+    const totalItems = (currentRFQ.rfq_items || []).reduce((s, i) => s + i.quantity, 0);
+    document.getElementById('rfq-ref').textContent = 'RFQ ' + currentRFQ.id.slice(0,8).toUpperCase();
+    document.getElementById('rfq-title').textContent = currentRFQ.title;
+    document.getElementById('rfq-vendors').textContent = 'Vendors: ' + (vendors.join(' · ') || '—');
+    document.getElementById('rfq-qty').textContent = `${totalItems} unit${totalItems !== 1 ? 's' : ''} across ${vendors.length} vendor${vendors.length !== 1 ? 's' : ''}`;
+    document.getElementById('rfq-location').textContent = currentRFQ.hq_location || 'Not specified';
+    document.getElementById('rfq-tier').textContent = currentRFQ.tier_filter ? currentRFQ.tier_filter.charAt(0).toUpperCase() + currentRFQ.tier_filter.slice(1) + ' and above' : 'Any tier';
+    document.getElementById('rfq-strategy').textContent = currentRFQ.strategy === 'split' ? 'Split bid' : 'Sole source';
+    document.getElementById('rfq-strategy').className = 'strategy-badge ' + (currentRFQ.strategy === 'split' ? 'strategy-split' : 'strategy-sole');
+
+    const days = currentRFQ.deadline ? Math.ceil((new Date(currentRFQ.deadline + 'T00:00:00') - new Date()) / 86400000) : null;
+    document.getElementById('rfq-deadline').textContent = days === null ? 'No deadline' : days <= 0 ? 'Deadline passed' : `⏱ ${days} day${days !== 1 ? 's' : ''} remaining`;
+
+    /* Load bids for this RFQ */
+    const { data: rawBids } = await _supabase
+      .from('bids')
+      .select('id, total_price, notes, status, created_at, reseller_id, profiles(first_name, last_name, company)')
+      .eq('rfq_id', currentRFQ.id)
+      .order('total_price', { ascending: true });
+
+    if (!rawBids || rawBids.length === 0) {
+      showEmptyBids();
+      return;
+    }
+
+    bids = rawBids.map(b => {
+      const name = b.profiles ? `${b.profiles.first_name || ''} ${b.profiles.last_name || ''}`.trim() || b.profiles.company || 'Unknown Reseller' : 'Unknown Reseller';
+      const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+      return {
+        id: b.id,
+        resellerId: b.reseller_id,
+        resellerName: name,
+        company: b.profiles?.company || '',
+        initials,
+        tier: 'authorized',
+        vendor: vendors.join(' · '),
+        price: b.total_price || 0,
+        delivery: null,
+        submittedAt: b.created_at?.split('T')[0],
+        notes: b.notes || '',
+        installIncluded: false,
+        financeAvailable: false,
+        hasMessage: false,
+        unreadMessages: 0,
+        awarded: b.status === 'accepted',
+      };
+    });
+
+    document.getElementById('bids-count').textContent = bids.length + ' bid' + (bids.length !== 1 ? 's' : '') + ' received';
+
+    const savedView = localStorage.getItem('bb_compare_view') || 'card';
+    setView(savedView);
+  }
+
+  function showEmptyState() {
+    document.getElementById('rfq-title').textContent = 'No active RFQs';
+    document.getElementById('rfq-vendors').textContent = 'Post an RFQ to start receiving bids';
+    showEmptyBids();
+  }
+
+  function showEmptyBids() {
+    document.getElementById('view-card').innerHTML = `
+      <div style="text-align:center;padding:80px 32px;color:var(--slate);">
+        <div style="font-size:48px;margin-bottom:20px;">📭</div>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--white);margin-bottom:10px;">No bids yet</div>
+        <div style="font-size:14px;">Resellers will appear here once they submit bids on your RFQ.</div>
+      </div>`;
+    document.getElementById('view-table').style.display = 'none';
+    document.getElementById('sort-bar').style.display = 'none';
+  }
 
   /* ═══════════════════════════════════════════════
      VIEW TOGGLE
@@ -879,9 +970,18 @@
   function closeAward() { document.getElementById('award-overlay').classList.remove('open'); }
   function closeAwardIfOutside(e) { if (e.target === document.getElementById('award-overlay')) closeAward(); }
 
-  function confirmAward() {
+  async function confirmAward() {
     if (!pendingAward) return;
-    bids = bids.map(b => ({ ...b, awarded: b.id === pendingAward.bidId }));
+    const { bidId } = pendingAward;
+
+    /* Mark the winner as accepted, all others as rejected */
+    await _supabase.from('bids').update({ status: 'accepted' }).eq('id', bidId);
+    await _supabase.from('bids').update({ status: 'rejected' }).neq('id', bidId).eq('rfq_id', currentRFQ.id);
+
+    /* Update RFQ status to awarded */
+    await _supabase.from('rfqs').update({ status: 'awarded' }).eq('id', currentRFQ.id);
+
+    bids = bids.map(b => ({ ...b, awarded: b.id === bidId }));
     closeAward();
     if (currentView === 'card') renderCards(bids);
     else renderTable(bids);
@@ -890,13 +990,9 @@
 
   /* ─── DATE ─── */
   function formatDate(str) {
+    if (!str) return 'TBD';
     return new Date(str + 'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
   }
-
-  /* ─── INIT ─── */
-  const savedView = localStorage.getItem('bb_compare_view') || 'card';
-  bids.sort((a,b) => a.price - b.price);
-  setView(savedView);
 </script>
 </body>
 </html>

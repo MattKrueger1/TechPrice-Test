@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Sign In / Create Account</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -746,25 +747,48 @@
 </div>
 
 <script>
+  /* ─── SUPABASE CLIENT ─── */
+  const { createClient } = supabase;
+  const _supabase = createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  /* ─── ON PAGE LOAD: redirect if already signed in ─── */
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session) {
+      const { data: profile } = await _supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      redirectToDashboard(profile?.role || 'buyer');
+    }
+  })();
+
+  function redirectToDashboard(role) {
+    if (role === 'reseller') {
+      window.location.href = 'bidbridge-reseller-dashboard.html';
+    } else {
+      window.location.href = 'bidbridge-buyer-dashboard_2.html';
+    }
+  }
+
   /* ─── TAB SWITCHING ─── */
   function switchTab(tab) {
-    const panels = document.querySelectorAll('.form-panel');
-    const btns = document.querySelectorAll('.tab-btn');
-    const successState = document.getElementById('success-state');
-
-    panels.forEach(p => p.classList.remove('active'));
-    btns.forEach(b => b.classList.remove('active'));
-    successState.classList.remove('visible');
-
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('success-state').classList.remove('visible');
     document.getElementById('panel-' + tab).classList.add('active');
-    btns[tab === 'login' ? 0 : 1].classList.add('active');
+    document.querySelectorAll('.tab-btn')[tab === 'login' ? 0 : 1].classList.add('active');
+    clearAuthError();
   }
 
   /* ─── ACCOUNT TYPE SELECTION ─── */
   function selectType(type) {
     document.getElementById('type-buyer').classList.toggle('selected', type === 'buyer');
     document.getElementById('type-reseller').classList.toggle('selected', type === 'reseller');
-
     if (type === 'reseller') {
       window.location.href = 'bidbridge-reseller-apply_1.html';
     }
@@ -783,18 +807,35 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  function showError(inputId, errorId) {
+  function showFieldError(inputId, errorId) {
     document.getElementById(inputId).classList.add('error');
     document.getElementById(errorId).classList.add('visible');
   }
 
-  function clearError(inputId, errorId) {
+  function clearFieldError(inputId, errorId) {
     document.getElementById(inputId).classList.remove('error');
     document.getElementById(errorId).classList.remove('visible');
   }
 
   function clearAllErrors(ids) {
-    ids.forEach(([input, error]) => clearError(input, error));
+    ids.forEach(([input, error]) => clearFieldError(input, error));
+  }
+
+  function showAuthError(msg) {
+    let el = document.getElementById('auth-error-banner');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'auth-error-banner';
+      el.style.cssText = 'background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:10px;padding:12px 16px;font-size:13px;color:#FF6B6B;margin-bottom:16px;';
+      document.querySelector('.auth-card').prepend(el);
+    }
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function clearAuthError() {
+    const el = document.getElementById('auth-error-banner');
+    if (el) el.style.display = 'none';
   }
 
   /* Live validation — clear errors on input */
@@ -804,11 +845,12 @@
       el.classList.remove('error');
       const errEl = document.getElementById(id + '-error');
       if (errEl) errEl.classList.remove('visible');
+      clearAuthError();
     });
   });
 
   /* ─── LOGIN HANDLER ─── */
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     let valid = true;
 
@@ -816,46 +858,38 @@
     const password = document.getElementById('login-password').value;
 
     clearAllErrors([['login-email','login-email-error'],['login-password','login-password-error']]);
+    clearAuthError();
 
-    if (!isValidEmail(email)) { showError('login-email','login-email-error'); valid = false; }
-    if (!password) { showError('login-password','login-password-error'); valid = false; }
-
+    if (!isValidEmail(email)) { showFieldError('login-email','login-email-error'); valid = false; }
+    if (!password) { showFieldError('login-password','login-password-error'); valid = false; }
     if (!valid) return;
 
     const btn = document.getElementById('login-btn');
     btn.classList.add('loading');
 
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — Authentication
-     * ─────────────────────────────────────────────────────────────
-     * Replace the setTimeout below with a real API call:
-     *
-     * const response = await fetch('/api/auth/login', {
-     *   method: 'POST',
-     *   headers: { 'Content-Type': 'application/json' },
-     *   body: JSON.stringify({ email, password })
-     * });
-     *
-     * const data = await response.json();
-     *
-     * if (response.ok) {
-     *   localStorage.setItem('bb_token', data.token);
-     *   localStorage.setItem('bb_user_type', data.userType); // 'buyer' | 'reseller' | 'admin'
-     *   redirectToDashboard(data.userType);
-     * } else {
-     *   showLoginError(data.message);
-     * }
-     * ─────────────────────────────────────────────────────────────
-     */
-    setTimeout(() => {
+    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
       btn.classList.remove('loading');
-      showSuccess('login');
-    }, 1400);
+      showAuthError(error.message === 'Invalid login credentials'
+        ? 'Incorrect email or password. Please try again.'
+        : error.message);
+      return;
+    }
+
+    /* fetch role to redirect to the right dashboard */
+    const { data: profile } = await _supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
+
+    showSuccess('login');
+    setTimeout(() => redirectToDashboard(profile?.role || 'buyer'), 1500);
   }
 
   /* ─── SIGNUP HANDLER ─── */
-  function handleSignup(e) {
+  async function handleSignup(e) {
     e.preventDefault();
     let valid = true;
 
@@ -873,77 +907,57 @@
       ['signup-email','signup-email-error'],
       ['signup-password','signup-password-error']
     ]);
+    clearAuthError();
 
-    if (!first) { showError('signup-first','signup-first-error'); valid = false; }
-    if (!last) { showError('signup-last','signup-last-error'); valid = false; }
-    if (!company) { showError('signup-company','signup-company-error'); valid = false; }
-    if (!isValidEmail(email)) { showError('signup-email','signup-email-error'); valid = false; }
-    if (password.length < 8) { showError('signup-password','signup-password-error'); valid = false; }
-
+    if (!first) { showFieldError('signup-first','signup-first-error'); valid = false; }
+    if (!last) { showFieldError('signup-last','signup-last-error'); valid = false; }
+    if (!company) { showFieldError('signup-company','signup-company-error'); valid = false; }
+    if (!isValidEmail(email)) { showFieldError('signup-email','signup-email-error'); valid = false; }
+    if (password.length < 8) { showFieldError('signup-password','signup-password-error'); valid = false; }
     if (!valid) return;
 
     const btn = document.getElementById('signup-btn');
     btn.classList.add('loading');
 
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — User Registration
-     * ─────────────────────────────────────────────────────────────
-     * Replace the setTimeout below with a real API call:
-     *
-     * const payload = {
-     *   firstName: first,
-     *   lastName: last,
-     *   company,
-     *   email,
-     *   password,
-     *   accountType,  // 'buyer' | 'reseller'
-     *   ...(accountType === 'reseller' && {
-     *     primaryVendor: document.getElementById('signup-vendor').value
-     *   })
-     * };
-     *
-     * const response = await fetch('/api/auth/register', {
-     *   method: 'POST',
-     *   headers: { 'Content-Type': 'application/json' },
-     *   body: JSON.stringify(payload)
-     * });
-     *
-     * const data = await response.json();
-     *
-     * if (response.ok) {
-     *   if (accountType === 'reseller') {
-     *     showResellerPending();
-     *   } else {
-     *     localStorage.setItem('bb_token', data.token);
-     *     redirectToDashboard('buyer');
-     *   }
-     * } else {
-     *   showSignupError(data.message);
-     * }
-     * ─────────────────────────────────────────────────────────────
-     */
-    setTimeout(() => {
+    /* 1. Create auth user */
+    const { data, error } = await _supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { first_name: first, last_name: last, company, role: accountType }
+      }
+    });
+
+    if (error) {
       btn.classList.remove('loading');
-      showSuccess(accountType);
-    }, 1600);
+      showAuthError(error.message);
+      return;
+    }
+
+    /* 2. Insert profile row */
+    if (data.user) {
+      const { error: profileError } = await _supabase.from('profiles').insert({
+        id: data.user.id,
+        role: accountType,
+        first_name: first,
+        last_name: last,
+        company,
+        status: accountType === 'reseller' ? 'pending' : 'active'
+      });
+      if (profileError) console.error('Profile insert error:', profileError.message);
+    }
+
+    btn.classList.remove('loading');
+    showSuccess(accountType);
   }
 
   /* ─── GOOGLE AUTH HANDLER ─── */
-  function handleGoogleAuth() {
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — Google OAuth
-     * ─────────────────────────────────────────────────────────────
-     * Implement Google OAuth 2.0 flow:
-     *
-     * window.location.href = '/api/auth/google';
-     *
-     * Server should handle the OAuth callback and redirect to
-     * the appropriate dashboard based on user type.
-     * ─────────────────────────────────────────────────────────────
-     */
-    alert('Google OAuth — connect to your OAuth provider (e.g. Google Identity Services)');
+  async function handleGoogleAuth() {
+    const { error } = await _supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/bidbridge-auth_1.html' }
+    });
+    if (error) showAuthError(error.message);
   }
 
   /* ─── SUCCESS STATE ─── */
@@ -963,37 +977,18 @@
       cta.href = 'index.html';
     } else if (type === 'login') {
       title.textContent = 'Welcome back!';
-      msg.textContent = 'Signing you in... redirecting to your dashboard.';
+      msg.textContent = 'Signing you in — redirecting to your dashboard...';
       cta.textContent = 'Go to dashboard →';
-      cta.href = 'buyer-dashboard.html';
+      cta.href = 'bidbridge-buyer-dashboard_2.html';
     } else {
       title.textContent = 'Account created!';
-      msg.textContent = 'Welcome to IT Pricing Network. Your account is ready — let\'s get your first RFQ posted.';
+      msg.textContent = 'Welcome to IT Pricing Network. Check your email to confirm your account, then you\'re ready to post your first RFQ.';
       cta.textContent = 'Go to my dashboard →';
-      cta.href = 'buyer-dashboard.html';
+      cta.href = 'bidbridge-buyer-dashboard_2.html';
     }
 
     state.classList.add('visible');
   }
-
-  /*
-   * ─────────────────────────────────────────────────────────────
-   * BACKEND INTEGRATION POINT — Route guard / redirect helper
-   * ─────────────────────────────────────────────────────────────
-   * function redirectToDashboard(userType) {
-   *   const routes = {
-   *     buyer: '/buyer/dashboard',
-   *     reseller: '/reseller/dashboard',
-   *     admin: '/admin/dashboard'
-   *   };
-   *   window.location.href = routes[userType] || '/';
-   * }
-   *
-   * On page load, check if already authenticated:
-   * const token = localStorage.getItem('bb_token');
-   * if (token) redirectToDashboard(localStorage.getItem('bb_user_type'));
-   * ─────────────────────────────────────────────────────────────
-   */
 </script>
 
 </body>

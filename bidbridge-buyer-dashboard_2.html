@@ -415,30 +415,29 @@
     <a href="index.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
 
     <div class="sidebar-section-label">Main</div>
-    <a class="nav-item active" href="buyer-dashboard.html">
+    <a class="nav-item active" href="bidbridge-buyer-dashboard_2.html">
       <span class="nav-icon">⊞</span> Dashboard
     </a>
     <a class="nav-item" href="bidbridge-submit-rfq_2.html">
       <span class="nav-icon">＋</span> New RFQ
     </a>
-    <a class="nav-item" href="buyer-rfqs.html">
+    <a class="nav-item" href="bidbridge-my-rfqs.html">
       <span class="nav-icon">📋</span> My RFQs
-      <span class="nav-badge">6</span>
+      <span class="nav-badge" id="badge-rfqs" style="display:none"></span>
     </a>
-    <a class="nav-item" href="compare-bids.html">
+    <a class="nav-item" href="bidbridge-compare-bids_1.html">
       <span class="nav-icon">⚖️</span> Compare bids
-      <span class="nav-badge">2</span>
+      <span class="nav-badge" id="badge-review" style="display:none"></span>
     </a>
 
     <div class="sidebar-section-label">Account</div>
-    <a class="nav-item" href="notifications.html">
+    <a class="nav-item" href="bidbridge-notifications_1.html">
       <span class="nav-icon">🔔</span> Notifications
-      <span class="nav-badge">4</span>
     </a>
-    <a class="nav-item" href="settings.html">
+    <a class="nav-item" href="bidbridge-settings.html">
       <span class="nav-icon">⚙</span> Settings
     </a>
-    <a class="nav-item" href="profile.html">
+    <a class="nav-item" href="bidbridge-profile.html">
       <span class="nav-icon">👤</span> Profile
     </a>
 
@@ -646,6 +645,12 @@
     document.getElementById('stat-bids').textContent = totalBids;
     document.getElementById('stat-review').textContent = review;
     document.getElementById('stat-awarded').textContent = awarded;
+
+    /* Sidebar badges — only show if count > 0 */
+    const rfqBadge = document.getElementById('badge-rfqs');
+    const reviewBadge = document.getElementById('badge-review');
+    if (allRFQs.length > 0) { rfqBadge.textContent = allRFQs.length; rfqBadge.style.display = ''; }
+    if (review > 0) { reviewBadge.textContent = review; reviewBadge.style.display = ''; }
 
     applyFilters();
   })();

@@ -37,66 +37,35 @@
     line-height: 1.6;
   }
 
-  /* ─── NAV ─── */
-  nav {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 64px;
-    background: rgba(11,27,51,0.85);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    position: fixed; top: 0; z-index: 100;
-  }
+  /* ─── APP SHELL ─── */
+  .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
 
-  .logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; }
-  .logo span { color: var(--accent); }
+  /* ─── SIDEBAR ─── */
+  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 36px; display: block; }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 24px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .user-block { display: flex; align-items: center; gap: 12px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--slate); }
 
-  .nav-right { display: flex; align-items: center; gap: 20px; font-size: 14px; color: var(--slate-light); }
-  .nav-right a { color: var(--slate-light); text-decoration: none; }
-  .nav-right a:hover { color: var(--white); }
+  /* ─── MAIN ─── */
+  .main-content { display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { display: flex; align-items: center; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; }
+  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
 
-  .nav-user {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 16px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--card-border);
-    border-radius: 999px;
-    font-size: 13px;
-  }
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 36px 40px; flex: 1; overflow-y: auto; }
+  .form-wrap { max-width: 820px; }
 
-  .user-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--accent-glow);
-    border: 1px solid rgba(0,200,150,0.3);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: var(--accent);
-  }
-
-  /* ─── PAGE LAYOUT ─── */
-  .page-wrap {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 56px 32px 100px;
-  }
-
-  /* ─── PAGE HEADER ─── */
-  .page-header { margin-bottom: 48px; }
-
-  .breadcrumb {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; color: var(--slate);
-    margin-bottom: 16px;
-  }
-  .breadcrumb a { color: var(--slate); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--white); }
-  .breadcrumb span { color: var(--slate); opacity: 0.5; }
-
-  .page-header h1 {
-    font-family: var(--font-head);
-    font-size: 32px; font-weight: 700;
-    letter-spacing: -0.5px; margin-bottom: 8px;
-  }
-
-  .page-header p { font-size: 16px; color: var(--slate-light); font-weight: 300; }
 
   /* ─── STEP INDICATOR ─── */
   .step-indicator {
@@ -582,9 +551,12 @@
   }
   .btn-another:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
 
+  @media (max-width: 1024px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .topbar, .page-body { padding: 16px 20px; }
+  }
   @media (max-width: 680px) {
-    nav { padding: 16px 20px; }
-    .page-wrap { padding: 32px 16px 80px; }
     .form-section { padding: 24px 20px; }
     .form-row, .form-row-3 { grid-template-columns: 1fr; }
     .strategy-cards { grid-template-columns: 1fr; }
@@ -594,30 +566,40 @@
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a href="bidbridge-buyer-dashboard_2.html" class="logo">IT Pricing <span>Network</span></a>
-  <div class="nav-right">
-    <a href="bidbridge-buyer-dashboard_2.html">Dashboard</a>
-    <div class="nav-user">
-      <div class="user-avatar" id="nav-avatar">—</div>
-      <span id="nav-name">Loading...</span>
-    </div>
-  </div>
-</nav>
+<div class="app-shell">
 
-<div class="page-wrap">
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="breadcrumb">
-      <a href="bidbridge-buyer-dashboard_2.html">Dashboard</a>
-      <span>›</span>
-      <span>New RFQ</span>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="bidbridge-buyer-dashboard_2.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
+    <div class="sidebar-section-label">Main</div>
+    <a class="nav-item" href="bidbridge-buyer-dashboard_2.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item active" href="bidbridge-submit-rfq_2.html"><span class="nav-icon">＋</span> New RFQ</a>
+    <a class="nav-item" href="bidbridge-my-rfqs.html"><span class="nav-icon">📋</span> My RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
+    <a class="nav-item" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge" id="badge-review" style="display:none"></span></a>
+    <div class="sidebar-section-label">Account</div>
+    <a class="nav-item" href="bidbridge-notifications_1.html"><span class="nav-icon">🔔</span> Notifications</a>
+    <a class="nav-item" href="bidbridge-settings.html"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="bidbridge-profile.html"><span class="nav-icon">👤</span> Profile</a>
+    <div class="sidebar-footer">
+      <div class="user-block">
+        <div class="user-avatar" id="user-avatar">—</div>
+        <div><div class="user-name" id="user-name">Loading…</div><div class="user-role" id="user-role">Buyer</div></div>
+      </div>
     </div>
-    <h1>Submit a Request for Quote</h1>
-    <p>Tell us what technology you need. We'll notify every authorized reseller who can compete for your business.</p>
-  </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>New RFQ</h1>
+        <p>Tell us what you need — authorized resellers will compete for your business.</p>
+      </div>
+    </div>
+
+    <div class="page-body">
+    <div class="form-wrap">
 
   <!-- STEP INDICATOR -->
   <div class="step-indicator" id="step-indicator">
@@ -831,7 +813,10 @@
     </div>
   </div>
 
-</div><!-- /page-wrap -->
+      </div><!-- /form-wrap -->
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
 
 <script>
   /* ═══════════════════════════════════════════════
@@ -1260,7 +1245,7 @@
      INIT
   ═══════════════════════════════════════════════ */
   window.addEventListener('DOMContentLoaded', async () => {
-    /* Auth guard + load user into nav */
+    /* Auth guard + load user into sidebar */
     const { data: { session } } = await _supabase.auth.getSession();
     if (!session) {
       window.location.href = 'bidbridge-auth_1.html';
@@ -1268,13 +1253,22 @@
     }
     const { data: profile } = await _supabase
       .from('profiles')
-      .select('first_name, last_name')
+      .select('first_name, last_name, company')
       .eq('id', session.user.id)
       .single();
     if (profile) {
       const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase();
-      document.getElementById('nav-avatar').textContent = initials || '?';
-      document.getElementById('nav-name').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+      document.getElementById('user-avatar').textContent = initials || '?';
+      document.getElementById('user-name').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+      document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
+    }
+
+    const { data: rfqs } = await _supabase.from('rfqs').select('id, status').eq('buyer_id', session.user.id);
+    if (rfqs) {
+      const total = rfqs.length;
+      const review = rfqs.filter(r => r.status === 'review').length;
+      if (total > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = total; b.style.display = ''; }
+      if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
     }
 
     // Set default deadline to 7 days from today

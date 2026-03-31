@@ -1164,6 +1164,13 @@
     const title = document.getElementById('project-title').value.trim();
     const notes = document.getElementById('project-desc').value.trim();
     const deadline = document.getElementById('project-deadline').value;
+    const deliveryDate = document.getElementById('project-delivery').value || null;
+    const deliveryLocation = document.getElementById('project-location').value.trim() || null;
+    const budgetRaw = document.getElementById('project-budget').value;
+    const budget = budgetRaw ? parseFloat(budgetRaw) : null;
+    const visibilityEl = document.getElementById('rfq-visibility');
+    const visibility = visibilityEl ? visibilityEl.value : 'all';
+    const tierFilter = tierFilterEnabled ? selectedTier : null;
 
     /* 1. Insert RFQ */
     const { data: rfq, error: rfqError } = await _supabase
@@ -1173,6 +1180,12 @@
         title,
         notes,
         deadline,
+        delivery_date: deliveryDate,
+        delivery_location: deliveryLocation,
+        budget,
+        strategy: selectedStrategy,
+        tier_filter: tierFilter,
+        visibility,
         status: 'active'
       })
       .select('id')

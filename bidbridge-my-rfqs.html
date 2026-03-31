@@ -706,7 +706,7 @@
     /* Fetch full detail including all SKU items */
     const { data, error } = await _supabase
       .from('rfqs')
-      .select('id, title, status, deadline, created_at, notes, rfq_items(vendor, sku, quantity, description)')
+      .select('id, title, status, deadline, created_at, notes, budget, delivery_date, delivery_location, strategy, tier_filter, visibility, rfq_items(vendor, sku, quantity, description)')
       .eq('id', rfqId)
       .single();
 
@@ -753,7 +753,6 @@
         <div class="drawer-section-title">Status</div>
         <span class="status-badge ${statusCls}">${statusLabel}</span>
       </div>
-
       <div class="drawer-section">
         <div class="drawer-section-title">Project details</div>
         <div class="drawer-row">
@@ -766,13 +765,42 @@
             <div class="drawer-field-value">${data.deadline ? formatDate(data.deadline) : 'Not set'}</div>
           </div>
         </div>
+        <div class="drawer-row">
+          <div class="drawer-field">
+            <div class="drawer-field-label">Budget</div>
+            <div class="drawer-field-value">${data.budget ? '$' + Number(data.budget).toLocaleString('en-US', {minimumFractionDigits:2}) : 'Not disclosed'}</div>
+          </div>
+          <div class="drawer-field">
+            <div class="drawer-field-label">Delivery location</div>
+            <div class="drawer-field-value">${data.delivery_location || 'Not specified'}</div>
+          </div>
+        </div>
+        <div class="drawer-row">
+          <div class="drawer-field">
+            <div class="drawer-field-label">Expected delivery</div>
+            <div class="drawer-field-value">${data.delivery_date ? formatDate(data.delivery_date) : 'Not specified'}</div>
+          </div>
+          <div class="drawer-field">
+            <div class="drawer-field-label">Sourcing strategy</div>
+            <div class="drawer-field-value">${data.strategy === 'split' ? '⚖️ Split bid' : '🤝 Sole source'}</div>
+          </div>
+        </div>
+        <div class="drawer-row">
+          <div class="drawer-field">
+            <div class="drawer-field-label">Partner tier filter</div>
+            <div class="drawer-field-value">${data.tier_filter ? data.tier_filter.charAt(0).toUpperCase() + data.tier_filter.slice(1) + ' minimum' : 'No minimum'}</div>
+          </div>
+          <div class="drawer-field">
+            <div class="drawer-field-label">Visibility</div>
+            <div class="drawer-field-value">${data.visibility === 'all' ? 'All verified resellers' : data.visibility === 'tier-filtered' ? 'Tier filtered' : 'Invited only'}</div>
+          </div>
+        </div>
         ${data.notes ? `
         <div class="drawer-field">
           <div class="drawer-field-label">Description</div>
           <div class="drawer-field-value" style="color:var(--slate-light);line-height:1.7;">${data.notes}</div>
         </div>` : ''}
       </div>
-
       <div class="drawer-section">
         <div class="drawer-section-title">Vendors &amp; SKUs (${Object.keys(byVendor).length} vendor${Object.keys(byVendor).length !== 1 ? 's' : ''} · ${data.rfq_items?.length || 0} line item${data.rfq_items?.length !== 1 ? 's' : ''})</div>
         ${vendorHTML || '<div style="color:var(--slate);font-size:13px;">No items found.</div>'}

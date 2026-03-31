@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Submit RFQ</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -597,10 +598,10 @@
 <nav>
   <a href="index.html" class="logo">IT Pricing <span>Network</span></a>
   <div class="nav-right">
-    <a href="buyer-dashboard.html">Dashboard</a>
+    <a href="bidbridge-buyer-dashboard_2.html">Dashboard</a>
     <div class="nav-user">
-      <div class="user-avatar">JM</div>
-      <span>James M.</span>
+      <div class="user-avatar" id="nav-avatar">—</div>
+      <span id="nav-name">Loading...</span>
     </div>
   </div>
 </nav>
@@ -610,7 +611,7 @@
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div class="breadcrumb">
-      <a href="buyer-dashboard.html">Dashboard</a>
+      <a href="bidbridge-buyer-dashboard_2.html">Dashboard</a>
       <span>›</span>
       <span>New RFQ</span>
     </div>
@@ -825,7 +826,7 @@
     <div class="rfq-id-badge" id="rfq-id-badge">RFQ #—</div>
     <p style="font-size:13px;color:var(--slate);margin-bottom:32px;">Bids will appear in your dashboard as resellers respond. Your deadline is set — sit back and let the market work.</p>
     <div class="success-actions">
-      <a href="buyer-dashboard.html" class="btn-dashboard">View my dashboard →</a>
+      <a href="bidbridge-buyer-dashboard_2.html" class="btn-dashboard">View my dashboard →</a>
       <button class="btn-another" onclick="resetForm()">Submit another RFQ</button>
     </div>
   </div>
@@ -1150,77 +1151,81 @@
   /* ═══════════════════════════════════════════════
      SUBMIT
   ═══════════════════════════════════════════════ */
-  function submitRFQ() {
+  async function submitRFQ() {
     const btn = document.getElementById('submit-btn');
     btn.classList.add('loading');
 
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — RFQ Submission
-     * ─────────────────────────────────────────────────────────────
-     * Collect all form data and POST to API:
-     *
-     * const vendorItems = document.querySelectorAll('.vendor-item');
-     * const vendors = Array.from(vendorItems).map(item => {
-     *   const id = item.id.replace('vendor-item-', '');
-     *   return {
-     *     vendor: document.getElementById('vendor-name-' + id).value,
-     *     productLine: document.getElementById('vendor-product-' + id).value,
-     *     partNumbers: document.getElementById('vendor-part-' + id).value,
-     *     quantity: document.getElementById('vendor-qty-' + id).value,
-     *     notes: document.getElementById('vendor-notes-' + id).value,
-     *   };
-     * });
-     *
-     * const payload = {
-     *   projectTitle: document.getElementById('project-title').value,
-     *   description: document.getElementById('project-desc').value,
-     *   bidDeadline: document.getElementById('project-deadline').value,
-     *   deliveryDate: document.getElementById('project-delivery').value,
-     *   budget: document.getElementById('project-budget').value,
-     *   deliveryLocation: document.getElementById('project-location').value,
-     *   sourcingStrategy: selectedStrategy,    // 'sole' | 'split'
-     *   tierFilter: tierFilterEnabled ? selectedTier : null,
-     *   visibility: document.getElementById('rfq-visibility').value,
-     *   vendors,
-     * };
-     *
-     * // For file uploads, use FormData:
-     * const formData = new FormData();
-     * formData.append('rfq', JSON.stringify(payload));
-     * uploadedFiles.forEach(f => formData.append('documents', f));
-     *
-     * const response = await fetch('/api/rfq/create', {
-     *   method: 'POST',
-     *   headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') },
-     *   body: formData
-     * });
-     *
-     * const data = await response.json();
-     *
-     * if (response.ok) {
-     *   // data.rfqId = the new RFQ ID
-     *   // data.notifiedCount = number of resellers notified
-     *   showSuccess(data.rfqId);
-     *
-     *   // If split bid: platform creates sub-RFQs per vendor
-     *   // and routes notifications to authorized resellers per vendor
-     *   // If sole source: one RFQ, notifies multi-vendor authorized resellers only
-     * }
-     * ─────────────────────────────────────────────────────────────
-     */
-    setTimeout(() => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'bidbridge-auth_1.html';
+      return;
+    }
+
+    const title = document.getElementById('project-title').value.trim();
+    const notes = document.getElementById('project-desc').value.trim();
+    const deadline = document.getElementById('project-deadline').value;
+
+    /* 1. Insert RFQ */
+    const { data: rfq, error: rfqError } = await _supabase
+      .from('rfqs')
+      .insert({
+        buyer_id: session.user.id,
+        title,
+        notes,
+        deadline,
+        status: 'active'
+      })
+      .select('id')
+      .single();
+
+    if (rfqError) {
       btn.classList.remove('loading');
-      showSuccess();
-    }, 2000);
+      alert('Error submitting RFQ: ' + rfqError.message);
+      return;
+    }
+
+    /* 2. Collect and insert all SKU line items */
+    const vendorItems = document.querySelectorAll('.vendor-item');
+    const itemsToInsert = [];
+
+    vendorItems.forEach(item => {
+      const id = item.id.replace('vendor-item-', '');
+      const nameSelect = document.getElementById('vendor-name-' + id)?.value;
+      const vendor = nameSelect === 'Other'
+        ? (document.getElementById('vendor-name-other-' + id)?.value || 'Other')
+        : nameSelect;
+      const vendorNotes = document.getElementById('vendor-notes-' + id)?.value || null;
+
+      const skuRows = document.querySelectorAll('#sku-list-' + id + ' .sku-row');
+      skuRows.forEach(row => {
+        const rowId = row.id.replace('sku-' + id + '-', '');
+        const sku = document.getElementById('sku-part-' + id + '-' + rowId)?.value?.trim();
+        const qty = parseInt(document.getElementById('sku-qty-' + id + '-' + rowId)?.value) || 1;
+        if (vendor && sku) {
+          itemsToInsert.push({
+            rfq_id: rfq.id,
+            vendor,
+            sku,
+            quantity: qty,
+            description: vendorNotes
+          });
+        }
+      });
+    });
+
+    if (itemsToInsert.length > 0) {
+      const { error: itemsError } = await _supabase.from('rfq_items').insert(itemsToInsert);
+      if (itemsError) console.error('Error saving items:', itemsError.message);
+    }
+
+    btn.classList.remove('loading');
+    showSuccess(rfq.id);
   }
 
-  function showSuccess() {
+  function showSuccess(rfqId) {
     document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
     document.getElementById('step-indicator').style.display = 'none';
-
-    const rfqNum = '#' + Math.floor(Math.random() * 9000 + 1000);
-    document.getElementById('rfq-id-badge').textContent = 'RFQ ' + rfqNum;
+    document.getElementById('rfq-id-badge').textContent = 'RFQ ' + rfqId.slice(0, 8).toUpperCase();
     document.getElementById('success-screen').classList.add('visible');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -1230,10 +1235,36 @@
   }
 
   /* ═══════════════════════════════════════════════
+     SUPABASE
+  ═══════════════════════════════════════════════ */
+  const { createClient } = supabase;
+  const _supabase = createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  /* ═══════════════════════════════════════════════
      INIT
   ═══════════════════════════════════════════════ */
-  // Set default deadline to 7 days from today
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
+    /* Auth guard + load user into nav */
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'bidbridge-auth_1.html';
+      return;
+    }
+    const { data: profile } = await _supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', session.user.id)
+      .single();
+    if (profile) {
+      const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase();
+      document.getElementById('nav-avatar').textContent = initials || '?';
+      document.getElementById('nav-name').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+    }
+
+    // Set default deadline to 7 days from today
     const deadline = document.getElementById('project-deadline');
     const d = new Date();
     d.setDate(d.getDate() + 7);

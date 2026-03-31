@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — See How RFQs Work</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1B33; --navy-mid: #112240; --navy-light: #1A3356;
+    --accent: #00C896; --accent-dim: #00a87b; --accent-glow: rgba(0,200,150,0.12);
+    --gold: #F5C842; --gold-glow: rgba(245,200,66,0.10);
+    --slate: #8896A9; --slate-light: #A8B8CC; --white: #F0F4FA;
+    --card-bg: rgba(255,255,255,0.04); --card-border: rgba(255,255,255,0.08);
+    --font-head: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+  html, body { background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 64px; background: rgba(11,27,51,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+  .logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--white); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; align-items: center; gap: 16px; }
+  .btn-signin { padding: 9px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; text-decoration: none; transition: all .2s; }
+  .btn-signin:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+  .nav-cta { background: var(--accent); color: var(--navy) !important; font-weight: 500 !important; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-size: 14px; transition: background .2s; }
+  .nav-cta:hover { background: var(--accent-dim); }
+
+  /* HERO */
+  .hero { padding: 160px 64px 80px; text-align: center; max-width: 860px; margin: 0 auto; }
+  .section-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.25); border-radius: 100px; padding: 6px 16px; font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 28px; }
+  .hero h1 { font-family: var(--font-head); font-size: clamp(38px, 5vw, 68px); font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 20px; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p { font-size: 18px; font-weight: 300; color: var(--slate-light); line-height: 1.7; max-width: 600px; margin: 0 auto 48px; }
+  .btn-primary { background: var(--accent); color: var(--navy); font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 14px 32px; border-radius: 10px; text-decoration: none; display: inline-block; transition: background .2s, transform .15s; }
+  .btn-primary:hover { background: var(--accent-dim); transform: translateY(-2px); }
+
+  /* SECTIONS */
+  .section { padding: 80px 64px; max-width: 1100px; margin: 0 auto; }
+  .section-label { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .section-title { font-family: var(--font-head); font-size: clamp(28px, 3vw, 42px); font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 12px; }
+  .section-sub { font-size: 16px; color: var(--slate-light); line-height: 1.7; max-width: 580px; margin-bottom: 48px; }
+
+  /* STEP 1 — RFQ FORMAT */
+  .rfq-format-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+  .rfq-format-text { padding-top: 8px; }
+  .rfq-format-text p { font-size: 15px; color: var(--slate-light); line-height: 1.7; margin-bottom: 24px; }
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .check-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; color: var(--slate-light); }
+  .check-list li::before { content: ''; width: 20px; height: 20px; min-width: 20px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.35); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 5l2.5 2.5L8 3' stroke='%2300C896' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; margin-top: 3px; }
+
+  /* RFQ MOCK FORM */
+  .rfq-mock { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; }
+  .rfq-mock-header { background: rgba(0,200,150,0.07); border-bottom: 1px solid rgba(0,200,150,0.12); padding: 16px 24px; display: flex; align-items: center; gap: 10px; }
+  .rfq-mock-header span { font-family: var(--font-head); font-size: 14px; font-weight: 600; color: var(--accent); }
+  .rfq-mock-step { display: flex; gap: 8px; margin-left: auto; }
+  .mock-step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,200,150,0.3); }
+  .mock-step-dot.active { background: var(--accent); }
+  .rfq-mock-body { padding: 24px; }
+  .mock-field { margin-bottom: 16px; }
+  .mock-label { font-size: 12px; color: var(--slate); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .mock-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--white); }
+  .mock-input.filled { border-color: rgba(0,200,150,0.2); color: var(--white); }
+  .mock-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mock-vendor-block { background: rgba(0,200,150,0.04); border: 1px solid rgba(0,200,150,0.1); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .mock-vendor-label { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .mock-sku-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .mock-sku-row:last-child { margin-bottom: 0; }
+  .mock-add-sku { font-size: 12px; color: var(--accent); cursor: default; opacity: 0.7; }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 0 64px; }
+
+  /* STEP 2 — DASHBOARD */
+  .dashboard-mock { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; }
+  .dashboard-mock-topbar { background: rgba(11,27,51,0.9); border-bottom: 1px solid var(--card-border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .dashboard-mock-topbar .topbar-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; }
+  .rfq-status-badge { background: rgba(0,200,150,0.12); border: 1px solid rgba(0,200,150,0.25); color: var(--accent); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; letter-spacing: 0.05em; }
+
+  /* Stats row */
+  .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--card-border); }
+  .dash-stat { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 16px; }
+  .dash-stat-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .dash-stat-value { font-family: var(--font-head); font-size: 22px; font-weight: 700; }
+  .dash-stat-value.accent { color: var(--accent); }
+  .dash-stat-value.gold { color: var(--gold); }
+  .dash-stat-sub { font-size: 11px; color: var(--slate); margin-top: 3px; }
+
+  /* Bids table */
+  .bids-section { padding: 20px 24px; }
+  .bids-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .bids-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; }
+  .bids-count { font-size: 12px; color: var(--slate); }
+  .bid-row { display: grid; grid-template-columns: 32px 1fr 100px 100px 80px 90px; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+  .bid-row.header { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; }
+  .bid-row:last-child { border-bottom: none; }
+  .bid-rank { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 12px; font-weight: 700; }
+  .rank-1 { background: rgba(245,200,66,0.15); border: 1px solid rgba(245,200,66,0.35); color: var(--gold); }
+  .rank-2 { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--slate-light); }
+  .rank-3 { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--slate-light); }
+  .bid-reseller { display: flex; align-items: center; gap: 8px; }
+  .bid-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--navy-light); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: var(--slate-light); }
+  .bid-name { font-size: 13px; color: var(--white); }
+  .bid-price { font-family: var(--font-head); font-size: 14px; font-weight: 700; }
+  .bid-price.lowest { color: var(--accent); }
+  .bid-savings { font-size: 12px; }
+  .bid-savings.positive { color: var(--accent); }
+  .bid-savings.negative { color: var(--slate); }
+  .bid-tier { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+  .tier-gold { background: rgba(245,200,66,0.1); color: var(--gold); }
+  .tier-platinum { background: rgba(168,184,204,0.1); color: var(--slate-light); }
+  .bid-days { font-size: 12px; }
+  .days-urgent { color: var(--gold); font-weight: 500; }
+  .days-ok { color: var(--slate-light); }
+
+  /* Savings callout */
+  .savings-callout { margin: 20px 24px 0; background: linear-gradient(135deg, rgba(0,200,150,0.08) 0%, transparent 70%); border: 1px solid rgba(0,200,150,0.15); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .savings-callout-left { display: flex; align-items: center; gap: 14px; }
+  .savings-icon { font-size: 24px; }
+  .savings-text h4 { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .savings-text p { font-size: 13px; color: var(--slate-light); }
+  .savings-amount { font-family: var(--font-head); font-size: 24px; font-weight: 700; color: var(--accent); }
+
+  /* VALUE PROPS */
+  .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+  .value-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 28px 24px; }
+  .value-icon { font-size: 28px; margin-bottom: 14px; }
+  .value-card h4 { font-family: var(--font-head); font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 8px; }
+  .value-card p { font-size: 14px; color: var(--slate-light); line-height: 1.65; }
+  .value-stat { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--accent); margin-top: 14px; }
+  .value-stat-label { font-size: 12px; color: var(--slate); }
+
+  /* CTA */
+  .cta-section { text-align: center; padding: 80px 64px 120px; background: linear-gradient(135deg, rgba(0,200,150,0.06) 0%, transparent 60%); border-top: 1px solid rgba(0,200,150,0.08); }
+  .cta-section h2 { font-family: var(--font-head); font-size: clamp(28px, 3vw, 44px); font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px; }
+  .cta-section p { font-size: 17px; color: var(--slate-light); max-width: 480px; margin: 0 auto 36px; }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .hero { padding: 120px 24px 60px; }
+    .section { padding: 60px 24px; }
+    .rfq-format-grid { grid-template-columns: 1fr; }
+    .dash-stats { grid-template-columns: repeat(2, 1fr); }
+    .bid-row { grid-template-columns: 32px 1fr 100px 80px; }
+    .bid-row .bid-tier, .bid-row .bid-days { display: none; }
+    .value-grid { grid-template-columns: 1fr; }
+    .divider { margin: 0 24px; }
+    .cta-section { padding: 60px 24px 80px; }
+    .savings-callout { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">IT Pricing <span>Network</span></a>
+  <div class="nav-links">
+    <a href="bidbridge-auth_1.html" class="btn-signin">Log in</a>
+    <a href="bidbridge-get-started.html" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="section-badge">✦ See it in action</div>
+  <h1>From one RFQ to the <em>best price</em> on the market</h1>
+  <p>See exactly how the platform works — from submitting your bill of materials to watching resellers compete in real time, ranked by price.</p>
+  <a href="bidbridge-auth_1.html" class="btn-primary">Post your first RFQ &rarr;</a>
+</div>
+
+<!-- STEP 1 — RFQ FORMAT -->
+<div class="section">
+  <div class="section-label">Step 1</div>
+  <div class="section-title">Submit your Bill of Materials</div>
+  <p class="section-sub">Post what you need in minutes. No phone calls, no emails. One structured form reaches every authorized reseller instantly.</p>
+
+  <div class="rfq-format-grid">
+    <div class="rfq-format-text">
+      <p>Your RFQ becomes the single source of truth for the entire procurement process. Add your vendor, part numbers, and quantities — resellers see exactly what you need and compete on price.</p>
+      <ul class="check-list">
+        <li>Select your vendor from 200+ supported OEMs or enter a custom vendor</li>
+        <li>Add multiple SKUs and quantities per vendor in one submission</li>
+        <li>Add multiple vendors to a single RFQ — sole source or split bid</li>
+        <li>Set delivery location, timeline, and any maintenance requirements</li>
+        <li>Choose visibility — open market or invite-only resellers</li>
+        <li>All communication with every reseller happens inside the platform</li>
+      </ul>
+    </div>
+
+    <!-- MOCK RFQ FORM -->
+    <div class="rfq-mock">
+      <div class="rfq-mock-header">
+        <span>New RFQ — Vendors &amp; Products</span>
+        <div class="rfq-mock-step">
+          <div class="mock-step-dot"></div>
+          <div class="mock-step-dot active"></div>
+          <div class="mock-step-dot"></div>
+          <div class="mock-step-dot"></div>
+        </div>
+      </div>
+      <div class="rfq-mock-body">
+        <div class="mock-vendor-block">
+          <div class="mock-vendor-label">Vendor 1</div>
+          <div class="mock-field">
+            <div class="mock-label">Vendor / OEM</div>
+            <div class="mock-input filled">Cisco Systems</div>
+          </div>
+          <div class="mock-label" style="margin-bottom:6px;">SKUs &amp; Quantities</div>
+          <div style="font-size:11px;color:var(--slate);display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:6px;padding:0 2px;">
+            <span>Part Number</span><span>Qty</span>
+          </div>
+          <div class="mock-sku-row">
+            <div class="mock-input filled" style="font-size:13px;">C9300-48P-A</div>
+            <div class="mock-input filled" style="width:60px;font-size:13px;text-align:center;">12</div>
+          </div>
+          <div class="mock-sku-row">
+            <div class="mock-input filled" style="font-size:13px;">C9300-NM-4G</div>
+            <div class="mock-input filled" style="width:60px;font-size:13px;text-align:center;">12</div>
+          </div>
+          <div class="mock-sku-row">
+            <div class="mock-input filled" style="font-size:13px;">CON-3SNT-C9300</div>
+            <div class="mock-input filled" style="width:60px;font-size:13px;text-align:center;">12</div>
+          </div>
+          <div class="mock-add-sku" style="margin-top:8px;font-size:12px;">+ Add another SKU</div>
+        </div>
+
+        <div class="mock-vendor-block">
+          <div class="mock-vendor-label">Vendor 2</div>
+          <div class="mock-field">
+            <div class="mock-label">Vendor / OEM</div>
+            <div class="mock-input filled">Palo Alto Networks</div>
+          </div>
+          <div class="mock-label" style="margin-bottom:6px;">SKUs &amp; Quantities</div>
+          <div style="font-size:11px;color:var(--slate);display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:6px;padding:0 2px;">
+            <span>Part Number</span><span>Qty</span>
+          </div>
+          <div class="mock-sku-row">
+            <div class="mock-input filled" style="font-size:13px;">PAN-PA-450</div>
+            <div class="mock-input filled" style="width:60px;font-size:13px;text-align:center;">2</div>
+          </div>
+          <div class="mock-add-sku" style="margin-top:8px;font-size:12px;">+ Add another SKU</div>
+        </div>
+
+        <div class="mock-field">
+          <div class="mock-label">Additional notes</div>
+          <div class="mock-input filled" style="font-size:13px;color:var(--slate-light);">3-year SmartNet required on all Cisco SKUs</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- STEP 2 — DASHBOARD -->
+<div class="section">
+  <div class="section-label">Step 2</div>
+  <div class="section-title">Watch resellers compete — ranked by price</div>
+  <p class="section-sub">Once your RFQ goes live, authorized resellers are notified instantly. Bids come in ranked from lowest to highest. Every bid, every reseller, one dashboard.</p>
+
+  <!-- DASHBOARD MOCK -->
+  <div class="dashboard-mock">
+    <div class="dashboard-mock-topbar">
+      <div class="topbar-title">RFQ #4821 — Cisco &amp; Palo Alto Refresh</div>
+      <div class="rfq-status-badge">ACTIVE</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="dash-stats">
+      <div class="dash-stat">
+        <div class="dash-stat-label">Bids received</div>
+        <div class="dash-stat-value accent">5</div>
+        <div class="dash-stat-sub">of 9 resellers notified</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-label">Time remaining</div>
+        <div class="dash-stat-value gold">2d 14h</div>
+        <div class="dash-stat-sub">Closes Apr 3, 5:00 PM</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-label">Lowest bid</div>
+        <div class="dash-stat-value accent">$218,400</div>
+        <div class="dash-stat-sub">vs. $267,000 list price</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-label">Max savings</div>
+        <div class="dash-stat-value" style="color:var(--accent);">$48,600</div>
+        <div class="dash-stat-sub">18.2% below list</div>
+      </div>
+    </div>
+
+    <!-- Bids table -->
+    <div class="bids-section">
+      <div class="bids-header">
+        <div class="bids-title">Bids — ranked lowest to highest</div>
+        <div class="bids-count">5 bids · 4 still pending</div>
+      </div>
+
+      <div class="bid-row header">
+        <div></div>
+        <div>Reseller</div>
+        <div>Total bid</div>
+        <div>vs. list price</div>
+        <div>Tier</div>
+        <div>Submitted</div>
+      </div>
+
+      <div class="bid-row">
+        <div class="bid-rank rank-1">1</div>
+        <div class="bid-reseller">
+          <div class="bid-avatar">NS</div>
+          <div class="bid-name">NetStar Solutions</div>
+        </div>
+        <div class="bid-price lowest">$218,400</div>
+        <div class="bid-savings positive">↓ $48,600 (18.2%)</div>
+        <div class="bid-tier tier-gold">Gold</div>
+        <div class="bid-days days-ok">2h ago</div>
+      </div>
+
+      <div class="bid-row">
+        <div class="bid-rank rank-2">2</div>
+        <div class="bid-reseller">
+          <div class="bid-avatar">AT</div>
+          <div class="bid-name">Apex Technology</div>
+        </div>
+        <div class="bid-price">$231,750</div>
+        <div class="bid-savings positive">↓ $35,250 (13.2%)</div>
+        <div class="bid-tier tier-platinum">Platinum</div>
+        <div class="bid-days days-ok">5h ago</div>
+      </div>
+
+      <div class="bid-row">
+        <div class="bid-rank rank-3">3</div>
+        <div class="bid-reseller">
+          <div class="bid-avatar">CP</div>
+          <div class="bid-name">CorePath IT</div>
+        </div>
+        <div class="bid-price">$244,200</div>
+        <div class="bid-savings positive">↓ $22,800 (8.5%)</div>
+        <div class="bid-tier tier-gold">Gold</div>
+        <div class="bid-days days-ok">Yesterday</div>
+      </div>
+
+      <div class="bid-row">
+        <div class="bid-rank rank-3">4</div>
+        <div class="bid-reseller">
+          <div class="bid-avatar">BC</div>
+          <div class="bid-name">BlueCrest Systems</div>
+        </div>
+        <div class="bid-price">$251,900</div>
+        <div class="bid-savings negative">↓ $15,100 (5.7%)</div>
+        <div class="bid-tier tier-gold">Gold</div>
+        <div class="bid-days days-ok">Yesterday</div>
+      </div>
+
+      <div class="bid-row">
+        <div class="bid-rank rank-3">5</div>
+        <div class="bid-reseller">
+          <div class="bid-avatar">VT</div>
+          <div class="bid-name">Vertex Tech Group</div>
+        </div>
+        <div class="bid-price">$259,500</div>
+        <div class="bid-savings negative">↓ $7,500 (2.8%)</div>
+        <div class="bid-tier tier-platinum">Platinum</div>
+        <div class="bid-days days-urgent">3h ago</div>
+      </div>
+    </div>
+
+    <!-- Savings callout -->
+    <div class="savings-callout">
+      <div class="savings-callout-left">
+        <div class="savings-icon">💰</div>
+        <div class="savings-text">
+          <h4>Market competition is working</h4>
+          <p>5 resellers competing has driven the price $48,600 below list — with 4 bids still pending. More competition typically means a lower final price.</p>
+        </div>
+      </div>
+      <div class="savings-amount">$48,600 saved</div>
+    </div>
+  </div>
+
+  <!-- Value props -->
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="value-icon">⚡</div>
+      <h4>One place for everything</h4>
+      <p>All bids, all reseller communication, all negotiation happens inside the platform. No inbox juggling, no lost threads.</p>
+      <div class="value-stat">1</div>
+      <div class="value-stat-label">place to manage your entire RFQ</div>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">📊</div>
+      <h4>Full price transparency</h4>
+      <p>Every bid ranked lowest to highest. You see exactly what the market is willing to charge — no guessing, no favoritism.</p>
+      <div class="value-stat">18%</div>
+      <div class="value-stat-label">avg. savings vs. direct quote</div>
+    </div>
+    <div class="value-card">
+      <div class="value-icon">🏆</div>
+      <h4>You choose the winner</h4>
+      <p>Select based on price, tier, delivery time, or any combination. You're in control — the platform just makes the introduction.</p>
+      <div class="value-stat">3x</div>
+      <div class="value-stat-label">more bids per RFQ on average</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Ready to post your first RFQ?</h2>
+  <p>Create a free buyer account and let the market compete for your business.</p>
+  <a href="bidbridge-auth_1.html" class="btn-primary">Get started — it's free &rarr;</a>
+</div>
+
+</body>
+</html>

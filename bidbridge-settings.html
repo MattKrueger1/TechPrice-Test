@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Settings</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -51,6 +52,8 @@
   .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; }
   .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
   .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+  .btn-signout { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-signout:hover { border-color: rgba(255,107,107,0.4); color: #FF6B6B; }
 
   /* ─── PAGE LAYOUT ─── */
   .page-body { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 36px 40px; align-items: start; }
@@ -176,6 +179,7 @@
         <h1>Settings</h1>
         <p>Manage your account preferences and platform settings</p>
       </div>
+      <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
     </div>
 
     <div class="page-body">
@@ -654,6 +658,17 @@
     toast.textContent = (isError ? '✗ ' : '✓ ') + msg;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+  }
+
+  const { createClient: _createClient } = supabase;
+  const _supabase = _createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  async function signOut() {
+    await _supabase.auth.signOut();
+    window.location.href = 'bidbridge-auth_1.html';
   }
 </script>
 

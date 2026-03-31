@@ -158,6 +158,8 @@
     transition: background .2s, transform .15s;
   }
   .btn-new-rfq:hover { background: var(--accent-dim); transform: translateY(-1px); }
+  .btn-signout { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-signout:hover { border-color: rgba(255,107,107,0.4); color: #FF6B6B; }
 
   /* ─── PAGE BODY ─── */
   .page-body { padding: 36px 40px; flex: 1; }
@@ -495,6 +497,7 @@
       <a href="bidbridge-submit-rfq_2.html" class="btn-new-rfq">
         <span>＋</span> New RFQ
       </a>
+      <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
     </div>
 
     <!-- PAGE BODY -->
@@ -912,6 +915,11 @@
   }
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+  async function signOut() {
+    await _supabase.auth.signOut();
+    window.location.href = 'bidbridge-auth_1.html';
+  }
 </script>
 
 <!-- ─── DETAIL DRAWER ─── -->

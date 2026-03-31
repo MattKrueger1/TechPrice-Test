@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Notifications</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -53,6 +54,8 @@
   .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
   .topbar-actions { display: flex; align-items: center; gap: 10px; }
   .btn-outline { padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-signout { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-signout:hover { border-color: rgba(255,107,107,0.4); color: #FF6B6B; }
   .btn-outline:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
 
   /* ─── PAGE BODY ─── */
@@ -196,6 +199,7 @@
       <div class="topbar-actions">
         <button class="btn-outline" onclick="markAllRead()">Mark all as read</button>
         <button class="btn-outline" onclick="togglePrefs()">⚙ Preferences</button>
+        <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
       </div>
     </div>
 
@@ -550,6 +554,17 @@
 
   /* ─── INIT ─── */
   renderNotifications();
+
+  const { createClient: _createClient } = supabase;
+  const _supabase = _createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  async function signOut() {
+    await _supabase.auth.signOut();
+    window.location.href = 'bidbridge-auth_1.html';
+  }
 </script>
 
 </body>

@@ -62,6 +62,8 @@
   .search-input:focus { border-color: var(--accent); }
   .btn-new { display: flex; align-items: center; gap: 7px; background: var(--accent); color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 500; padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; text-decoration: none; transition: background .2s; white-space: nowrap; }
   .btn-new:hover { background: var(--accent-dim); }
+  .btn-signout { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-signout:hover { border-color: rgba(255,107,107,0.4); color: #FF6B6B; }
 
   /* ─── PAGE BODY ─── */
   .page-body { padding: 32px 40px; flex: 1; }
@@ -319,6 +321,7 @@
           <input type="text" class="search-input" id="search-input" placeholder="Search by name, vendor, RFQ #..." oninput="applyFilters()">
         </div>
         <a href="bidbridge-submit-rfq_2.html" class="btn-new">＋ New RFQ</a>
+        <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
       </div>
     </div>
 
@@ -816,6 +819,11 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
   /* ─── INIT ─── (handled in async block above) */
+
+  async function signOut() {
+    await _supabase.auth.signOut();
+    window.location.href = 'bidbridge-auth_1.html';
+  }
 </script>
 
 </body>

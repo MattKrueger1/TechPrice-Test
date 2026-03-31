@@ -52,6 +52,8 @@
   .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; }
   .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
   .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
+  .btn-signout { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-signout:hover { border-color: rgba(255,107,107,0.4); color: #FF6B6B; }
 
   /* ─── PAGE BODY ─── */
   .page-body { padding: 36px 40px; display: grid; grid-template-columns: 280px 1fr; gap: 28px; align-items: start; }
@@ -201,6 +203,7 @@
         <h1>My profile</h1>
         <p>Manage your personal information and account settings</p>
       </div>
+      <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
     </div>
 
     <div class="page-body">
@@ -723,6 +726,11 @@
     toast.textContent = (isError ? '✗ ' : '✓ ') + msg;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
+  }
+
+  async function signOut() {
+    await _supabase.auth.signOut();
+    window.location.href = 'bidbridge-auth_1.html';
   }
 </script>
 

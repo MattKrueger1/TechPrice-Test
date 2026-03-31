@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Compare Bids</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -364,18 +365,18 @@
   <aside class="sidebar">
     <a href="bidbridge-buyer-dashboard_2.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
     <div class="sidebar-section-label">Main</div>
-    <a class="nav-item" href="buyer-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="bidbridge-buyer-dashboard_2.html"><span class="nav-icon">⊞</span> Dashboard</a>
     <a class="nav-item" href="bidbridge-submit-rfq_2.html"><span class="nav-icon">＋</span> New RFQ</a>
-    <a class="nav-item" href="buyer-rfqs.html"><span class="nav-icon">📋</span> My RFQs <span class="nav-badge">6</span></a>
-    <a class="nav-item active" href="compare-bids.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge">2</span></a>
+    <a class="nav-item" href="bidbridge-my-rfqs.html"><span class="nav-icon">📋</span> My RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
+    <a class="nav-item active" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge" id="badge-review" style="display:none"></span></a>
     <div class="sidebar-section-label">Account</div>
-    <a class="nav-item" href="notifications.html"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge">4</span></a>
-    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙</span> Settings</a>
-    <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span> Profile</a>
+    <a class="nav-item" href="bidbridge-notifications_1.html"><span class="nav-icon">🔔</span> Notifications</a>
+    <a class="nav-item" href="bidbridge-settings.html"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="bidbridge-profile.html"><span class="nav-icon">👤</span> Profile</a>
     <div class="sidebar-footer">
       <div class="user-block">
-        <div class="user-avatar">JM</div>
-        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+        <div class="user-avatar" id="user-avatar">—</div>
+        <div><div class="user-name" id="user-name">Loading...</div><div class="user-role" id="user-role">Buyer</div></div>
       </div>
     </div>
   </aside>
@@ -386,7 +387,7 @@
     <!-- TOPBAR -->
     <div class="topbar">
       <div class="breadcrumb">
-        <a href="buyer-dashboard.html">Dashboard</a>
+        <a href="bidbridge-buyer-dashboard_2.html">Dashboard</a>
         <span>›</span>
         <a href="#">My RFQs</a>
         <span>›</span>
@@ -536,6 +537,37 @@
 </div>
 
 <script>
+  /* ─── SUPABASE + SIDEBAR INIT ─── */
+  const { createClient } = supabase;
+  const _supabase = createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+
+    const { data: profile } = await _supabase
+      .from('profiles').select('first_name, last_name, company')
+      .eq('id', session.user.id).single();
+    if (profile) {
+      const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase();
+      document.getElementById('user-avatar').textContent = initials || '?';
+      document.getElementById('user-name').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+      document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
+    }
+
+    const { data: rfqs } = await _supabase
+      .from('rfqs').select('id, status').eq('buyer_id', session.user.id);
+    if (rfqs) {
+      const total = rfqs.length;
+      const review = rfqs.filter(r => r.status === 'review').length;
+      if (total > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = total; b.style.display = ''; }
+      if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
+    }
+  })();
+
   /* ═══════════════════════════════════════════════
      DATA
   ═══════════════════════════════════════════════ */

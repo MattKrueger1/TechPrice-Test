@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Buyer Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -443,10 +444,10 @@
 
     <div class="sidebar-footer">
       <div class="user-block">
-        <div class="user-avatar">JM</div>
+        <div class="user-avatar" id="user-avatar">—</div>
         <div>
-          <div class="user-name">James M.</div>
-          <div class="user-role">Buyer · Acme Corp</div>
+          <div class="user-name" id="user-name">Loading...</div>
+          <div class="user-role" id="user-role">Buyer</div>
         </div>
       </div>
     </div>
@@ -459,7 +460,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <h1>Dashboard</h1>
-        <p>Friday, March 27, 2026</p>
+        <p id="topbar-greeting">Welcome back</p>
       </div>
 
       <div class="search-wrap">
@@ -479,22 +480,22 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">Active RFQs</div>
-          <div class="stat-value accent">4</div>
-          <div class="stat-sub up">↑ 2 posted this week</div>
+          <div class="stat-value accent" id="stat-active">—</div>
+          <div class="stat-sub up" id="stat-active-sub"></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Total bids received</div>
-          <div class="stat-value">18</div>
+          <div class="stat-value" id="stat-bids">—</div>
           <div class="stat-sub">Across all open RFQs</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Awaiting your review</div>
-          <div class="stat-value gold">2</div>
+          <div class="stat-value gold" id="stat-review">—</div>
           <div class="stat-sub">Bids ready to compare</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Deals awarded</div>
-          <div class="stat-value">3</div>
+          <div class="stat-value" id="stat-awarded">—</div>
           <div class="stat-sub">This quarter</div>
         </div>
       </div>
@@ -505,35 +506,8 @@
           <div class="notif-title">Recent activity</div>
           <a class="notif-see-all" href="notifications.html">See all</a>
         </div>
-        <div class="notif-list">
-          <div class="notif-item unread" onclick="window.location='compare-bids.html'">
-            <div class="notif-dot"></div>
-            <div>
-              <div class="notif-text"><strong>3 new bids</strong> received on your Cisco Catalyst 9300 RFQ. Bid deadline closes in 2 days.</div>
-              <div class="notif-time">35 minutes ago</div>
-            </div>
-          </div>
-          <div class="notif-item unread" onclick="window.location='compare-bids.html'">
-            <div class="notif-dot"></div>
-            <div>
-              <div class="notif-text"><strong>Palo Alto Networks refresh</strong> — 5 resellers have bid. Ready to compare.</div>
-              <div class="notif-time">2 hours ago</div>
-            </div>
-          </div>
-          <div class="notif-item" onclick="">
-            <div class="notif-dot read"></div>
-            <div>
-              <div class="notif-text"><strong>NetStar Solutions</strong> was awarded the Fortinet firewall RFQ. Deal closed successfully.</div>
-              <div class="notif-time">Yesterday at 3:14 PM</div>
-            </div>
-          </div>
-          <div class="notif-item" onclick="">
-            <div class="notif-dot read"></div>
-            <div>
-              <div class="notif-text">Your RFQ <strong>HPE Aruba wireless refresh</strong> went live. 8 resellers notified.</div>
-              <div class="notif-time">2 days ago</div>
-            </div>
-          </div>
+        <div class="notif-list" id="notif-list">
+          <div style="padding:20px;font-size:13px;color:var(--slate);">No recent activity yet. Activity will appear here as resellers bid on your RFQs.</div>
         </div>
       </div>
 
@@ -600,101 +574,81 @@
 </div><!-- /app-shell -->
 
 <script>
-  /* ═══════════════════════════════════════════════
-     MOCK DATA
-     ─────────────────────────────────────────────
-     BACKEND INTEGRATION POINT — RFQ List
-     Replace this data with a real API call:
+  /* ─── SUPABASE CLIENT ─── */
+  const { createClient } = supabase;
+  const _supabase = createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
 
-     const response = await fetch('/api/buyer/rfqs', {
-       headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
-     });
-     const { rfqs } = await response.json();
-     renderRFQs(rfqs);
-
-     Each RFQ object should include:
-     { id, title, vendors, status, strategy, bidCount,
-       maxBids, deadline, postedDate, hasNewBids }
-  ═══════════════════════════════════════════════ */
-  const MOCK_RFQS = [
-    {
-      id: 4821,
-      title: 'Network infrastructure refresh — Austin HQ',
-      vendors: ['Cisco', 'Aruba'],
-      status: 'review',
-      strategy: 'split',
-      bidCount: 7,
-      maxBids: 10,
-      deadline: '2026-03-29',
-      postedDate: '2026-03-20',
-      hasNewBids: true,
-    },
-    {
-      id: 4809,
-      title: 'Palo Alto firewall refresh — all sites',
-      vendors: ['Palo Alto Networks'],
-      status: 'review',
-      strategy: 'sole',
-      bidCount: 5,
-      maxBids: 8,
-      deadline: '2026-03-31',
-      postedDate: '2026-03-18',
-      hasNewBids: true,
-    },
-    {
-      id: 4797,
-      title: 'HPE Aruba wireless refresh — warehouse',
-      vendors: ['HPE / Aruba'],
-      status: 'active',
-      strategy: 'sole',
-      bidCount: 3,
-      maxBids: 8,
-      deadline: '2026-04-05',
-      postedDate: '2026-03-25',
-      hasNewBids: false,
-    },
-    {
-      id: 4783,
-      title: 'CrowdStrike endpoint — global rollout',
-      vendors: ['CrowdStrike'],
-      status: 'active',
-      strategy: 'sole',
-      bidCount: 3,
-      maxBids: 8,
-      deadline: '2026-04-10',
-      postedDate: '2026-03-24',
-      hasNewBids: false,
-    },
-    {
-      id: 4761,
-      title: 'Fortinet SD-WAN — branch offices',
-      vendors: ['Fortinet'],
-      status: 'awarded',
-      strategy: 'sole',
-      bidCount: 6,
-      maxBids: 6,
-      deadline: '2026-03-10',
-      postedDate: '2026-03-01',
-      hasNewBids: false,
-    },
-    {
-      id: 4744,
-      title: 'NetApp storage expansion — Q1',
-      vendors: ['NetApp', 'Cisco'],
-      status: 'closed',
-      strategy: 'split',
-      bidCount: 4,
-      maxBids: 4,
-      deadline: '2026-02-28',
-      postedDate: '2026-02-14',
-      hasNewBids: false,
-    },
-  ];
-
+  let allRFQs = [];
   let activeFilter = 'all';
   let activeSearch = '';
   let activeSort = 'newest';
-  let currentData = [...MOCK_RFQS];
+
+  /* ─── INIT ─── */
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'bidbridge-auth_1.html';
+      return;
+    }
+
+    /* Load profile */
+    const { data: profile } = await _supabase
+      .from('profiles')
+      .select('first_name, last_name, company, role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile) {
+      const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase();
+      document.getElementById('user-avatar').textContent = initials || '?';
+      document.getElementById('user-name').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+      document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
+      document.getElementById('topbar-greeting').textContent = `Welcome back, ${profile.first_name || 'there'}`;
+    }
+
+    /* Load RFQs with items and bid counts */
+    const { data: rfqs, error } = await _supabase
+      .from('rfqs')
+      .select('id, title, status, deadline, created_at, rfq_items(vendor), bids(id)')
+      .eq('buyer_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading RFQs:', error.message);
+      renderRFQs([]);
+      return;
+    }
+
+    allRFQs = (rfqs || []).map(rfq => ({
+      id: rfq.id,
+      shortId: rfq.id.slice(0, 8).toUpperCase(),
+      title: rfq.title,
+      vendors: [...new Set((rfq.rfq_items || []).map(i => i.vendor))],
+      status: rfq.status,
+      bidCount: (rfq.bids || []).length,
+      maxBids: 10,
+      deadline: rfq.deadline,
+      postedDate: rfq.created_at?.split('T')[0],
+      hasNewBids: false,
+    }));
+
+    /* Render stats */
+    const active = allRFQs.filter(r => r.status === 'active').length;
+    const totalBids = allRFQs.reduce((sum, r) => sum + r.bidCount, 0);
+    const review = allRFQs.filter(r => r.status === 'review').length;
+    const awarded = allRFQs.filter(r => r.status === 'awarded').length;
+
+    document.getElementById('stat-active').textContent = active;
+    document.getElementById('stat-active-sub').textContent = active > 0 ? `${active} accepting bids` : 'No active RFQs';
+    document.getElementById('stat-bids').textContent = totalBids;
+    document.getElementById('stat-review').textContent = review;
+    document.getElementById('stat-awarded').textContent = awarded;
+
+    applyFilters();
+  })();
 
   /* ─── RENDER ─── */
   function renderRFQs(data) {
@@ -723,37 +677,28 @@
         draft: ['status-draft', 'Draft'],
       };
       const [statusClass, statusLabel] = statusMap[rfq.status] || ['status-draft', 'Draft'];
-      const strategyTag = rfq.strategy === 'split'
-        ? '<span class="strategy-tag strategy-split">Split bid</span>'
-        : '<span class="strategy-tag strategy-sole">Sole source</span>';
 
-      const fillPct = Math.round((rfq.bidCount / rfq.maxBids) * 100);
-      const deadlineClass = daysUntil(rfq.deadline) <= 2 ? 'deadline-urgent'
-        : daysUntil(rfq.deadline) <= 5 ? 'deadline-soon' : 'deadline-ok';
-      const deadlineText = rfq.status === 'awarded' || rfq.status === 'closed'
-        ? `<span class="deadline-ok">${formatDate(rfq.deadline)}</span>`
-        : `<span class="${deadlineClass}">${daysUntilLabel(rfq.deadline)}</span>`;
+      const vendorList = rfq.vendors.length > 0 ? rfq.vendors.join(' · ') : 'No items';
+      const fillPct = Math.min(100, Math.round((rfq.bidCount / rfq.maxBids) * 100));
 
-      const newBadge = rfq.hasNewBids
-        ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:8px;vertical-align:middle;"></span>'
-        : '';
+      const deadlineText = !rfq.deadline ? '<span class="deadline-ok">No deadline set</span>'
+        : rfq.status === 'awarded' || rfq.status === 'closed'
+          ? `<span class="deadline-ok">${formatDate(rfq.deadline)}</span>`
+          : `<span class="${daysUntil(rfq.deadline) <= 2 ? 'deadline-urgent' : daysUntil(rfq.deadline) <= 5 ? 'deadline-soon' : 'deadline-ok'}">${daysUntilLabel(rfq.deadline)}</span>`;
 
       const actionLabel = rfq.status === 'review' ? 'Compare bids →'
         : rfq.status === 'awarded' ? 'View award'
         : rfq.status === 'closed' ? 'View results'
         : 'View bids';
 
-      const actionHref = rfq.status === 'review' || rfq.status === 'active'
-        ? 'compare-bids.html' : '#';
-
       return `
-        <tr onclick="window.location='${actionHref}'" data-status="${rfq.status}" data-title="${rfq.title.toLowerCase()}" data-vendors="${rfq.vendors.join(' ').toLowerCase()}">
+        <tr data-status="${rfq.status}" data-title="${rfq.title.toLowerCase()}" data-vendors="${rfq.vendors.join(' ').toLowerCase()}">
           <td>
-            <div class="rfq-title">RFQ #${rfq.id} — ${rfq.title}${newBadge}</div>
-            <div class="rfq-vendors">${rfq.vendors.join(' · ')}</div>
+            <div class="rfq-title">${rfq.title}</div>
+            <div class="rfq-vendors">${vendorList}</div>
           </td>
           <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-          <td>${strategyTag}</td>
+          <td><span class="strategy-tag strategy-sole">Sole source</span></td>
           <td>
             <div class="bids-count">
               <span>${rfq.bidCount}</span>
@@ -761,14 +706,14 @@
             </div>
           </td>
           <td>${deadlineText}</td>
-          <td style="color:var(--slate);font-size:13px;">${formatDate(rfq.postedDate)}</td>
-          <td><button class="btn-view" onclick="event.stopPropagation();window.location='${actionHref}'">${actionLabel}</button></td>
+          <td style="color:var(--slate);font-size:13px;">${rfq.postedDate ? formatDate(rfq.postedDate) : '—'}</td>
+          <td><button class="btn-view">${actionLabel}</button></td>
         </tr>
       `;
     }).join('');
   }
 
-  /* ─── FILTER ─── */
+  /* ─── FILTER / SORT ─── */
   function setFilter(el, filter) {
     document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
@@ -787,26 +732,16 @@
   }
 
   function applyFilters() {
-    let data = [...MOCK_RFQS];
-
-    if (activeFilter !== 'all') {
-      data = data.filter(r => r.status === activeFilter);
-    }
-
-    if (activeSearch) {
-      data = data.filter(r =>
-        r.title.toLowerCase().includes(activeSearch) ||
-        r.vendors.join(' ').toLowerCase().includes(activeSearch) ||
-        String(r.id).includes(activeSearch)
-      );
-    }
-
-    if (activeSort === 'newest') data.sort((a, b) => b.id - a.id);
+    let data = [...allRFQs];
+    if (activeFilter !== 'all') data = data.filter(r => r.status === activeFilter);
+    if (activeSearch) data = data.filter(r =>
+      r.title.toLowerCase().includes(activeSearch) ||
+      r.vendors.join(' ').toLowerCase().includes(activeSearch)
+    );
+    if (activeSort === 'newest') data.sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
     else if (activeSort === 'deadline') data.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
     else if (activeSort === 'bids-desc') data.sort((a, b) => b.bidCount - a.bidCount);
     else if (activeSort === 'bids-asc') data.sort((a, b) => a.bidCount - b.bidCount);
-
-    currentData = data;
     renderRFQs(data);
   }
 
@@ -818,8 +753,7 @@
 
   function daysUntil(dateStr) {
     const now = new Date(); now.setHours(0,0,0,0);
-    const d = new Date(dateStr + 'T00:00:00');
-    return Math.ceil((d - now) / (1000 * 60 * 60 * 24));
+    return Math.ceil((new Date(dateStr + 'T00:00:00') - now) / 86400000);
   }
 
   function daysUntilLabel(dateStr) {
@@ -829,9 +763,6 @@
     if (days === 1) return 'Closes tomorrow';
     return `${days} days left`;
   }
-
-  /* ─── INIT ─── */
-  renderRFQs(MOCK_RFQS);
 </script>
 
 </body>

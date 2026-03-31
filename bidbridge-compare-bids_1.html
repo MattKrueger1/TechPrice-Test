@@ -58,8 +58,8 @@
   .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
   .btn-outline { padding: 9px 18px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
-  .btn-signout { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
-  .btn-signout:hover { border-color: rgba(255,107,107,0.4); color: #FF6B6B; }
+  .btn-signout { width: 100%; margin-top: 12px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; text-align: left; display: flex; align-items: center; gap: 8px; }
+  .btn-signout:hover { border-color: rgba(255,107,107,0.35); color: #FF6B6B; background: rgba(255,107,107,0.05); }
   .btn-outline:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
   .btn-primary { padding: 9px 20px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s, transform .15s; white-space: nowrap; }
   .btn-primary:hover { background: var(--accent-dim); transform: translateY(-1px); }
@@ -380,6 +380,7 @@
         <div class="user-avatar" id="user-avatar">—</div>
         <div><div class="user-name" id="user-name">Loading...</div><div class="user-role" id="user-role">Buyer</div></div>
       </div>
+      <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
     </div>
   </aside>
 
@@ -421,7 +422,6 @@
         <select id="rfq-selector" style="display:none;padding:9px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--white);font-family:var(--font-body);font-size:13px;outline:none;cursor:pointer;max-width:220px;"></select>
         <button class="btn-outline" onclick="openBroadcast()">📢 Message all</button>
         <button class="btn-outline">Export PDF</button>
-        <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
       </div>
     </div>
 

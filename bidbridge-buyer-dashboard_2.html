@@ -404,6 +404,31 @@
     .page-body { padding: 24px 20px; }
     .topbar { padding: 16px 20px; }
   }
+
+  /* ─── DETAIL DRAWER ─── */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+  .drawer { position: fixed; top: 0; right: 0; width: 520px; max-width: 100vw; height: 100vh; background: var(--navy-mid); border-left: 1px solid var(--card-border); z-index: 201; display: flex; flex-direction: column; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); overflow: hidden; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 28px 32px 20px; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
+  .drawer-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.3; max-width: 380px; }
+  .drawer-close { background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: var(--slate-light); font-size: 18px; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s, color .2s; }
+  .drawer-close:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 28px 32px; }
+  .drawer-section { margin-bottom: 28px; }
+  .drawer-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); margin-bottom: 14px; }
+  .drawer-field { margin-bottom: 16px; }
+  .drawer-field-label { font-size: 12px; color: var(--slate); margin-bottom: 4px; }
+  .drawer-field-value { font-size: 14px; color: var(--white); line-height: 1.6; }
+  .drawer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .drawer-vendor-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+  .drawer-vendor-name { font-family: var(--font-head); font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+  .drawer-sku-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+  .drawer-sku-row:last-child { border-bottom: none; }
+  .drawer-sku-part { color: var(--white); font-family: monospace; font-size: 13px; }
+  .drawer-sku-qty { color: var(--slate-light); }
+  .drawer-loading { text-align: center; padding: 60px 20px; color: var(--slate); font-size: 14px; }
+  .rfq-table tbody tr { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -697,7 +722,7 @@
         : 'View bids';
 
       return `
-        <tr data-status="${rfq.status}" data-title="${rfq.title.toLowerCase()}" data-vendors="${rfq.vendors.join(' ').toLowerCase()}">
+        <tr onclick="openDrawer('${rfq.id}')" data-status="${rfq.status}" data-title="${rfq.title.toLowerCase()}" data-vendors="${rfq.vendors.join(' ').toLowerCase()}">
           <td>
             <div class="rfq-title">${rfq.title}</div>
             <div class="rfq-vendors">${vendorList}</div>
@@ -712,7 +737,7 @@
           </td>
           <td>${deadlineText}</td>
           <td style="color:var(--slate);font-size:13px;">${rfq.postedDate ? formatDate(rfq.postedDate) : '—'}</td>
-          <td><button class="btn-view">${actionLabel}</button></td>
+          <td><button class="btn-view" onclick="event.stopPropagation()">${actionLabel}</button></td>
         </tr>
       `;
     }).join('');
@@ -768,7 +793,108 @@
     if (days === 1) return 'Closes tomorrow';
     return `${days} days left`;
   }
+
+  /* ─── DETAIL DRAWER ─── */
+  async function openDrawer(rfqId) {
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-body').innerHTML = '<div class="drawer-loading">Loading...</div>';
+
+    const rfq = allRFQs.find(r => r.id === rfqId);
+    if (rfq) document.getElementById('drawer-title').textContent = rfq.title;
+
+    const { data, error } = await _supabase
+      .from('rfqs')
+      .select('id, title, status, deadline, created_at, notes, rfq_items(vendor, sku, quantity, description)')
+      .eq('id', rfqId)
+      .single();
+
+    if (error || !data) {
+      document.getElementById('drawer-body').innerHTML = '<div class="drawer-loading">Could not load RFQ details.</div>';
+      return;
+    }
+
+    const statusMap = {
+      active: ['status-active', 'Accepting bids'],
+      review: ['status-review', 'Ready to review'],
+      awarded: ['status-awarded', 'Awarded'],
+      closed: ['status-closed', 'Closed'],
+      draft: ['status-draft', 'Draft'],
+    };
+    const [statusCls, statusLabel] = statusMap[data.status] || ['status-draft', 'Draft'];
+
+    const byVendor = {};
+    (data.rfq_items || []).forEach(item => {
+      if (!byVendor[item.vendor]) byVendor[item.vendor] = [];
+      byVendor[item.vendor].push(item);
+    });
+
+    const vendorHTML = Object.entries(byVendor).map(([vendor, items]) => `
+      <div class="drawer-vendor-block">
+        <div class="drawer-vendor-name">${vendor}</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:6px;">
+          <span style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.07em;">Part number / SKU</span>
+          <span style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.07em;">Qty</span>
+        </div>
+        ${items.map(item => `
+          <div class="drawer-sku-row">
+            <span class="drawer-sku-part">${item.sku || '—'}</span>
+            <span class="drawer-sku-qty">× ${item.quantity}</span>
+          </div>
+        `).join('')}
+        ${items[0]?.description ? `<div style="margin-top:10px;font-size:12px;color:var(--slate-light);">Notes: ${items[0].description}</div>` : ''}
+      </div>
+    `).join('');
+
+    document.getElementById('drawer-body').innerHTML = `
+      <div class="drawer-section">
+        <div class="drawer-section-title">Status</div>
+        <span class="status-badge ${statusCls}">${statusLabel}</span>
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">Project details</div>
+        <div class="drawer-row">
+          <div class="drawer-field">
+            <div class="drawer-field-label">Posted</div>
+            <div class="drawer-field-value">${formatDate(data.created_at?.split('T')[0])}</div>
+          </div>
+          <div class="drawer-field">
+            <div class="drawer-field-label">Bid deadline</div>
+            <div class="drawer-field-value">${data.deadline ? formatDate(data.deadline) : 'Not set'}</div>
+          </div>
+        </div>
+        ${data.notes ? `
+        <div class="drawer-field">
+          <div class="drawer-field-label">Description</div>
+          <div class="drawer-field-value" style="color:var(--slate-light);line-height:1.7;">${data.notes}</div>
+        </div>` : ''}
+      </div>
+      <div class="drawer-section">
+        <div class="drawer-section-title">Vendors &amp; SKUs (${Object.keys(byVendor).length} vendor${Object.keys(byVendor).length !== 1 ? 's' : ''} · ${data.rfq_items?.length || 0} line item${data.rfq_items?.length !== 1 ? 's' : ''})</div>
+        ${vendorHTML || '<div style="color:var(--slate);font-size:13px;">No items found.</div>'}
+      </div>
+    `;
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 </script>
+
+<!-- ─── DETAIL DRAWER ─── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="drawer-title">RFQ Details</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <div class="drawer-loading">Loading...</div>
+  </div>
+</div>
 
 </body>
 </html>

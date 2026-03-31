@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — My Profile</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -136,6 +137,8 @@
   select option { background: var(--navy-mid); }
 
   .field-hint { font-size: 12px; color: var(--slate); margin-top: 5px; }
+  .required-marker { color: var(--error); font-size: 13px; margin-left: 3px; }
+  .field-view.field-empty { color: var(--slate); font-style: italic; }
 
   /* ─── PASSWORD SECTION ─── */
   .pwd-group { margin-bottom: 16px; }
@@ -176,16 +179,16 @@
     <div class="sidebar-section-label">Main</div>
     <a class="nav-item" href="bidbridge-buyer-dashboard_2.html"><span class="nav-icon">⊞</span> Dashboard</a>
     <a class="nav-item" href="bidbridge-submit-rfq_2.html"><span class="nav-icon">＋</span> New RFQ</a>
-    <a class="nav-item" href="#"><span class="nav-icon">📋</span> My RFQs</a>
-    <a class="nav-item" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids </a>
+    <a class="nav-item" href="bidbridge-my-rfqs.html"><span class="nav-icon">📋</span> My RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
+    <a class="nav-item" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge" id="badge-review" style="display:none"></span></a>
     <div class="sidebar-section-label">Account</div>
-    <a class="nav-item" href="bidbridge-notifications_1.html"><span class="nav-icon">🔔</span> Notifications </a>
-    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
-    <a class="nav-item active" href="#"><span class="nav-icon">👤</span> Profile</a>
+    <a class="nav-item" href="bidbridge-notifications_1.html"><span class="nav-icon">🔔</span> Notifications</a>
+    <a class="nav-item" href="bidbridge-settings.html"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item active" href="bidbridge-profile.html"><span class="nav-icon">👤</span> Profile</a>
     <div class="sidebar-footer">
       <div class="user-block">
-        <div class="user-avatar-sm">JM</div>
-        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+        <div class="user-avatar-sm" id="user-avatar">—</div>
+        <div><div class="user-name" id="user-name">Loading…</div><div class="user-role" id="user-role">Buyer</div></div>
       </div>
     </div>
   </aside>
@@ -208,12 +211,12 @@
         <!-- PROFILE CARD -->
         <div class="profile-card">
           <div class="avatar-wrap">
-            <div class="avatar">JM</div>
+            <div class="avatar" id="profile-avatar">—</div>
             <div class="avatar-edit" title="Change photo">✎</div>
           </div>
-          <div class="profile-name">James Mitchell</div>
-          <div class="profile-title">IT Director</div>
-          <div class="profile-company">Acme Corporation</div>
+          <div class="profile-name" id="profile-name">—</div>
+          <div class="profile-title" id="profile-title-display">—</div>
+          <div class="profile-company" id="profile-company-display">—</div>
           <div class="account-type-badge badge-buyer">🏢 Buyer account</div>
           <div class="profile-stats">
             <div class="profile-stat">
@@ -349,6 +352,13 @@
                 </select>
               </div>
             </div>
+          </div>
+
+          <div class="form-group">
+            <label>Company HQ <span class="required-marker">*</span></label>
+            <div class="field-view field-empty" id="view-hq">Not set</div>
+            <input type="text" id="input-hq" placeholder="e.g. Dallas, TX">
+            <div class="field-hint">Used as the default HQ location on your RFQs.</div>
           </div>
 
           <div class="form-row">
@@ -510,10 +520,74 @@
 </div>
 
 <script>
+  /* ─── SUPABASE INIT ─── */
+  const { createClient } = supabase;
+  const _supabase = createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  let _session = null;
+
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+    _session = session;
+
+    const { data: profile } = await _supabase
+      .from('profiles').select('first_name, last_name, company, company_hq')
+      .eq('id', session.user.id).single();
+
+    if (profile) {
+      const fn = profile.first_name || '';
+      const ln = profile.last_name || '';
+      const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '?';
+
+      /* Sidebar */
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('user-name').textContent = `${fn} ${ln}`.trim();
+      document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
+
+      /* Profile card */
+      document.getElementById('profile-avatar').textContent = initials;
+      document.getElementById('profile-name').textContent = `${fn} ${ln}`.trim();
+      document.getElementById('profile-company-display').textContent = profile.company || '—';
+
+      /* Personal section fields */
+      setField('first', fn);
+      setField('last', ln);
+
+      /* Company section fields */
+      setField('company', profile.company || '');
+      if (profile.company_hq) {
+        document.getElementById('view-hq').textContent = profile.company_hq;
+        document.getElementById('view-hq').classList.remove('field-empty');
+        document.getElementById('input-hq').value = profile.company_hq;
+      }
+    }
+
+    /* Badges */
+    const { data: rfqs } = await _supabase
+      .from('rfqs').select('id, status').eq('buyer_id', session.user.id);
+    if (rfqs) {
+      const total = rfqs.length;
+      const review = rfqs.filter(r => r.status === 'review').length;
+      if (total > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = total; b.style.display = ''; }
+      if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
+    }
+  })();
+
+  function setField(id, value) {
+    const view = document.getElementById('view-' + id);
+    const input = document.getElementById('input-' + id);
+    if (view && value) view.textContent = value;
+    if (input && value) input.value = value;
+  }
+
   /* ─── EDIT MODE ─── */
   const sections = {
     personal: ['first','last','title','phone','email'],
-    company: ['company','industry','city','state','desc'],
+    company: ['company','hq','industry','city','state','desc'],
     prefs: ['defloc','bidwindow','anon','strategy'],
   };
 
@@ -545,33 +619,55 @@
     document.getElementById('cancel-' + section).style.display = 'none';
   }
 
-  function saveSection(section) {
+  async function saveSection(section) {
+    /* Validate required fields */
+    if (section === 'company') {
+      const hq = document.getElementById('input-hq').value.trim();
+      if (!hq) {
+        showToast('Company HQ is required', true);
+        document.getElementById('input-hq').focus();
+        return;
+      }
+    }
+
+    /* Update view elements */
     sections[section].forEach(field => {
       const view = document.getElementById('view-' + field);
       const input = document.getElementById('input-' + field);
-      if (view && input) view.textContent = input.value || input.options?.[input.selectedIndex]?.text || '';
+      if (view && input) {
+        const val = input.value || input.options?.[input.selectedIndex]?.text || '';
+        view.textContent = val || '—';
+        if (field === 'hq' && val) view.classList.remove('field-empty');
+      }
     });
 
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — Save profile section
-     *
-     * const payload = {};
-     * sections[section].forEach(field => {
-     *   const input = document.getElementById('input-' + field);
-     *   payload[field] = input.value || input.options?.[input.selectedIndex]?.value;
-     * });
-     *
-     * await fetch(`/api/profile/${section}`, {
-     *   method: 'PATCH',
-     *   headers: {
-     *     'Content-Type': 'application/json',
-     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
-     *   },
-     *   body: JSON.stringify(payload)
-     * });
-     * ─────────────────────────────────────────────────────────────
-     */
+    /* Persist to Supabase */
+    if (_session) {
+      if (section === 'personal') {
+        await _supabase.from('profiles').update({
+          first_name: document.getElementById('input-first').value.trim(),
+          last_name: document.getElementById('input-last').value.trim(),
+        }).eq('id', _session.user.id);
+
+        /* Refresh profile card */
+        const fn = document.getElementById('input-first').value.trim();
+        const ln = document.getElementById('input-last').value.trim();
+        const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '?';
+        document.getElementById('profile-avatar').textContent = initials;
+        document.getElementById('user-avatar').textContent = initials;
+        document.getElementById('profile-name').textContent = `${fn} ${ln}`.trim();
+        document.getElementById('user-name').textContent = `${fn} ${ln}`.trim();
+      }
+
+      if (section === 'company') {
+        const company = document.getElementById('input-company').value.trim();
+        const company_hq = document.getElementById('input-hq').value.trim();
+        await _supabase.from('profiles').update({ company, company_hq }).eq('id', _session.user.id);
+        document.getElementById('profile-company-display').textContent = company;
+        document.getElementById('user-role').textContent = `Buyer · ${company}`;
+      }
+    }
+
     cancelEdit(section);
     showToast('Changes saved successfully');
   }

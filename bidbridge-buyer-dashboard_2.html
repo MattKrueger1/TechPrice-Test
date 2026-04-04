@@ -1038,7 +1038,13 @@
     }
 
     // Load message threads after RFQs are ready
-    loadBuyerMsgThreads();
+    await loadBuyerMsgThreads();
+
+    // If navigated here via #messages hash (e.g. from Messages link on other pages), open panel
+    if (window.location.hash === '#messages') {
+      const navEl = document.getElementById('nav-messages');
+      showPanel('messages', navEl);
+    }
   })();
 
   /* ══════════════════════════════════════════════════════

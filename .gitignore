@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Auth tokens (contain secrets — never commit)
+auth.json
+reseller-auth.json
+
+# Test artifacts
+test-results/
+playwright-report/
+
+# OS files
+.DS_Store

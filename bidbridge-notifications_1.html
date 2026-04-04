@@ -173,16 +173,16 @@
     <div class="sidebar-section-label">Main</div>
     <a class="nav-item" href="bidbridge-buyer-dashboard_2.html"><span class="nav-icon">⊞</span> Dashboard</a>
     <a class="nav-item" href="bidbridge-submit-rfq_2.html"><span class="nav-icon">＋</span> New RFQ</a>
-    <a class="nav-item" href="#"><span class="nav-icon">📋</span> My RFQs</a>
-    <a class="nav-item" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids </a>
+    <a class="nav-item" href="bidbridge-my-rfqs.html"><span class="nav-icon">📋</span> My RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
+    <a class="nav-item" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge" id="badge-review" style="display:none"></span></a>
     <div class="sidebar-section-label">Account</div>
-    <a class="nav-item active" href="#"><span class="nav-icon">🔔</span> Notifications </a>
-    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
-    <a class="nav-item" href="#"><span class="nav-icon">👤</span> Profile</a>
+    <a class="nav-item active" href="bidbridge-notifications_1.html"><span class="nav-icon">🔔</span> Notifications</a>
+    <a class="nav-item" href="bidbridge-settings.html"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="bidbridge-profile.html"><span class="nav-icon">👤</span> Profile</a>
     <div class="sidebar-footer">
       <div class="user-block">
-        <div class="user-avatar">JM</div>
-        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+        <div class="user-avatar" id="sidebar-avatar">—</div>
+        <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">Buyer</div></div>
       </div>
       <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
     </div>
@@ -323,159 +323,113 @@
 </div>
 
 <script>
-  /*
-   * ─────────────────────────────────────────────────────────────
-   * BACKEND INTEGRATION POINT — Notifications
-   *
-   * const response = await fetch('/api/notifications', {
-   *   headers: { Authorization: 'Bearer ' + localStorage.getItem('bb_token') }
-   * });
-   * const { notifications } = await response.json();
-   * renderNotifications(notifications);
-   *
-   * Mark all read:
-   * await fetch('/api/notifications/read-all', { method: 'PATCH', headers: {...} });
-   *
-   * Mark single read:
-   * await fetch(`/api/notifications/${id}/read`, { method: 'PATCH', headers: {...} });
-   *
-   * Notification preferences:
-   * await fetch('/api/notifications/preferences', {
-   *   method: 'PATCH',
-   *   body: JSON.stringify({ newBids: { email: true, inApp: true }, ... })
-   * });
-   * ─────────────────────────────────────────────────────────────
-   */
+  const _supabase = supabase.createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
 
-  const NOTIFICATIONS = [
-    {
-      id: 1, type: 'bid', unread: true, unreadColor: 'accent',
-      icon: '📨', iconClass: 'icon-bid',
-      title: '3 new bids on your Cisco Catalyst RFQ',
-      body: 'NetStar Solutions, Apex Technology, and CorePath IT have all submitted bids on RFQ #4821. You now have 7 bids total. Deadline closes in 2 days.',
-      time: '35 minutes ago', tag: 'bid', tagLabel: 'New bids',
-      cta: 'Compare bids →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
-      date: 'today'
-    },
-    {
-      id: 2, type: 'message', unread: true, unreadColor: 'accent',
-      icon: '💬', iconClass: 'icon-message',
-      title: 'New message from NetStar Solutions',
-      body: 'NetStar Solutions has sent you a question about RFQ #4821: "Can you confirm your SmartNet coverage includes all 12 switches plus the 4 Aruba APs?"',
-      time: '1 hour ago', tag: 'message', tagLabel: 'Message',
-      cta: 'Reply →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
-      date: 'today'
-    },
-    {
-      id: 3, type: 'deadline', unread: true, unreadColor: 'error',
-      icon: '⏰', iconClass: 'icon-deadline',
-      title: 'Bid deadline closing soon — RFQ #4821',
-      body: 'Your Cisco Catalyst 9300 RFQ closes in 48 hours. You currently have 7 bids. If you want to extend the deadline, you can do so from the RFQ management page.',
-      time: '2 hours ago', tag: 'deadline', tagLabel: 'Deadline',
-      cta: 'View RFQ →', ctaColor: 'error', ctaLink: 'buyer-dashboard.html',
-      date: 'today'
-    },
-    {
-      id: 4, type: 'bid', unread: true, unreadColor: 'accent',
-      icon: '📨', iconClass: 'icon-bid',
-      title: '5 resellers have bid on your Palo Alto refresh RFQ',
-      body: 'RFQ #4809 (Palo Alto firewall refresh — all sites) now has 5 bids. The deadline is March 31. Your bids are ready to compare.',
-      time: '2 hours ago', tag: 'bid', tagLabel: 'New bids',
-      cta: 'Compare bids →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
-      date: 'today'
-    },
-    {
-      id: 5, type: 'rank', unread: true, unreadColor: 'gold',
-      icon: '📊', iconClass: 'icon-rank',
-      title: 'Your bid rank changed — RFQ #4818',
-      body: 'A new reseller has submitted a lower bid on RFQ #4818 (Fortinet SD-WAN — retail chain). You are now in 2nd place. The deadline is in 3 days — consider revising your bid.',
-      time: '4 hours ago', tag: 'rank', tagLabel: 'Rank change',
-      cta: 'Revise bid →', ctaColor: 'gold', ctaLink: 'bidbridge-reseller-dashboard.html',
-      date: 'today'
-    },
-    {
-      id: 6, type: 'rfq', unread: true, unreadColor: 'accent',
-      icon: '🔔', iconClass: 'icon-rfq',
-      title: 'New RFQ matches your vendor authorizations',
-      body: 'A new RFQ has been posted for Fortinet SD-WAN across 12 branch offices (RFQ #4822, Dallas TX, $280k budget). You are authorized to bid as a Fortinet Platinum partner.',
-      time: '6 hours ago', tag: 'rfq', tagLabel: 'New RFQ',
-      cta: 'View RFQ →', ctaColor: '', ctaLink: 'bidbridge-rfq-detail.html',
-      date: 'today'
-    },
-    {
-      id: 7, type: 'award', unread: false, unreadColor: '',
-      icon: '🏆', iconClass: 'icon-award',
-      title: 'NetStar Solutions was awarded RFQ #4761',
-      body: 'You selected NetStar Solutions as the winner for your Fortinet firewall refresh RFQ. The deal has been marked as awarded. IT Pricing Network has notified all resellers of the outcome.',
-      time: 'Yesterday at 3:14 PM', tag: 'award', tagLabel: 'Award',
-      cta: 'View details →', ctaColor: '', ctaLink: 'buyer-dashboard.html',
-      date: 'yesterday'
-    },
-    {
-      id: 8, type: 'bid', unread: false, unreadColor: '',
-      icon: '📨', iconClass: 'icon-bid',
-      title: 'First bid received on HPE Aruba wireless RFQ',
-      body: 'Apex Technology Group has submitted the first bid on RFQ #4797 (HPE Aruba wireless refresh — warehouse). 7 other resellers have been notified.',
-      time: 'Yesterday at 11:22 AM', tag: 'bid', tagLabel: 'New bid',
-      cta: 'View bid →', ctaColor: '', ctaLink: 'bidbridge-compare-bids.html',
-      date: 'yesterday'
-    },
-    {
-      id: 9, type: 'message', unread: false, unreadColor: '',
-      icon: '💬', iconClass: 'icon-message',
-      title: 'Buyer responded to your question — RFQ #4821',
-      body: 'Buyer #4821 replied: "Standard delivery entrance is fine. Please coordinate with our facilities team upon arrival."',
-      time: 'Yesterday at 9:45 AM', tag: 'message', tagLabel: 'Message',
-      cta: 'View thread →', ctaColor: '', ctaLink: 'bidbridge-reseller-dashboard.html',
-      date: 'yesterday'
-    },
-    {
-      id: 10, type: 'rfq', unread: false, unreadColor: '',
-      icon: '✅', iconClass: 'icon-rfq',
-      title: 'Your RFQ #4797 went live',
-      body: 'HPE Aruba wireless refresh RFQ has been published. 8 authorized resellers have been notified and can now submit bids. Deadline: April 5, 2026.',
-      time: '2 days ago', tag: 'rfq', tagLabel: 'RFQ live',
-      cta: 'View RFQ →', ctaColor: '', ctaLink: 'buyer-dashboard.html',
-      date: 'earlier'
-    },
-    {
-      id: 11, type: 'system', unread: false, unreadColor: '',
-      icon: '⚠️', iconClass: 'icon-system',
-      title: 'Fortinet partner certification expiring soon',
-      body: 'Your Fortinet Gold partner certification expires in 30 days (April 26, 2026). Please upload your renewed certification to maintain your eligibility to bid on Fortinet RFQs.',
-      time: '3 days ago', tag: 'system', tagLabel: 'System alert',
-      cta: 'Update certification →', ctaColor: 'error', ctaLink: '#',
-      date: 'earlier'
-    },
-    {
-      id: 12, type: 'award', unread: false, unreadColor: '',
-      icon: '📋', iconClass: 'icon-info',
-      title: 'Your bid on RFQ #4744 was not selected',
-      body: 'The buyer has selected another reseller for the NetApp storage expansion RFQ. Thank you for bidding. Your win rate this quarter is 37% — keep it up.',
-      time: '5 days ago', tag: 'award', tagLabel: 'Not selected',
-      cta: 'View outcome →', ctaColor: '', ctaLink: 'bidbridge-reseller-dashboard.html',
-      date: 'earlier'
-    },
-  ];
-
+  let _userId = null;
+  let allNotifications = [];
   let activeFilter = 'all';
-  let notifications = NOTIFICATIONS.map(n => ({ ...n }));
+
+  /* ─── TYPE CONFIG ─── */
+  const TYPE_CONFIG = {
+    bid_submitted:  { icon: '📨', iconClass: 'icon-bid',    tagLabel: 'New bid',    borderClass: 'unread',       dotClass: '',      ctaLabel: 'View bids →' },
+    rfq_updated:    { icon: '✏️',  iconClass: 'icon-rfq',    tagLabel: 'RFQ updated',borderClass: 'unread',       dotClass: '',      ctaLabel: 'View bids →' },
+    rfq_cancelled:  { icon: '🚫',  iconClass: 'icon-system', tagLabel: 'Cancelled',  borderClass: 'unread-error', dotClass: 'error', ctaLabel: 'View RFQ →' },
+    bid_won:        { icon: '🏆',  iconClass: 'icon-award',  tagLabel: 'Award',      borderClass: 'unread',       dotClass: '',      ctaLabel: 'View award →' },
+    bid_lost:       { icon: '📋',  iconClass: 'icon-info',   tagLabel: 'Not selected',borderClass:'unread',       dotClass: '',      ctaLabel: 'View details →' },
+  };
+
+  /* ─── INIT ─── */
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+    _userId = session.user.id;
+
+    // Load profile for sidebar
+    const { data: profile } = await _supabase
+      .from('profiles')
+      .select('first_name, last_name, company')
+      .eq('id', _userId)
+      .single();
+
+    if (profile) {
+      const name = ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || session.user.email;
+      const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '?';
+      document.getElementById('sidebar-avatar').textContent = initials;
+      document.getElementById('sidebar-name').textContent = name;
+      document.getElementById('sidebar-role').textContent = 'Buyer' + (profile.company ? ' · ' + profile.company : '');
+    }
+
+    // Load real notifications
+    const { data: rows } = await _supabase
+      .from('notifications')
+      .select('id, type, rfq_id, message, read, created_at')
+      .eq('user_id', _userId)
+      .order('created_at', { ascending: false });
+
+    // Also load RFQ titles for context
+    const rfqIds = [...new Set((rows || []).map(r => r.rfq_id).filter(Boolean))];
+    let rfqTitleMap = {};
+    if (rfqIds.length > 0) {
+      const { data: rfqRows } = await _supabase
+        .from('rfqs')
+        .select('id, title')
+        .in('id', rfqIds);
+      (rfqRows || []).forEach(r => { rfqTitleMap[r.id] = r.title; });
+    }
+
+    allNotifications = (rows || []).map(r => ({
+      id: r.id,
+      type: r.type,
+      rfq_id: r.rfq_id,
+      message: r.message,
+      unread: !r.read,
+      created_at: r.created_at,
+      rfqTitle: rfqTitleMap[r.rfq_id] || null,
+    }));
+
+    renderNotifications();
+
+    // Populate sidebar nav badges
+    const { data: rfqsBadge } = await _supabase
+      .from('rfqs').select('id, status').eq('buyer_id', _userId);
+    if (rfqsBadge) {
+      const active = rfqsBadge.filter(r => r.status === 'active').length;
+      const review = rfqsBadge.filter(r => r.status === 'review').length;
+      if (active > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = active; b.style.display = ''; }
+      if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
+    }
+  })();
 
   /* ─── RENDER ─── */
   function renderNotifications() {
     const container = document.getElementById('notif-list');
-    let filtered = notifications;
+    let filtered = allNotifications;
 
-    if (activeFilter === 'unread') filtered = notifications.filter(n => n.unread);
-    else if (activeFilter !== 'all') filtered = notifications.filter(n => n.type === activeFilter);
+    if (activeFilter === 'unread') filtered = allNotifications.filter(n => n.unread);
+    else if (activeFilter === 'bid') filtered = allNotifications.filter(n => n.type === 'bid_submitted');
+    else if (activeFilter !== 'all') filtered = allNotifications.filter(n => n.type === activeFilter);
 
     if (filtered.length === 0) {
       container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:16px;">🔔</div><h3>All caught up</h3><p>No notifications match this filter.</p></div>`;
+      updateCounts();
       return;
     }
 
+    // Group by date
+    const now = new Date();
+    const todayStr = now.toDateString();
+    const yesterdayStr = new Date(now - 86400000).toDateString();
     const groups = { today: [], yesterday: [], earlier: [] };
-    filtered.forEach(n => { if (groups[n.date]) groups[n.date].push(n); });
+
+    filtered.forEach(n => {
+      const d = new Date(n.created_at).toDateString();
+      if (d === todayStr) groups.today.push(n);
+      else if (d === yesterdayStr) groups.yesterday.push(n);
+      else groups.earlier.push(n);
+    });
 
     const labels = { today: 'Today', yesterday: 'Yesterday', earlier: 'Earlier' };
     let html = '';
@@ -484,24 +438,32 @@
       if (!items.length) return;
       html += `<div class="date-group"><div class="date-label">${labels[key]}</div>`;
       items.forEach(n => {
-        const borderClass = n.unread
-          ? n.unreadColor === 'gold' ? 'unread-gold' : n.unreadColor === 'error' ? 'unread-error' : 'unread'
-          : '';
-        const dotClass = n.unread
-          ? n.unreadColor === 'gold' ? 'gold' : n.unreadColor === 'error' ? 'error' : ''
-          : 'read';
-        const tagClass = `tag-${n.type}`;
+        const cfg = TYPE_CONFIG[n.type] || { icon: '🔔', iconClass: 'icon-rfq', tagLabel: n.type, borderClass: 'unread', dotClass: '', ctaLabel: 'View →' };
+        const borderClass = n.unread ? cfg.borderClass : '';
+        const dotClass = n.unread ? cfg.dotClass : 'read';
+        const ctaLink = n.rfq_id ? `bidbridge-compare-bids_1.html?rfq=${n.rfq_id}` : 'bidbridge-my-rfqs.html';
+        const title = n.type === 'bid_submitted'
+          ? `New bid received${n.rfqTitle ? ' on ' + n.rfqTitle : ''}`
+          : n.type === 'rfq_cancelled'
+          ? `RFQ cancelled${n.rfqTitle ? ' — ' + n.rfqTitle : ''}`
+          : n.type === 'rfq_updated'
+          ? `RFQ updated${n.rfqTitle ? ' — ' + n.rfqTitle : ''}`
+          : n.type === 'bid_won'
+          ? `Bid awarded${n.rfqTitle ? ' — ' + n.rfqTitle : ''}`
+          : n.type === 'bid_lost'
+          ? `Bid not selected${n.rfqTitle ? ' — ' + n.rfqTitle : ''}`
+          : n.message?.split('.')[0] || 'Notification';
 
         html += `
-          <div class="notif-item ${borderClass}" onclick="markRead(${n.id})" id="notif-${n.id}">
-            <div class="notif-icon-wrap ${n.iconClass}">${n.icon}</div>
+          <div class="notif-item ${borderClass}" onclick="handleClick('${n.id}', '${ctaLink}')" id="notif-${n.id}" style="cursor:pointer;">
+            <div class="notif-icon-wrap ${cfg.iconClass}">${cfg.icon}</div>
             <div class="notif-content">
-              <div class="notif-title">${n.title}</div>
-              <div class="notif-body">${n.body}</div>
+              <div class="notif-title">${title}</div>
+              <div class="notif-body">${n.message || ''}</div>
               <div class="notif-meta">
-                <span class="notif-time">${n.time}</span>
-                <span class="notif-tag ${tagClass}">${n.tagLabel}</span>
-                ${n.cta ? `<a class="notif-cta ${n.ctaColor}" href="${n.ctaLink}" onclick="event.stopPropagation();">${n.cta}</a>` : ''}
+                <span class="notif-time">${formatTimeAgo(n.created_at)}</span>
+                <span class="notif-tag tag-bid">${cfg.tagLabel}</span>
+                <span class="notif-cta">${cfg.ctaLabel}</span>
               </div>
             </div>
             <div class="unread-dot ${dotClass}"></div>
@@ -515,15 +477,21 @@
     updateCounts();
   }
 
-  /* ─── MARK READ ─── */
-  function markRead(id) {
-    const n = notifications.find(n => n.id === id);
+  /* ─── CLICK → MARK READ + NAVIGATE ─── */
+  async function handleClick(id, link) {
+    // Mark read in Supabase
+    await _supabase.from('notifications').update({ read: true }).eq('id', id);
+    // Update local state
+    const n = allNotifications.find(n => n.id === id);
     if (n) n.unread = false;
-    renderNotifications();
+    // Navigate
+    window.location.href = link;
   }
 
-  function markAllRead() {
-    notifications.forEach(n => n.unread = false);
+  /* ─── MARK ALL READ ─── */
+  async function markAllRead() {
+    await _supabase.from('notifications').update({ read: true }).eq('user_id', _userId);
+    allNotifications.forEach(n => n.unread = false);
     renderNotifications();
   }
 
@@ -537,12 +505,26 @@
 
   /* ─── COUNTS ─── */
   function updateCounts() {
-    const unread = notifications.filter(n => n.unread).length;
-    document.getElementById('count-all').textContent = notifications.length;
+    const unread = allNotifications.filter(n => n.unread).length;
+    document.getElementById('count-all').textContent = allNotifications.length;
     document.getElementById('count-unread').textContent = unread;
     document.getElementById('unread-summary').textContent = unread > 0
       ? `${unread} unread notification${unread !== 1 ? 's' : ''}`
       : 'All caught up';
+  }
+
+  /* ─── TIME HELPER ─── */
+  function formatTimeAgo(iso) {
+    if (!iso) return '—';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Yesterday';
+    return days + ' days ago';
   }
 
   /* ─── PREFS TOGGLE ─── */
@@ -551,15 +533,6 @@
     card.style.display = card.style.display === 'none' ? 'block' : 'none';
     if (card.style.display === 'block') card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-
-  /* ─── INIT ─── */
-  renderNotifications();
-
-  const { createClient: _createClient } = supabase;
-  const _supabase = _createClient(
-    'https://kgejpzjoiewrgwzixcaa.supabase.co',
-    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
-  );
 
   async function signOut() {
     await _supabase.auth.signOut();

@@ -763,6 +763,14 @@
         .select('role')
         .eq('id', session.user.id)
         .single();
+      if (!profile) {
+        const { data: resellerProfile } = await _supabase
+          .from('reseller_profiles')
+          .select('id')
+          .eq('id', session.user.id)
+          .single();
+        if (resellerProfile) { window.location.href = 'bidbridge-reseller-dashboard.html'; return; }
+      }
       redirectToDashboard(profile?.role || 'buyer');
     }
   })();
@@ -877,15 +885,21 @@
       return;
     }
 
-    /* fetch role to redirect to the right dashboard */
-    const { data: profile } = await _supabase
-      .from('profiles')
-      .select('role')
+    /* check reseller_profiles first — auto-created buyer profiles exist for all users */
+    const { data: resellerProfile } = await _supabase
+      .from('reseller_profiles')
+      .select('id')
       .eq('id', data.user.id)
       .single();
 
+    if (resellerProfile) {
+      showSuccess('login');
+      setTimeout(() => { window.location.href = 'bidbridge-reseller-dashboard.html'; }, 1500);
+      return;
+    }
+
     showSuccess('login');
-    setTimeout(() => redirectToDashboard(profile?.role || 'buyer'), 1500);
+    setTimeout(() => redirectToDashboard('buyer'), 1500);
   }
 
   /* ─── SIGNUP HANDLER ─── */

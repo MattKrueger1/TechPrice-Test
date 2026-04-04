@@ -114,6 +114,7 @@
 
   input[type="text"],
   input[type="email"],
+  input[type="password"],
   input[type="tel"],
   input[type="url"],
   input[type="number"],
@@ -121,6 +122,10 @@
   select {
     width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 15px; outline: none; transition: border-color .2s, background .2s; appearance: none;
   }
+  .field-wrap { position: relative; }
+  input[type="password"] { padding-right: 48px; }
+  .pwd-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--slate); cursor: pointer; font-size: 13px; padding: 4px; transition: color .2s; }
+  .pwd-toggle:hover { color: var(--white); }
   textarea { resize: vertical; min-height: 90px; line-height: 1.6; font-size: 14px; }
   input::placeholder, textarea::placeholder { color: var(--slate); }
   input:focus, textarea:focus, select:focus { border-color: var(--accent); background: rgba(0,200,150,0.04); }
@@ -257,6 +262,7 @@
     footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -342,8 +348,9 @@
           <div class="field-error" id="company-name-error">Company name is required</div>
         </div>
         <div class="form-group">
-          <label for="company-website">Company website <span class="optional">(optional)</span></label>
+          <label for="company-website">Company website <span class="required">*</span></label>
           <input type="url" id="company-website" placeholder="https://netstar.com">
+          <div class="field-error" id="company-website-error">Company website is required</div>
         </div>
       </div>
 
@@ -370,7 +377,7 @@
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="form-row-3">
         <div class="form-group">
           <label for="company-city">City <span class="required">*</span></label>
           <input type="text" id="company-city" placeholder="Dallas">
@@ -380,6 +387,12 @@
           <label for="company-state">State <span class="required">*</span></label>
           <input type="text" id="company-state" placeholder="TX">
           <div class="field-error" id="company-state-error">State is required</div>
+        </div>
+        <div class="form-group">
+          <label for="company-hq">Company HQ <span class="required">*</span></label>
+          <input type="text" id="company-hq" placeholder="Dallas, TX">
+          <div class="field-error" id="company-hq-error">Company HQ is required</div>
+          <div class="field-hint">Used as your default location on RFQ bids.</div>
         </div>
       </div>
 
@@ -427,8 +440,11 @@
 
       <div class="form-group">
         <label for="contact-password">Create a password <span class="required">*</span></label>
-        <input type="password" id="contact-password" placeholder="Min. 8 characters">
-        <div class="field-error" id="contact-password-error">Password must be at least 8 characters</div>
+        <div class="field-wrap">
+          <input type="password" id="contact-password" placeholder="Min. 8 characters" autocomplete="new-password">
+          <button type="button" class="pwd-toggle" onclick="togglePwd('contact-password', this)">Show</button>
+          <div class="field-error" id="contact-password-error">Password must be at least 8 characters</div>
+        </div>
         <div class="field-hint">You'll use this email and password to log in once approved.</div>
       </div>
     </div>
@@ -505,7 +521,9 @@
 
     <div class="form-nav">
       <button class="btn-back" onclick="goToStep(2)">← Back</button>
-      <button class="btn-next" id="submit-btn" onclick="submitApplication()" disabled>Submit application →</button>
+      <div id="submit-error-banner" style="display:none;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.35);border-radius:10px;padding:12px 16px;font-size:13px;color:#FF6B6B;margin-bottom:12px;line-height:1.5;"></div>
+      <div class="field-error" id="submit-check-error" style="margin-bottom:10px;text-align:right;">Please agree to all terms above before submitting.</div>
+      <button class="btn-next" id="submit-btn" onclick="submitApplication()">Submit application →</button>
     </div>
   </div>
 
@@ -549,6 +567,13 @@
 </footer>
 
 <script>
+  /* ─── SUPABASE ─── */
+  const { createClient: _createClient } = supabase;
+  const _supabase = _createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
   /* ═══════════════════════════════════════════════
      STATE
   ═══════════════════════════════════════════════ */
@@ -569,6 +594,14 @@
     { value: 'gold', label: 'Gold', sub: 'Gold certified' },
     { value: 'platinum', label: 'Platinum', sub: 'Diamond / Top tier' },
   ];
+
+  /* ─── PASSWORD TOGGLE ─── */
+  function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    btn.textContent = isText ? 'Show' : 'Hide';
+  }
 
   /* ─── STEP NAVIGATION ─── */
   function goToStep(n) {
@@ -592,10 +625,12 @@
     const required = {
       1: [
         ['company-name','company-name-error', v => v.trim().length > 0],
+        ['company-website','company-website-error', v => v.trim().length > 0],
         ['company-founded','company-founded-error', v => v.trim().length > 0],
         ['company-size','company-size-error', v => v !== ''],
         ['company-city','company-city-error', v => v.trim().length > 0],
         ['company-state','company-state-error', v => v.trim().length > 0],
+        ['company-hq','company-hq-error', v => v.trim().length > 0],
         ['contact-first','contact-first-error', v => v.trim().length > 0],
         ['contact-last','contact-last-error', v => v.trim().length > 0],
         ['contact-title','contact-title-error', v => v.trim().length > 0],
@@ -720,8 +755,8 @@
   function updateSubmitBtn() {
     const allChecked = Object.values(checks).every(Boolean);
     const btn = document.getElementById('submit-btn');
-    btn.disabled = !allChecked;
-    btn.style.opacity = allChecked ? '1' : '0.5';
+    btn.style.opacity = allChecked ? '1' : '0.6';
+    if (allChecked) document.getElementById('submit-check-error').classList.remove('visible');
   }
 
   /* ─── BUILD REVIEW ─── */
@@ -731,6 +766,7 @@
     const state = document.getElementById('company-state').value;
     const size = document.getElementById('company-size').value;
     const website = document.getElementById('company-website').value;
+    const hq = document.getElementById('company-hq').value;
     const founded = document.getElementById('company-founded').value;
     const firstName = document.getElementById('contact-first').value;
     const lastName = document.getElementById('contact-last').value;
@@ -757,10 +793,11 @@
       <div class="review-section">
         <div class="review-section-title">Company information</div>
         <div class="review-row"><span class="review-label">Company</span><span class="review-value">${company}</span></div>
+        <div class="review-row"><span class="review-label">Website</span><span class="review-value">${website}</span></div>
+        <div class="review-row"><span class="review-label">HQ</span><span class="review-value">${hq}</span></div>
         <div class="review-row"><span class="review-label">Location</span><span class="review-value">${city}, ${state}</span></div>
         <div class="review-row"><span class="review-label">Size</span><span class="review-value">${size}</span></div>
         <div class="review-row"><span class="review-label">Founded</span><span class="review-value">${founded}</span></div>
-        ${website ? `<div class="review-row"><span class="review-label">Website</span><span class="review-value">${website}</span></div>` : ''}
       </div>
       <div class="review-section">
         <div class="review-section-title">Primary contact</div>
@@ -777,76 +814,73 @@
   }
 
   /* ─── SUBMIT ─── */
-  function submitApplication() {
+  async function submitApplication() {
     const btn = document.getElementById('submit-btn');
-    if (btn.disabled) return;
+    const allChecked = Object.values(checks).every(Boolean);
+    if (!allChecked) {
+      document.getElementById('submit-check-error').classList.add('visible');
+      return;
+    }
     btn.textContent = 'Submitting...';
     btn.disabled = true;
+    document.getElementById('submit-error-banner').style.display = 'none';
 
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — Reseller Application Submission
-     *
-     * Use FormData to handle file uploads:
-     *
-     * const formData = new FormData();
-     *
-     * formData.append('company', JSON.stringify({
-     *   name: document.getElementById('company-name').value,
-     *   website: document.getElementById('company-website').value,
-     *   founded: document.getElementById('company-founded').value,
-     *   size: document.getElementById('company-size').value,
-     *   city: document.getElementById('company-city').value,
-     *   state: document.getElementById('company-state').value,
-     *   description: document.getElementById('company-desc').value,
-     * }));
-     *
-     * formData.append('contact', JSON.stringify({
-     *   firstName: document.getElementById('contact-first').value,
-     *   lastName: document.getElementById('contact-last').value,
-     *   title: document.getElementById('contact-title').value,
-     *   email: document.getElementById('contact-email').value,
-     *   phone: document.getElementById('contact-phone').value,
-     *   password: document.getElementById('contact-password').value,
-     * }));
-     *
-     * // Vendor authorizations + file uploads
-     * const vendorItems = document.querySelectorAll('.vendor-auth-item');
-     * const vendors = [];
-     * vendorItems.forEach(item => {
-     *   const id = item.id.replace('vendor-auth-','');
-     *   const fileInput = item.querySelector('input[type="file"]');
-     *   vendors.push({
-     *     vendor: document.getElementById('va-vendor-' + id).value,
-     *     tier: item.querySelector('.tier-option.selected input')?.value,
-     *   });
-     *   if (fileInput?.files[0]) formData.append('cert-' + id, fileInput.files[0]);
-     * });
-     * formData.append('vendors', JSON.stringify(vendors));
-     *
-     * formData.append('references', JSON.stringify([
-     *   { name: ref1Name, company: ref1Company, email: ref1Email, phone: ref1Phone, project: ref1Project },
-     *   { name: ref2Name, company: ref2Company, email: ref2Email, phone: ref2Phone, project: ref2Project },
-     * ]));
-     *
-     * const response = await fetch('/api/reseller/apply', {
-     *   method: 'POST',
-     *   body: formData
-     * });
-     *
-     * // On success: create pending account, notify admin, send confirmation email
-     * ─────────────────────────────────────────────────────────────
-     */
-    setTimeout(() => {
+    const email = document.getElementById('contact-email').value.trim();
+    const password = document.getElementById('contact-password').value;
+
+    try {
+      const { data: authData, error: authError } = await _supabase.auth.signUp({ email, password });
+      if (authError) throw authError;
+
+      const userId = authData.user?.id;
+      if (!userId) throw new Error('Could not create account. Please try again.');
+
+      const { error: profileError } = await _supabase.from('reseller_profiles').insert({
+        id: userId,
+        company: document.getElementById('company-name').value.trim(),
+        website: document.getElementById('company-website').value.trim(),
+        company_hq: document.getElementById('company-hq').value.trim(),
+        year_founded: document.getElementById('company-founded').value.trim(),
+        company_size: document.getElementById('company-size').value,
+        city: document.getElementById('company-city').value.trim(),
+        state: document.getElementById('company-state').value.trim(),
+        description: document.getElementById('company-desc').value.trim() || null,
+        contact_first: document.getElementById('contact-first').value.trim(),
+        contact_last: document.getElementById('contact-last').value.trim(),
+        contact_title: document.getElementById('contact-title').value.trim(),
+        contact_phone: document.getElementById('contact-phone').value.trim(),
+        status: 'pending',
+      });
+      if (profileError) throw profileError;
+
+      const vendorItems = document.querySelectorAll('.vendor-auth-item');
+      const vendorRows = [];
+      vendorItems.forEach(item => {
+        const id = item.id.replace('vendor-auth-', '');
+        const vendor = document.getElementById('va-vendor-' + id)?.value;
+        const tier = item.querySelector('.tier-option.selected input')?.value;
+        if (vendor && tier) vendorRows.push({ reseller_id: userId, vendor, tier, verified: false });
+      });
+      if (vendorRows.length > 0) {
+        const { error: vendorError } = await _supabase.from('reseller_vendors').insert(vendorRows);
+        if (vendorError) throw vendorError;
+      }
+
       document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('step-indicator').style.display = 'none';
       document.getElementById('success-screen').classList.add('visible');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 1800);
+    } catch (err) {
+      console.error('Submit error:', err);
+      btn.textContent = 'Submit application →';
+      btn.disabled = false;
+      document.getElementById('submit-error-banner').textContent = 'Error: ' + (err.message || 'Something went wrong. Please try again.');
+      document.getElementById('submit-error-banner').style.display = 'block';
+    }
   }
 
   /* ─── LIVE VALIDATION CLEAR ─── */
-  ['company-name','company-founded','company-city','company-state','contact-first','contact-last','contact-title','contact-email','contact-phone','contact-password'].forEach(id => {
+  ['company-name','company-website','company-founded','company-city','company-state','company-hq','contact-first','contact-last','contact-title','contact-email','contact-phone','contact-password'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', () => {
       el.classList.remove('error');
@@ -854,6 +888,9 @@
       if (err) err.classList.remove('visible');
     });
   });
+
+  /* set initial submit button opacity */
+  updateSubmitBtn();
 </script>
 
 </body>

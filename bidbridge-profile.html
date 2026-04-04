@@ -573,9 +573,9 @@
     const { data: rfqs } = await _supabase
       .from('rfqs').select('id, status').eq('buyer_id', session.user.id);
     if (rfqs) {
-      const total = rfqs.length;
+      const active = rfqs.filter(r => r.status === 'active').length;
       const review = rfqs.filter(r => r.status === 'review').length;
-      if (total > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = total; b.style.display = ''; }
+      if (active > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = active; b.style.display = ''; }
       if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
     }
   })();

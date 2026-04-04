@@ -102,6 +102,7 @@
   }
   .rfq-card:hover { border-color: rgba(255,255,255,0.14); }
   .rfq-card.has-new { border-left: 3px solid var(--accent); }
+  .rfq-card.dimmed { opacity: 0.45; filter: grayscale(0.5); }
 
   .rfq-card-main { padding: 22px 26px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
 
@@ -144,7 +145,61 @@
   .s-closed::before { background: var(--slate); }
   .s-draft { background: rgba(255,255,255,0.05); color: var(--slate); border: 1px solid rgba(255,255,255,0.08); }
   .s-draft::before { background: var(--slate); }
+  .s-cancelled { background: rgba(255,107,107,0.08); color: var(--error); border: 1px solid rgba(255,107,107,0.2); }
+  .s-cancelled::before { background: var(--error); }
+
+  /* ─── CANCEL MODAL ─── */
+  .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;display:flex;align-items:center;justify-content:center; }
+  .modal-box { background:var(--navy-mid);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px;width:480px;max-width:92vw;box-shadow:0 16px 48px rgba(0,0,0,0.5); }
+  .modal-title { font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:8px; }
+  .modal-sub { font-size:13px;color:var(--slate-light);margin-bottom:24px;line-height:1.6; }
+  .reason-option { display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,background .2s; }
+  .reason-option:hover { border-color:rgba(255,107,107,0.3);background:rgba(255,107,107,0.04); }
+  .reason-option.selected { border-color:rgba(255,107,107,0.5);background:rgba(255,107,107,0.08); }
+  .reason-option input[type=checkbox] { margin-top:2px;accent-color:var(--error);flex-shrink:0; }
+  .reason-label { font-size:13px;color:var(--slate-light);line-height:1.5; }
+  .reason-option.selected .reason-label { color:var(--white); }
+  .modal-actions { display:flex;gap:10px;margin-top:24px;justify-content:flex-end; }
+  .btn-modal-cancel { padding:9px 20px;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:9px;color:var(--slate-light);font-family:var(--font-body);font-size:13px;cursor:pointer;transition:all .2s; }
+  .btn-modal-cancel:hover { border-color:rgba(255,255,255,0.25);color:var(--white); }
+  .btn-modal-confirm { padding:9px 20px;background:rgba(255,107,107,0.15);border:1px solid rgba(255,107,107,0.4);border-radius:9px;color:var(--error);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s; }
+  .btn-modal-confirm:hover { background:rgba(255,107,107,0.25); }
+  .btn-modal-confirm:disabled { opacity:0.4;cursor:not-allowed; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+
+  /* ─── EDIT MODAL ─── */
+  .edit-modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;display:flex;align-items:center;justify-content:center; }
+  .edit-modal-box { background:var(--navy-mid);border:1px solid rgba(255,255,255,0.1);border-radius:16px;width:580px;max-width:94vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.5); }
+  .edit-modal-header { display:flex;align-items:center;justify-content:space-between;padding:24px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0; }
+  .edit-modal-header h2 { font-family:var(--font-head);font-size:17px;font-weight:700; }
+  .edit-modal-body { overflow-y:auto;padding:24px 28px;flex:1; }
+  .edit-modal-footer { padding:16px 28px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0; }
+  .edit-field { margin-bottom:18px; }
+  .edit-label { font-size:12px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px; }
+  .edit-input { width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:9px;color:var(--white);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .2s; }
+  .edit-input:focus { border-color:var(--accent); }
+  .edit-input::placeholder { color:var(--slate); }
+  .edit-textarea { resize:vertical;min-height:90px; }
+  .edit-row { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+  .edit-vendor-block { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 18px;margin-bottom:10px; }
+  .edit-vendor-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px; }
+  .edit-vendor-label { font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em; }
+  .btn-remove-ev { background:transparent;border:none;color:var(--slate);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;transition:color .2s; }
+  .btn-remove-ev:hover { color:var(--error); }
+  .edit-sku-grid { display:grid;grid-template-columns:1fr 100px 34px;gap:8px;align-items:end; }
+  .edit-sku-grid-header { display:grid;grid-template-columns:1fr 100px 34px;gap:8px;margin-bottom:4px; }
+  .edit-sku-col-label { font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.05em; }
+  .btn-remove-sku-ev { background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:7px;color:var(--slate);font-size:15px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0; }
+  .btn-remove-sku-ev:hover { color:var(--error);border-color:rgba(255,107,107,0.3); }
+  .btn-add-sku-ev { display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px dashed rgba(0,200,150,0.25);border-radius:8px;padding:6px 12px;color:var(--accent);font-family:var(--font-body);font-size:12px;font-weight:500;cursor:pointer;margin-top:8px;transition:background .2s,border-color .2s; }
+  .btn-add-sku-ev:hover { background:rgba(0,200,150,0.07);border-color:rgba(0,200,150,0.5); }
+  .btn-add-vendor-ev { display:flex;align-items:center;gap:8px;width:100%;padding:11px 16px;background:transparent;border:1px dashed rgba(0,200,150,0.25);border-radius:10px;color:var(--accent);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;margin-top:4px;transition:background .2s,border-color .2s; }
+  .btn-add-vendor-ev:hover { background:rgba(0,200,150,0.07);border-color:rgba(0,200,150,0.5); }
+  .ev-select { width:100%;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--white);font-family:var(--font-body);font-size:13px;outline:none; }
+  .ev-select option { background:var(--navy-mid); }
+  .btn-edit-save { padding:10px 22px;background:var(--accent);border:none;border-radius:9px;color:var(--navy);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:background .2s; }
+  .btn-edit-save:hover { background:var(--accent-dim); }
+  .btn-edit-save:disabled { opacity:0.4;cursor:not-allowed; }
 
   /* ─── CARD FOOTER ─── */
   .rfq-card-footer { padding: 12px 26px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -338,9 +393,10 @@
           <div class="stat-label">Active</div>
           <div class="stat-value accent" id="stat-active">—</div>
         </div>
-        <div class="stat-card" onclick="filterByStatus('review', this)">
+        <div class="stat-card" onclick="filterByStatus('unread', this)">
           <div class="stat-label">Ready to review</div>
           <div class="stat-value gold" id="stat-review">—</div>
+          <div style="font-size:11px;color:var(--gold);margin-top:4px;opacity:0.75;" id="stat-review-unread"></div>
         </div>
         <div class="stat-card" onclick="filterByStatus('awarded', this)">
           <div class="stat-label">Awarded</div>
@@ -354,11 +410,11 @@
 
       <!-- FILTER BAR -->
       <div class="filter-bar">
-        <div class="filter-pill active" id="pill-all" onclick="setFilter('all', this)">All RFQs</div>
-        <div class="filter-pill" id="pill-active" onclick="setFilter('active', this)">Active</div>
+        <div class="filter-pill" id="pill-all" onclick="setFilter('all', this)">All RFQs</div>
+        <div class="filter-pill active" id="pill-active" onclick="setFilter('active', this)">Active</div>
         <div class="filter-pill" id="pill-review" onclick="setFilter('review', this)">Ready to review</div>
         <div class="filter-pill" id="pill-awarded" onclick="setFilter('awarded', this)">Awarded</div>
-        <div class="filter-pill" id="pill-closed" onclick="setFilter('closed', this)">Closed</div>
+        <div class="filter-pill" id="pill-closed" onclick="setFilter('closed', this)">Closed / Cancelled</div>
         <div class="filter-pill" id="pill-draft" onclick="setFilter('draft', this)">Draft</div>
         <div class="filter-right">
           <div class="sort-wrap">
@@ -397,6 +453,61 @@
   </div>
 </div>
 
+<!-- ─── EDIT RFQ MODAL ─── -->
+<div class="edit-modal-backdrop" id="edit-modal" style="display:none;" onclick="if(event.target===this)closeEditModal()">
+  <div class="edit-modal-box">
+    <div class="edit-modal-header">
+      <h2>Edit RFQ</h2>
+      <button class="drawer-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="edit-modal-body" id="edit-modal-body">
+      <div style="text-align:center;padding:40px;color:var(--slate);">Loading...</div>
+    </div>
+    <div class="edit-modal-footer">
+      <button class="btn-modal-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-edit-save" id="edit-save-btn" onclick="saveEditRFQ()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CANCEL RFQ MODAL ─── -->
+<div class="modal-backdrop" id="cancel-modal" style="display:none;" onclick="if(event.target===this)closeCancelModal()">
+  <div class="modal-box">
+    <div class="modal-title">Cancel this RFQ?</div>
+    <div class="modal-sub">Select the reason(s) for cancellation. All resellers who have submitted bids will be notified.</div>
+    <div id="cancel-reasons">
+      <label class="reason-option" onclick="toggleReason(this)">
+        <input type="checkbox" value="Budget was not approved internally">
+        <span class="reason-label">Budget was not approved internally</span>
+      </label>
+      <label class="reason-option" onclick="toggleReason(this)">
+        <input type="checkbox" value="We decided to go with an existing vendor">
+        <span class="reason-label">We decided to go with an existing vendor</span>
+      </label>
+      <label class="reason-option" onclick="toggleReason(this)">
+        <input type="checkbox" value="Project scope or requirements changed">
+        <span class="reason-label">Project scope or requirements changed</span>
+      </label>
+      <label class="reason-option" onclick="toggleReason(this)">
+        <input type="checkbox" value="Project has been put on hold">
+        <span class="reason-label">Project has been put on hold</span>
+      </label>
+      <label class="reason-option" onclick="toggleReason(this)">
+        <input type="checkbox" value="The bids received did not meet our requirements">
+        <span class="reason-label">The bids received did not meet our requirements</span>
+      </label>
+      <label class="reason-option" onclick="toggleReason(this)">
+        <input type="checkbox" value="Posted in error">
+        <span class="reason-label">Posted in error</span>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeCancelModal()">Go back</button>
+      <button class="btn-modal-confirm" id="cancel-confirm-btn" onclick="confirmCancelRFQ()" disabled>Cancel RFQ</button>
+    </div>
+  </div>
+</div>
+
 <!-- ─── DETAIL DRAWER ─── -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
@@ -417,13 +528,47 @@
     'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
   );
 
-  let activeFilter = 'all';
+  let activeFilter = 'active';
   let allRFQs = [];
+  let _currentUserId = null;
+
+  /* ─── VIEWED BID TRACKING ─── */
+  function _viewedKey() { return 'itpn_viewed_bids_' + (_currentUserId || 'anon'); }
+  function getViewedBids() {
+    try { return JSON.parse(localStorage.getItem(_viewedKey()) || '{}'); } catch { return {}; }
+  }
+  function markBidsViewed(rfqId, bidIds) {
+    const viewed = getViewedBids();
+    viewed[rfqId] = [...new Set([...(viewed[rfqId] || []), ...bidIds])];
+    try { localStorage.setItem(_viewedKey(), JSON.stringify(viewed)); } catch {}
+    // Refresh unread state
+    allRFQs = allRFQs.map(r => r.id === rfqId
+      ? { ...r, hasUnreadBids: computeUnread(r, viewed) }
+      : r
+    );
+    updateUnreadCount();
+  }
+  function computeUnread(rfq, viewed) {
+    if (rfq.status !== 'review') return false;
+    const seenIds = viewed[rfq.id] || [];
+    return (rfq._bidIds || []).some(id => !seenIds.includes(id));
+  }
+  function updateUnreadCount() {
+    const unreadCount = allRFQs.filter(r => r.hasUnreadBids).length;
+    const el = document.getElementById('stat-review-unread');
+    if (el) el.textContent = unreadCount > 0 ? unreadCount + ' unread' : 'none unread';
+  }
+  function navigateToCompareBids(rfqId) {
+    const rfq = allRFQs.find(function(r) { return r.id === rfqId; });
+    markBidsViewed(rfqId, rfq ? (rfq._bidIds || []) : []);
+    window.location = 'bidbridge-compare-bids_1.html?rfq=' + rfqId;
+  }
 
   /* ─── INIT ─── */
   (async () => {
     const { data: { session } } = await _supabase.auth.getSession();
     if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+    _currentUserId = session.user.id;
 
     /* Load profile */
     const { data: profile } = await _supabase
@@ -439,42 +584,101 @@
     /* Load RFQs */
     const { data: rfqs, error } = await _supabase
       .from('rfqs')
-      .select('id, title, status, deadline, created_at, notes, budget, hq_location, strategy, tier_filter, rfq_items(vendor), bids(id)')
+      .select('id, title, status, deadline, created_at, notes, budget, hq_location, strategy, tier_filter, winner_reseller_id, winner_price, sku_updated_at, rfq_items(vendor), bids(id, total_price, created_at)')
       .eq('buyer_id', session.user.id)
       .order('created_at', { ascending: false });
 
     if (error) { console.error(error.message); applyFilters(); return; }
 
-    allRFQs = (rfqs || []).map(rfq => ({
-      id: rfq.id,
-      shortId: rfq.id.slice(0, 8).toUpperCase(),
-      title: rfq.title,
-      vendors: [...new Set((rfq.rfq_items || []).map(i => i.vendor))],
-      strategy: rfq.strategy || 'sole',
-      tierMin: rfq.tier_filter || null,
-      status: rfq.status,
-      bids: (rfq.bids || []).length,
-      maxBids: 10,
-      deadline: rfq.deadline,
-      posted: rfq.created_at?.split('T')[0],
-      budget: rfq.budget || null,
-      hasNew: false,
-      newCount: 0,
-    }));
+    allRFQs = (rfqs || []).map(rfq => {
+      // Only count bids submitted after the last SKU change (if any)
+      const skuCutoff = rfq.sku_updated_at ? new Date(rfq.sku_updated_at) : null;
+      const validBids = (rfq.bids || []).filter(b => !skuCutoff || new Date(b.created_at) > skuCutoff);
+      return {
+        id: rfq.id,
+        shortId: rfq.id.slice(0, 8).toUpperCase(),
+        title: rfq.title,
+        vendors: [...new Set((rfq.rfq_items || []).map(i => i.vendor))],
+        strategy: rfq.strategy || 'sole',
+        tierMin: rfq.tier_filter || null,
+        status: rfq.status,
+        bids: (rfq.bids || []).length,
+        maxBids: 10,
+        deadline: rfq.deadline,
+        posted: rfq.created_at?.split('T')[0],
+        budget: rfq.budget || null,
+        hasNew: false,
+        newCount: 0,
+        skuUpdatedAt: rfq.sku_updated_at || null,
+        lowestBid: validBids.length > 0 ? Math.min(...validBids.map(b => b.total_price || 0)) : null,
+        highestBid: validBids.length > 0 ? Math.max(...validBids.map(b => b.total_price || 0)) : null,
+        _acceptedResellerId: rfq.winner_reseller_id || null,
+        winnerPrice: rfq.winner_price || null,
+        _bidIds: (rfq.bids || []).map(b => b.id),
+      };
+    });
+
+    // Compute unread state after allRFQs is built
+    const viewed = getViewedBids();
+    allRFQs = allRFQs.map(r => ({ ...r, hasUnreadBids: computeUnread(r, viewed) }));
 
     /* Stats */
     document.getElementById('stat-total').textContent = allRFQs.length;
     document.getElementById('stat-active').textContent = allRFQs.filter(r => r.status === 'active').length;
     document.getElementById('stat-review').textContent = allRFQs.filter(r => r.status === 'review').length;
+    updateUnreadCount();
     document.getElementById('stat-awarded').textContent = allRFQs.filter(r => r.status === 'awarded').length;
     document.getElementById('stat-draft').textContent = allRFQs.filter(r => r.status === 'draft').length;
 
     /* Sidebar badges */
     const rfqBadge = document.getElementById('badge-rfqs');
     const reviewBadge = document.getElementById('badge-review');
-    if (allRFQs.length > 0) { rfqBadge.textContent = allRFQs.length; rfqBadge.style.display = ''; }
+    const activeRfqCount = allRFQs.filter(r => r.status === 'active').length;
+    if (activeRfqCount > 0) { rfqBadge.textContent = activeRfqCount; rfqBadge.style.display = ''; }
     const reviewCount = allRFQs.filter(r => r.status === 'review').length;
     if (reviewCount > 0) { reviewBadge.textContent = reviewCount; reviewBadge.style.display = ''; }
+
+    // Fetch highest-ever bid per RFQ from bid_history for accurate savings
+    const rfqIds = allRFQs.map(r => r.id);
+    if (rfqIds.length > 0) {
+      const { data: historyRows } = await _supabase
+        .from('bid_history')
+        .select('rfq_id, total_price')
+        .in('rfq_id', rfqIds);
+
+      if (historyRows && historyRows.length > 0) {
+        const highestEverByRfq = {};
+        historyRows.forEach(h => {
+          if (!highestEverByRfq[h.rfq_id] || h.total_price > highestEverByRfq[h.rfq_id]) {
+            highestEverByRfq[h.rfq_id] = h.total_price;
+          }
+        });
+        allRFQs = allRFQs.map(rfq => ({
+          ...rfq,
+          highestBid: Math.max(rfq.highestBid || 0, highestEverByRfq[rfq.id] || 0) || rfq.highestBid,
+        }));
+      }
+    }
+
+    // Fetch winner reseller names for awarded RFQs
+    const winnerIds = [...new Set(allRFQs.map(r => r._acceptedResellerId).filter(Boolean))];
+    if (winnerIds.length > 0) {
+      const { data: winnerProfiles } = await _supabase
+        .from('reseller_profiles')
+        .select('id, company, contact_first, contact_last')
+        .in('id', winnerIds);
+
+      const profileMap = {};
+      (winnerProfiles || []).forEach(p => {
+        const name = ((p.contact_first || '') + ' ' + (p.contact_last || '')).trim();
+        profileMap[p.id] = p.company || name || 'Unknown reseller';
+      });
+
+      allRFQs = allRFQs.map(rfq => rfq._acceptedResellerId
+        ? Object.assign({}, rfq, { winner: profileMap[rfq._acceptedResellerId] || 'Unknown reseller' })
+        : rfq
+      );
+    }
 
     applyFilters();
   })();
@@ -503,6 +707,7 @@
         awarded: ['s-awarded', 'Awarded'],
         closed: ['s-closed', 'Closed'],
         draft: ['s-draft', 'Draft'],
+        cancelled: ['s-cancelled', 'Cancelled'],
       };
       const [statusCls, statusLabel] = statusMap[rfq.status] || ['s-draft', 'Draft'];
       const fillPct = Math.round((rfq.bids / rfq.maxBids) * 100);
@@ -516,19 +721,23 @@
         : days === 0 ? 'Closes today'
         : `${days} days remaining`;
 
+const cardClick = (rfq.status === 'active' || rfq.status === 'review')
+        ? "navigateToCompareBids('" + rfq.id + "')"
+        : "openDrawer('" + rfq.id + "')";
+
       const primaryAction = rfq.status === 'review'
-        ? `<button class="btn-action btn-compare" onclick="window.location='bidbridge-compare-bids.html'">Compare bids →</button>`
+        ? `<button class="btn-action btn-compare" onclick="navigateToCompareBids('${rfq.id}')">Compare bids →</button>`
         : rfq.status === 'draft'
         ? `<button class="btn-action btn-compare" onclick="window.location='bidbridge-submit-rfq.html'">Continue editing →</button>`
         : rfq.status === 'active'
-        ? `<button class="btn-action btn-compare" onclick="window.location='bidbridge-compare-bids.html'">View bids →</button>`
+        ? `<button class="btn-action btn-compare" onclick="navigateToCompareBids('${rfq.id}')">View bids →</button>`
         : `<button class="btn-action btn-secondary-action">View results</button>`;
 
       return `
-        <div class="rfq-card${rfq.hasNew ? ' has-new' : ''}" onclick="openDrawer('${rfq.id}')">
+        <div class="rfq-card${rfq.hasNew ? ' has-new' : ''}${(rfq.status === 'awarded' || rfq.status === 'closed' || rfq.status === 'cancelled') ? ' dimmed' : ''}" onclick="${cardClick}">
           <div class="rfq-card-main">
             <div>
-              <div class="rfq-id">RFQ ${rfq.shortId} · Posted ${formatDate(rfq.posted)}</div>
+              <div class="rfq-id">RFQ ${rfq.shortId} · Posted ${formatDate(rfq.posted)}${rfq.hasUnreadBids ? ' <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.4);color:var(--gold);font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;letter-spacing:0.05em;">NEW BIDS</span>' : ''}</div>
               <div class="rfq-title">${rfq.title}</div>
               <div class="rfq-tags" style="margin-top:10px;">
                 ${rfq.vendors.map(v => `<span class="tag tag-vendor">${v}</span>`).join('')}
@@ -539,6 +748,12 @@
               <div class="rfq-meta" style="margin-top:12px;">
                 <div class="rfq-meta-item">💰 <strong>${rfq.budget ? '$' + rfq.budget.toLocaleString() : 'Budget not disclosed'}</strong></div>
                 <div class="rfq-meta-item">📅 <strong class="${dlClass}">${dlText}</strong></div>
+                ${rfq.lowestBid !== null && rfq.highestBid !== null && rfq.bids > 0 ? `
+                  <div class="rfq-meta-item" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.05);width:100%;">
+                    ${rfq.winner ? `<span style="color:var(--slate);font-size:12px;">Awarded to: </span><strong style="color:var(--accent);">🏆 ${rfq.winner}</strong><span style="color:var(--slate);font-size:12px;margin-left:12px;">at </span><strong style="color:var(--accent);">$${(rfq.winnerPrice || rfq.lowestBid).toLocaleString()}</strong>` : `<span style="color:var(--slate);font-size:12px;">Best bid: </span><strong style="color:var(--accent);">$${rfq.lowestBid.toLocaleString()}</strong>`}
+                    ${!rfq.winner && rfq.highestBid > rfq.lowestBid ? `<span style="color:var(--slate);font-size:12px;margin-left:12px;">Savings vs. highest: </span><strong style="color:var(--gold);">$${(rfq.highestBid - rfq.lowestBid).toLocaleString()}</strong>` : ''}
+                    ${rfq.winner && rfq.highestBid > (rfq.winnerPrice || rfq.lowestBid) ? `<span style="color:var(--slate);font-size:12px;margin-left:12px;">Savings: </span><strong style="color:var(--gold);">$${(rfq.highestBid - (rfq.winnerPrice || rfq.lowestBid)).toLocaleString()}</strong>` : ''}
+                  </div>` : ''}
               </div>
             </div>
             <div class="bid-progress">
@@ -557,7 +772,9 @@
             <div class="footer-left">
               ${rfq.status === 'active' || rfq.status === 'review'
                 ? `<button class="btn-action btn-secondary-action" onclick="extendDeadline('${rfq.id}')">Extend deadline</button>
-                   <button class="btn-action btn-secondary-action" onclick="broadcastMessage('${rfq.id}')">📢 Message all resellers</button>`
+                   <button class="btn-action btn-secondary-action" onclick="broadcastMessage('${rfq.id}')">📢 Message all resellers</button>
+                   <button class="btn-action btn-secondary-action" onclick="editRFQ('${rfq.id}')">✏️ Edit</button>
+                   <button class="btn-action btn-danger-sm" onclick="openCancelModal('${rfq.id}')">✕ Cancel RFQ</button>`
                 : rfq.status === 'draft'
                 ? `<button class="btn-action btn-danger-sm" onclick="deleteDraft('${rfq.id}')">Delete draft</button>`
                 : `<button class="btn-action btn-secondary-action" onclick="duplicateRFQ('${rfq.id}')">Duplicate RFQ</button>`
@@ -583,7 +800,8 @@
   function filterByStatus(status, cardEl) {
     document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
     cardEl.classList.add('active-filter');
-    const pillId = 'pill-' + status;
+    // 'unread' has no pill — highlight the review pill as the closest match
+    const pillId = status === 'unread' ? 'pill-review' : 'pill-' + status;
     const pill = document.getElementById(pillId);
     if (pill) {
       document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
@@ -598,11 +816,14 @@
     const sort = document.querySelector('.sort-select').value;
     let data = [...allRFQs];
 
-    if (activeFilter !== 'all') data = data.filter(r => r.status === activeFilter);
+    if (activeFilter === 'unread') data = data.filter(r => r.hasUnreadBids);
+    else if (activeFilter === 'closed') data = data.filter(r => r.status === 'closed' || r.status === 'cancelled');
+    else if (activeFilter !== 'all') data = data.filter(r => r.status === activeFilter);
     if (q) data = data.filter(r =>
       r.title.toLowerCase().includes(q) ||
       r.vendors.join(' ').toLowerCase().includes(q) ||
-      String(r.id).includes(q)
+      r.shortId.toLowerCase().includes(q) ||
+      r.id.toLowerCase().includes(q)
     );
 
     if (sort === 'newest') data.sort((a, b) => b.id - a.id);
@@ -673,6 +894,335 @@
     }
   }
 
+  const EV_VENDORS = [
+    'Cisco','Fortinet','Palo Alto Networks','HPE / Aruba','Dell Technologies',
+    'Juniper Networks','Microsoft','VMware','NetApp','Rubrik','Zscaler',
+    'CrowdStrike','Pure Storage','Arista Networks','F5 Networks','Commvault',
+    'SentinelOne','Check Point','Extreme Networks','Nutanix','Veeam',
+    'Veritas','IBM','Lenovo','Supermicro','Other'
+  ];
+
+  let _editRfqId = null;
+  let _evVendorCount = 0;
+  let _evSkuCounts = {};
+  let _editRfqItemIds = {};
+  let _editOriginalData = null; // snapshot before editing for diff
+
+  async function editRFQ(id) {
+    _editRfqId = id;
+    _evVendorCount = 0;
+    _evSkuCounts = {};
+    _editRfqItemIds = {};
+    _editOriginalData = null;
+    document.getElementById('edit-modal').style.display = 'flex';
+    document.getElementById('edit-modal-body').innerHTML = '<div style="text-align:center;padding:40px;color:var(--slate);">Loading...</div>';
+    document.getElementById('edit-save-btn').disabled = true;
+
+    const { data, error } = await _supabase
+      .from('rfqs')
+      .select('id, title, notes, deadline, delivery_date, budget, hq_location, rfq_items(id, vendor, sku, quantity, description)')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      document.getElementById('edit-modal-body').innerHTML = '<div style="text-align:center;padding:40px;color:var(--error);">Could not load RFQ details.</div>';
+      return;
+    }
+
+    // Snapshot original state for diff on save
+    _editOriginalData = JSON.parse(JSON.stringify(data));
+
+    // Group items by vendor preserving IDs
+    const byVendor = {};
+    (data.rfq_items || []).forEach(item => {
+      if (!byVendor[item.vendor]) byVendor[item.vendor] = [];
+      byVendor[item.vendor].push(item);
+    });
+
+    document.getElementById('edit-modal-body').innerHTML = `
+      <div class="edit-field">
+        <div class="edit-label">Project name</div>
+        <input class="edit-input" id="edit-title" type="text" value="${(data.title || '').replace(/"/g, '&quot;')}">
+      </div>
+      <div class="edit-field">
+        <div class="edit-label">Project description</div>
+        <textarea class="edit-input edit-textarea" id="edit-notes">${data.notes || ''}</textarea>
+      </div>
+      <div class="edit-row">
+        <div class="edit-field">
+          <div class="edit-label">Bid deadline</div>
+          <input class="edit-input" id="edit-deadline" type="date" value="${data.deadline || ''}">
+        </div>
+        <div class="edit-field">
+          <div class="edit-label">Expected delivery date</div>
+          <input class="edit-input" id="edit-delivery" type="date" value="${data.delivery_date || ''}">
+        </div>
+      </div>
+      <div class="edit-row">
+        <div class="edit-field">
+          <div class="edit-label">Budget (optional)</div>
+          <input class="edit-input" id="edit-budget" type="number" placeholder="e.g. 150000" value="${data.budget || ''}">
+        </div>
+        <div class="edit-field">
+          <div class="edit-label">HQ location</div>
+          <input class="edit-input" id="edit-location" type="text" value="${(data.hq_location || '').replace(/"/g, '&quot;')}">
+        </div>
+      </div>
+      <div class="edit-field" style="margin-top:4px;">
+        <div class="edit-label" style="margin-bottom:12px;">Vendors &amp; SKUs</div>
+        <div id="ev-vendor-list"></div>
+        <button class="btn-add-vendor-ev" onclick="evAddVendor()"><span style="font-size:16px;">+</span> Add a vendor</button>
+      </div>
+    `;
+
+    // Pre-populate existing vendors
+    Object.entries(byVendor).forEach(([vendor, items]) => {
+      evAddVendor(vendor, items);
+    });
+    // If no vendors, add one blank
+    if (Object.keys(byVendor).length === 0) evAddVendor();
+
+    document.getElementById('edit-save-btn').disabled = false;
+  }
+
+  function evAddVendor(presetVendor, presetItems) {
+    _evVendorCount++;
+    const vid = _evVendorCount;
+    _evSkuCounts[vid] = 0;
+    const vendorOptions = EV_VENDORS.map(v =>
+      `<option value="${v}"${presetVendor === v ? ' selected' : ''}>${v}</option>`
+    ).join('');
+    const block = document.createElement('div');
+    block.className = 'edit-vendor-block';
+    block.id = 'ev-vendor-' + vid;
+    block.innerHTML = `
+      <div class="edit-vendor-header">
+        <span class="edit-vendor-label">Vendor</span>
+        <button class="btn-remove-ev" onclick="evRemoveVendor(${vid})" title="Remove vendor">×</button>
+      </div>
+      <select class="ev-select" id="ev-vname-${vid}">
+        <option value="" disabled${!presetVendor ? ' selected' : ''}>Select vendor</option>
+        ${vendorOptions}
+      </select>
+      <div style="margin-top:12px;">
+        <div class="edit-sku-grid-header">
+          <span class="edit-sku-col-label">Part number / SKU</span>
+          <span class="edit-sku-col-label">Qty</span>
+          <span></span>
+        </div>
+        <div id="ev-sku-list-${vid}"></div>
+        <button class="btn-add-sku-ev" onclick="evAddSku(${vid})">+ Add SKU</button>
+      </div>
+    `;
+    document.getElementById('ev-vendor-list').appendChild(block);
+
+    if (presetItems && presetItems.length > 0) {
+      presetItems.forEach(item => evAddSku(vid, item.sku, item.quantity));
+    } else {
+      evAddSku(vid);
+    }
+  }
+
+  function evRemoveVendor(vid) {
+    const el = document.getElementById('ev-vendor-' + vid);
+    if (el) el.remove();
+  }
+
+  function evAddSku(vid, presetSku, presetQty) {
+    _evSkuCounts[vid] = (_evSkuCounts[vid] || 0) + 1;
+    const sid = _evSkuCounts[vid];
+    const row = document.createElement('div');
+    row.className = 'edit-sku-grid';
+    row.id = 'ev-sku-' + vid + '-' + sid;
+    row.innerHTML = `
+      <input class="edit-input" style="padding:7px 10px;font-size:13px;" type="text" id="ev-part-${vid}-${sid}" placeholder="e.g. C9300-48P-A" value="${presetSku || ''}">
+      <input class="edit-input" style="padding:7px 10px;font-size:13px;" type="number" id="ev-qty-${vid}-${sid}" placeholder="Qty" min="1" value="${presetQty || ''}">
+      <button class="btn-remove-sku-ev" onclick="evRemoveSku(${vid},${sid})">×</button>
+    `;
+    document.getElementById('ev-sku-list-' + vid).appendChild(row);
+  }
+
+  function evRemoveSku(vid, sid) {
+    const el = document.getElementById('ev-sku-' + vid + '-' + sid);
+    if (el) el.remove();
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal').style.display = 'none';
+    _editRfqId = null;
+  }
+
+  async function saveEditRFQ() {
+    if (!_editRfqId) return;
+    const btn = document.getElementById('edit-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const title = document.getElementById('edit-title').value.trim();
+    const notes = document.getElementById('edit-notes').value.trim();
+    const deadline = document.getElementById('edit-deadline').value || null;
+    const delivery_date = document.getElementById('edit-delivery').value || null;
+    const budget = document.getElementById('edit-budget').value ? parseFloat(document.getElementById('edit-budget').value) : null;
+    const hq_location = document.getElementById('edit-location').value.trim();
+
+    if (!title) { showToast('Project name is required.'); btn.disabled = false; btn.textContent = 'Save changes'; return; }
+
+    // Collect vendor blocks
+    const newItems = [];
+    document.querySelectorAll('[id^="ev-vendor-"]').forEach(block => {
+      const vid = block.id.replace('ev-vendor-', '');
+      const vendorEl = document.getElementById('ev-vname-' + vid);
+      const vendor = vendorEl ? vendorEl.value : '';
+      if (!vendor) return;
+      block.querySelectorAll('[id^="ev-sku-' + vid + '-"]').forEach(row => {
+        const sid = row.id.replace('ev-sku-' + vid + '-', '');
+        const sku = (document.getElementById('ev-part-' + vid + '-' + sid)?.value || '').trim();
+        const qty = parseInt(document.getElementById('ev-qty-' + vid + '-' + sid)?.value || '1') || 1;
+        newItems.push({ rfq_id: _editRfqId, vendor, sku, quantity: qty });
+      });
+    });
+
+    if (newItems.length === 0) { showToast('Please add at least one vendor with a SKU.'); btn.disabled = false; btn.textContent = 'Save changes'; return; }
+
+    // Detect price-impacting SKU changes before saving
+    const origItems = (_editOriginalData?.rfq_items || []);
+    const addedSkusCheck = newItems.filter(i => !origItems.some(o => o.vendor === i.vendor && o.sku === i.sku && String(o.quantity) === String(i.quantity)));
+    const removedSkusCheck = origItems.filter(o => !newItems.some(i => i.vendor === o.vendor && i.sku === o.sku && String(i.quantity) === String(o.quantity)));
+    const priceImpacting = addedSkusCheck.length > 0 || removedSkusCheck.length > 0;
+
+    // 1. Update RFQ fields — stamp sku_updated_at if SKUs changed
+    const rfqUpdate = { title, notes, deadline, delivery_date, budget, hq_location };
+    if (priceImpacting) rfqUpdate.sku_updated_at = new Date().toISOString();
+
+    const { error: rfqErr } = await _supabase.from('rfqs').update(rfqUpdate).eq('id', _editRfqId);
+    if (rfqErr) { showToast('Error saving RFQ. Please try again.'); btn.disabled = false; btn.textContent = 'Save changes'; return; }
+
+    // 2. Delete old rfq_items and reinsert
+    await _supabase.from('rfq_items').delete().eq('rfq_id', _editRfqId);
+    const { error: itemErr } = await _supabase.from('rfq_items').insert(newItems);
+    if (itemErr) { showToast('RFQ saved but SKUs may not have updated. Please try again.'); btn.disabled = false; btn.textContent = 'Save changes'; return; }
+
+    // 3. Build change summary for notifications
+    const orig = _editOriginalData;
+    const changes = [];
+    if (orig.title !== title) changes.push(`Title changed to "${title}"`);
+    if (orig.deadline !== deadline) changes.push(`Bid deadline updated to ${deadline || 'not set'}`);
+    if ((orig.delivery_date || '') !== (delivery_date || '')) changes.push(`Expected delivery updated to ${delivery_date || 'not set'}`);
+    if ((orig.budget || '') !== (budget || '')) changes.push(`Budget updated to ${budget ? '$' + Number(budget).toLocaleString() : 'not disclosed'}`);
+    if ((orig.hq_location || '') !== (hq_location || '')) changes.push(`HQ location updated to ${hq_location}`);
+    if ((orig.notes || '') !== notes) changes.push('Project description updated');
+
+    // SKU diff
+    const oldSkus = (orig.rfq_items || []).map(i => `${i.vendor}|${i.sku}|${i.quantity}`).sort();
+    const newSkus = newItems.map(i => `${i.vendor}|${i.sku}|${i.quantity}`).sort();
+    const addedSkus = newItems.filter(i => !orig.rfq_items.some(o => o.vendor === i.vendor && o.sku === i.sku && String(o.quantity) === String(i.quantity)));
+    const removedSkus = (orig.rfq_items || []).filter(o => !newItems.some(i => i.vendor === o.vendor && i.sku === o.sku && String(i.quantity) === String(o.quantity)));
+    addedSkus.forEach(i => changes.push(`Added: ${i.vendor} — ${i.sku || '(no part#)'} × ${i.quantity}`));
+    removedSkus.forEach(o => changes.push(`Removed: ${o.vendor} — ${o.sku || '(no part#)'} × ${o.quantity}`));
+
+    // 4. Notify resellers with pending bids if anything changed
+    if (changes.length > 0) {
+      const { data: bidsData } = await _supabase.from('bids').select('id, reseller_id').eq('rfq_id', _editRfqId).eq('status', 'pending');
+      if (bidsData && bidsData.length > 0) {
+        const resellerIds = [...new Set(bidsData.map(b => b.reseller_id))];
+        const rfqTitle = allRFQs.find(r => r.id === _editRfqId)?.title || title;
+        const changeSummary = changes.join(' · ');
+        const notifRows = resellerIds.map(uid => ({
+          user_id: uid,
+          type: 'rfq_updated',
+          rfq_id: _editRfqId,
+          bid_id: null,
+          message: `The RFQ "${rfqTitle}" has been updated by the buyer. Changes: ${changeSummary}. Please review and revise your bid if needed.`,
+          read: false,
+        }));
+        await _supabase.from('notifications').insert(notifRows);
+      }
+    }
+
+    // 5. Update local state
+    allRFQs = allRFQs.map(r => {
+      if (r.id !== _editRfqId) return r;
+      const update = { title, deadline, vendors: [...new Set(newItems.map(i => i.vendor))] };
+      if (priceImpacting) { update.lowestBid = null; update.highestBid = null; }
+      return Object.assign({}, r, update);
+    });
+    closeEditModal();
+    applyFilters();
+    showToast('RFQ updated. ' + (changes.length > 0 ? 'Resellers have been notified.' : ''));
+  }
+
+  let _cancelRfqId = null;
+
+  function openCancelModal(id) {
+    _cancelRfqId = id;
+    // Reset selections
+    document.querySelectorAll('#cancel-reasons .reason-option').forEach(el => {
+      el.classList.remove('selected');
+      el.querySelector('input').checked = false;
+    });
+    document.getElementById('cancel-confirm-btn').disabled = true;
+    document.getElementById('cancel-modal').style.display = 'flex';
+  }
+
+  function closeCancelModal() {
+    document.getElementById('cancel-modal').style.display = 'none';
+    _cancelRfqId = null;
+  }
+
+  function toggleReason(label) {
+    const cb = label.querySelector('input');
+    cb.checked = !cb.checked;
+    label.classList.toggle('selected', cb.checked);
+    const anySelected = [...document.querySelectorAll('#cancel-reasons input')].some(i => i.checked);
+    document.getElementById('cancel-confirm-btn').disabled = !anySelected;
+  }
+
+  async function confirmCancelRFQ() {
+    if (!_cancelRfqId) return;
+    const reasons = [...document.querySelectorAll('#cancel-reasons input:checked')].map(i => i.value);
+    const reasonText = reasons.join('; ');
+    const btn = document.getElementById('cancel-confirm-btn');
+    btn.disabled = true;
+    btn.textContent = 'Cancelling...';
+
+    const rfqId = _cancelRfqId;
+    const rfq = allRFQs.find(r => r.id === rfqId);
+
+    // 1. Update RFQ status to cancelled
+    const { error: rfqErr } = await _supabase.from('rfqs').update({ status: 'cancelled' }).eq('id', rfqId);
+    if (rfqErr) { console.error('Cancel RFQ error:', rfqErr); showToast('Error cancelling RFQ: ' + rfqErr.message); btn.disabled = false; btn.textContent = 'Cancel RFQ'; return; }
+
+    // 2. Fetch all active bids on this RFQ (any status except already cancelled/rejected)
+    const { data: bidsData, error: bidsErr } = await _supabase.from('bids').select('id, reseller_id, status').eq('rfq_id', rfqId);
+    console.log('bidsData for cancel:', bidsData, bidsErr);
+
+    const activeBids = (bidsData || []).filter(b => b.status !== 'cancelled' && b.status !== 'rejected');
+    if (activeBids.length > 0) {
+      const bidIds = activeBids.map(b => b.id);
+      const resellerIds = [...new Set(activeBids.map(b => b.reseller_id))];
+
+      // 3. Update bids to cancelled
+      await _supabase.from('bids').update({ status: 'cancelled' }).in('id', bidIds);
+
+      // 4. Insert notifications for each reseller who bid
+      const notifRows = resellerIds.map(uid => ({
+        user_id: uid,
+        type: 'rfq_cancelled',
+        rfq_id: rfqId,
+        bid_id: null,
+        message: `The RFQ "${rfq?.title || 'RFQ'}" has been cancelled by the buyer. Reason: ${reasonText}`,
+        read: false,
+      }));
+      await _supabase.from('notifications').insert(notifRows);
+    }
+
+    // 5. Update local state
+    allRFQs = allRFQs.map(r => r.id === rfqId ? { ...r, status: 'cancelled' } : r);
+    closeCancelModal();
+    applyFilters();
+    showToast('RFQ cancelled. All resellers have been notified.');
+  }
+
   /* ─── DATE HELPERS ─── */
   function formatDate(str) {
     if (!str) return '—';
@@ -724,8 +1274,9 @@
       awarded: ['s-awarded', 'Awarded'],
       closed: ['s-closed', 'Closed'],
       draft: ['s-draft', 'Draft'],
+      cancelled: ['s-cancelled', 'Cancelled'],
     };
-    const [statusCls, statusLabel] = statusMap[data.status] || ['s-draft', 'Draft'];
+    const [statusCls, statusLabel] = statusMap[data.status] || ['s-draft', data.status || 'Draft'];
 
     /* Group items by vendor */
     const byVendor = {};
@@ -756,6 +1307,19 @@
         <div class="drawer-section-title">Status</div>
         <span class="status-badge ${statusCls}">${statusLabel}</span>
       </div>
+      ${rfq && rfq.winner ? `
+      <div class="drawer-section" style="background:rgba(0,200,150,0.06);border:1px solid rgba(0,200,150,0.2);border-radius:10px;padding:16px 18px;margin-bottom:20px;">
+        <div class="drawer-section-title" style="color:var(--accent);margin-bottom:10px;">Awarded to</div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:rgba(0,200,150,0.15);border:1px solid rgba(0,200,150,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">🏆</div>
+          <div>
+            <div style="font-size:15px;font-weight:600;color:var(--white);">${rfq.winner}</div>
+            <div style="font-size:13px;color:var(--accent);margin-top:2px;">Winning bid: <strong>$${(rfq.winnerPrice || rfq.lowestBid || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</strong>
+            ${rfq.highestBid && rfq.highestBid > (rfq.winnerPrice || 0) ? `<span style="color:var(--slate);margin-left:10px;">· Savings: <strong style="color:var(--gold);">$${(rfq.highestBid - (rfq.winnerPrice || rfq.lowestBid || 0)).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</strong></span>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>` : ''}
       <div class="drawer-section">
         <div class="drawer-section-title">Project details</div>
         <div class="drawer-row">

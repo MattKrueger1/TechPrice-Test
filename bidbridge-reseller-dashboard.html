@@ -79,21 +79,25 @@
   .search-input::placeholder { color: var(--slate); }
   .search-input:focus { border-color: var(--accent); }
 
-  /* ─── TABS ─── */
-  .tab-bar { display: flex; gap: 2px; padding: 0 40px; background: var(--navy-mid); border-bottom: 1px solid var(--card-border); }
-  .tab-btn { padding: 16px 24px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--slate); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; transition: color .2s, border-color .2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; margin-bottom: -1px; }
-  .tab-btn:hover { color: var(--slate-light); }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab-count { background: rgba(255,255,255,0.08); color: var(--slate-light); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
-  .tab-btn.active .tab-count { background: rgba(0,200,150,0.15); color: var(--accent); }
+
+  /* ─── NEW RFQ ALERT BANNER ─── */
+  .new-rfq-banner { display:none; align-items:center; gap:14px; padding:14px 40px; background:rgba(0,200,150,0.08); border-bottom:1px solid rgba(0,200,150,0.2); }
+  .new-rfq-banner.visible { display:flex; }
+  .new-rfq-banner-icon { font-size:20px; flex-shrink:0; }
+  .new-rfq-banner-text { flex:1; font-size:13px; color:var(--slate-light); }
+  .new-rfq-banner-text strong { color:var(--white); }
+  .new-rfq-banner-btn { background:var(--accent); color:var(--navy); font-size:12px; font-weight:700; padding:6px 16px; border-radius:8px; border:none; cursor:pointer; white-space:nowrap; font-family:var(--font-body); }
+  .new-rfq-banner-dismiss { background:transparent; border:none; color:var(--slate); font-size:18px; cursor:pointer; padding:0 4px; flex-shrink:0; }
 
   /* ─── PAGE BODY ─── */
   .page-body { padding: 32px 40px; flex: 1; }
 
   /* ─── STAT CARDS ─── */
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
-  .stat-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px 22px; transition: border-color .2s; }
-  .stat-card:hover { border-color: rgba(255,255,255,0.14); }
+  .stat-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px 22px; min-height: 110px; display: flex; flex-direction: column; justify-content: space-between; transition: border-color .2s; }
+  .stat-card.clickable { cursor: pointer; }
+  .stat-card.clickable:hover { border-color: rgba(0,200,150,0.35); background: rgba(0,200,150,0.03); }
+  .stat-card:not(.clickable):hover { border-color: rgba(255,255,255,0.14); }
   .stat-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
   .stat-value { font-family: var(--font-head); font-size: 30px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
   .stat-value.accent { color: var(--accent); }
@@ -143,8 +147,16 @@
   }
   .rfq-card:hover { border-color: rgba(0,200,150,0.25); background: rgba(0,200,150,0.02); }
   .rfq-card.new-rfq { border-left: 3px solid var(--accent); }
+  .rfq-card.bid-submitted { border-color: rgba(245,200,66,0.3); background: rgba(245,200,66,0.02); }
+  .rfq-card.bid-submitted:hover { border-color: rgba(245,200,66,0.5); }
 
   .new-tag { position: absolute; top: 16px; right: 20px; background: var(--accent); color: var(--navy); font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.05em; }
+
+  .bid-status-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: rgba(245,200,66,0.06); border: 1px solid rgba(245,200,66,0.2); border-radius: 9px; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .bid-status-left { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .bid-status-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.3); }
+  .bid-rank-pill { font-size: 12px; color: var(--slate-light); }
+  .bid-rank-pill strong { color: var(--white); }
 
   .rfq-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
   .rfq-card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
@@ -170,6 +182,53 @@
   .btn-bid { padding: 9px 22px; background: var(--accent); border: none; border-radius: 9px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s, transform .15s; white-space: nowrap; }
   .btn-bid:hover { background: var(--accent-dim); transform: translateY(-1px); }
   .btn-bid-count { font-size: 12px; color: var(--slate); }
+
+  /* ─── BID MODAL ─── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 18px; width: 100%; max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+  .modal-header { padding: 24px 28px 20px; border-bottom: 1px solid var(--card-border); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-shrink: 0; }
+  .modal-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; }
+  .modal-subtitle { font-size: 13px; color: var(--slate-light); margin-top: 4px; }
+  .modal-close { background: none; border: none; color: var(--slate); font-size: 22px; cursor: pointer; line-height: 1; padding: 0; flex-shrink: 0; }
+  .modal-close:hover { color: var(--white); }
+  .modal-body { padding: 24px 28px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 20px 28px; border-top: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 16px; }
+
+  .sku-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  .sku-table thead th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--slate); font-weight: 500; padding: 0 10px 10px; text-align: left; }
+  .sku-table thead th:last-child { text-align: right; }
+  .sku-table thead th.right { text-align: right; }
+  .sku-table tbody tr { border-top: 1px solid rgba(255,255,255,0.05); }
+  .sku-table tbody td { padding: 12px 10px; font-size: 13px; vertical-align: middle; }
+  .sku-part { font-family: monospace; font-size: 12px; color: var(--accent); background: rgba(0,200,150,0.07); padding: 3px 8px; border-radius: 5px; }
+  .sku-qty { color: var(--slate-light); text-align: center; }
+  .sku-price-wrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+  .sku-price-input { width: 110px; padding: 7px 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--white); font-family: var(--font-body); font-size: 13px; text-align: right; outline: none; transition: border-color .2s; }
+  .sku-price-input:focus { border-color: var(--accent); }
+  .sku-price-input::placeholder { color: var(--slate); }
+  .sku-line-total { font-size: 13px; font-weight: 500; color: var(--white); min-width: 90px; text-align: right; }
+
+  .bid-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 16px 0; }
+  .bid-total-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 10px; }
+  .bid-total-label { font-size: 14px; color: var(--slate-light); }
+  .bid-total-value { font-family: var(--font-head); font-size: 24px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+
+  .bid-notes-label { font-size: 12px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .bid-notes-input { width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 13px; resize: vertical; outline: none; transition: border-color .2s; min-height: 72px; }
+  .bid-notes-input:focus { border-color: var(--accent); }
+  .bid-notes-input::placeholder { color: var(--slate); }
+
+  .btn-submit-bid { padding: 11px 28px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
+  .btn-submit-bid:hover { background: var(--accent-dim); }
+  .btn-submit-bid:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-cancel-bid { padding: 11px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; transition: all .2s; }
+  .btn-cancel-bid:hover { border-color: rgba(255,255,255,0.25); color: var(--white); }
+  .bid-error { font-size: 13px; color: var(--error); display: none; }
+  .bid-success { text-align: center; padding: 32px 20px; }
+  .bid-success-icon { font-size: 48px; margin-bottom: 12px; }
+  .bid-success-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .bid-success-sub { font-size: 14px; color: var(--slate-light); }
 
   /* ─── ACTIVE BIDS (My bids tab) ─── */
   .active-bid-card {
@@ -298,6 +357,54 @@
   .empty-state h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
   .empty-state p { font-size: 14px; color: var(--slate-light); max-width: 360px; margin: 0 auto; }
 
+  /* ─── MESSAGES INBOX ─── */
+  .msg-inbox { display: grid; grid-template-columns: 300px 1fr; border: 1px solid var(--card-border); border-radius: 14px; overflow: hidden; height: 580px; }
+  .msg-thread-list { background: var(--navy-mid); border-right: 1px solid var(--card-border); overflow-y: auto; display: flex; flex-direction: column; }
+  .msg-thread-empty { padding: 40px 18px; text-align: center; color: var(--slate); font-size: 13px; line-height: 1.7; }
+  .msg-thread-item { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: background .15s; border-left: 3px solid transparent; }
+  .msg-thread-item:hover { background: rgba(255,255,255,0.04); }
+  .msg-thread-item.active { background: rgba(0,200,150,0.07); border-left-color: var(--accent); }
+  .msg-thread-item.unread .msg-thread-rfq { color: var(--white); font-weight: 600; }
+  .msg-thread-item.active .msg-thread-rfq { color: var(--accent); }
+  .msg-thread-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+  .msg-thread-rfq { font-size: 13px; font-weight: 500; color: var(--slate-light); line-height: 1.3; }
+  .msg-thread-time { font-size: 11px; color: var(--slate); white-space: nowrap; flex-shrink: 0; }
+  .msg-thread-preview { font-size: 12px; color: var(--slate); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-thread-item.unread .msg-thread-preview { color: var(--slate-light); }
+  .msg-thread-unread-badge { background: var(--accent); color: var(--navy); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; flex-shrink: 0; }
+  .msg-conversation { display: flex; flex-direction: column; background: var(--navy); overflow: hidden; }
+  .msg-conv-header { padding: 16px 20px; border-bottom: 1px solid var(--card-border); background: var(--navy-mid); flex-shrink: 0; }
+  .msg-conv-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; }
+  .msg-conv-sub { font-size: 12px; color: var(--slate-light); margin-top: 2px; }
+  .msg-conv-thread-area { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .msg-conv-compose { padding: 12px 20px; border-top: 1px solid var(--card-border); background: var(--navy-mid); flex-shrink: 0; display: flex; gap: 10px; align-items: flex-end; }
+  .msg-conv-compose .msg-textarea { flex: 1; min-height: 44px; max-height: 100px; resize: none; }
+  .msg-conv-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--slate); font-size: 14px; text-align: center; gap: 8px; }
+
+  /* ─── PAGE SECTIONS ─── */
+  .page-section { margin-bottom: 52px; scroll-margin-top: 80px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--card-border); }
+  .section-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; letter-spacing: -0.3px; display: flex; align-items: center; gap: 10px; }
+  .section-count { background: rgba(255,255,255,0.08); color: var(--slate-light); font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; font-family: var(--font-body); }
+  .section-count.accent { background: rgba(0,200,150,0.12); color: var(--accent); }
+  .section-count.warn { background: rgba(245,200,66,0.12); color: var(--gold); }
+  .section-header-right { display: flex; align-items: center; gap: 10px; }
+
+  /* ─── NEEDS ATTENTION STRIP ─── */
+  .attn-strip { display: flex; flex-direction: column; gap: 8px; margin-bottom: 36px; }
+  .attn-item { display: flex; align-items: center; gap: 14px; padding: 12px 18px; background: rgba(245,200,66,0.06); border: 1px solid rgba(245,200,66,0.2); border-radius: 11px; cursor: pointer; transition: border-color .2s, background .2s; }
+  .attn-item:hover { border-color: rgba(245,200,66,0.4); background: rgba(245,200,66,0.09); }
+  .attn-item.urgent { background: rgba(255,107,107,0.06); border-color: rgba(255,107,107,0.2); }
+  .attn-item.urgent:hover { border-color: rgba(255,107,107,0.4); background: rgba(255,107,107,0.09); }
+  .attn-item.msg { background: rgba(0,200,150,0.05); border-color: rgba(0,200,150,0.2); }
+  .attn-item.msg:hover { border-color: rgba(0,200,150,0.4); background: rgba(0,200,150,0.08); }
+  .attn-icon { font-size: 18px; flex-shrink: 0; }
+  .attn-text { flex: 1; font-size: 13px; color: var(--slate-light); line-height: 1.5; }
+  .attn-text strong { color: var(--white); }
+  .attn-cta { font-size: 12px; color: var(--gold); font-weight: 600; white-space: nowrap; }
+  .attn-item.urgent .attn-cta { color: var(--error); }
+  .attn-item.msg .attn-cta { color: var(--accent); }
+
   @media (max-width: 1024px) {
     .app-shell { grid-template-columns: 1fr; }
     .sidebar { display: none; }
@@ -307,7 +414,41 @@
     .active-bid-header { grid-template-columns: 1fr; }
     .rank-block { align-items: flex-start; }
   }
+  .btn-signout { display: block; width: 100%; margin-top: 12px; padding: 9px 16px; background: transparent; border: 1px solid rgba(255,107,107,0.25); border-radius: 8px; color: var(--error); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; text-align: left; }
+  .btn-signout:hover { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.4); }
+
+  /* ─── NOTIFICATION DRAWER ─── */
+  .notif-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 298; display: none; }
+  .notif-backdrop.open { display: block; }
+  .notif-drawer { position: fixed; top: 0; right: -420px; width: 400px; height: 100vh; background: var(--navy-mid); border-left: 1px solid var(--card-border); z-index: 299; display: flex; flex-direction: column; transition: right .28s cubic-bezier(.4,0,.2,1); box-shadow: -8px 0 32px rgba(0,0,0,0.35); }
+  .notif-drawer.open { right: 0; }
+  .notif-drawer-header { padding: 22px 24px 16px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .notif-drawer-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .notif-drawer-close { background: none; border: none; color: var(--slate); font-size: 22px; cursor: pointer; line-height: 1; padding: 0; }
+  .notif-drawer-close:hover { color: var(--white); }
+  .notif-drawer-actions { padding: 10px 24px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .notif-mark-all { background: none; border: none; color: var(--slate-light); font-family: var(--font-body); font-size: 12px; cursor: pointer; padding: 0; }
+  .notif-mark-all:hover { color: var(--accent); }
+  .notif-unread-count { font-size: 12px; color: var(--slate); }
+  .notif-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+  .notif-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: background .15s; position: relative; }
+  .notif-item:hover { background: rgba(255,255,255,0.04); }
+  .notif-item.unread { background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent); padding-left: 21px; }
+  .notif-item.unread:hover { background: rgba(0,200,150,0.04); }
+  .notif-item.unread-gold { border-left-color: var(--gold); }
+  .notif-item.unread-error { border-left-color: var(--error); }
+  .notif-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .notif-body { flex: 1; min-width: 0; }
+  .notif-msg { font-size: 13px; line-height: 1.55; color: var(--slate-light); }
+  .notif-item.unread .notif-msg { color: var(--white); font-weight: 500; }
+  .notif-time { font-size: 11px; color: var(--slate); margin-top: 4px; }
+  .notif-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
+  .notif-dot.gold { background: var(--gold); }
+  .notif-dot.error { background: var(--error); }
+  .notif-empty { text-align: center; padding: 60px 24px; color: var(--slate); font-size: 14px; }
+  .notif-empty-icon { font-size: 40px; margin-bottom: 12px; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -319,32 +460,31 @@
 
     <!-- Partner profile -->
     <div class="sidebar-profile">
-      <div class="profile-company">NetStar Solutions</div>
+      <div class="profile-company" id="sidebar-company">—</div>
       <div style="font-size:11px;color:var(--slate);margin-bottom:2px;">Authorized reseller · Verified ✓</div>
-      <div class="profile-tiers">
-        <div class="profile-tier-row"><span class="profile-tier-vendor">Cisco</span><span class="tier-chip gold">⭐ Gold</span></div>
-        <div class="profile-tier-row"><span class="profile-tier-vendor">Fortinet</span><span class="tier-chip platinum">💠 Platinum</span></div>
-        <div class="profile-tier-row"><span class="profile-tier-vendor">Palo Alto</span><span class="tier-chip gold">⭐ Gold</span></div>
-        <div class="profile-tier-row"><span class="profile-tier-vendor">Aruba</span><span class="tier-chip silver">◈ Silver</span></div>
+      <div class="profile-tiers" id="sidebar-tiers">
+        <div style="font-size:12px;color:var(--slate);">Loading...</div>
       </div>
     </div>
 
     <div class="sidebar-section-label">Main</div>
-    <a class="nav-item active" href="#"><span class="nav-icon">⊞</span> Dashboard</a>
-    <a class="nav-item" href="#"><span class="nav-icon">🔍</span> Browse RFQs <span class="nav-badge">12</span></a>
-    <a class="nav-item" href="#"><span class="nav-icon">📨</span> My bids <span class="nav-badge">5</span></a>
-    <a class="nav-item" href="#"><span class="nav-icon">🏆</span> Won deals</a>
+    <a class="nav-item active" id="nav-dashboard" href="#" onclick="scrollToTop(); return false;"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" id="nav-browse" href="#" onclick="scrollToSection('section-open-rfqs'); return false;"><span class="nav-icon">🔍</span> Open RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
+    <a class="nav-item" id="nav-mybids" href="#" onclick="scrollToSection('section-my-bids'); return false;"><span class="nav-icon">📨</span> My bids <span class="nav-badge" id="badge-bids" style="display:none"></span></a>
+    <a class="nav-item" id="nav-won" href="#" onclick="scrollToSection('section-won-lost'); return false;"><span class="nav-icon">🏆</span> Won / Lost</a>
 
     <div class="sidebar-section-label">Account</div>
-    <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge gold">3</span></a>
-    <a class="nav-item" href="#"><span class="nav-icon">⭐</span> My profile</a>
+    <a class="nav-item" href="#" onclick="openNotifPanel(); return false;"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge gold" id="notif-badge" style="display:none"></span></a>
+    <a class="nav-item" id="nav-messages" href="#" onclick="scrollToSection('section-messages'); return false;"><span class="nav-icon">💬</span> Messages <span class="nav-badge" id="badge-messages" style="display:none"></span></a>
+    <a class="nav-item" href="bidbridge-reseller-profile.html"><span class="nav-icon">⭐</span> My profile</a>
     <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
 
     <div class="sidebar-footer">
       <div class="user-block">
-        <div class="user-avatar">MR</div>
-        <div><div class="user-name">Mike Reynolds</div><div class="user-role">Reseller · NetStar Solutions</div></div>
+        <div class="user-avatar" id="sidebar-avatar">—</div>
+        <div><div class="user-name" id="sidebar-name">—</div><div class="user-role">Authorized Reseller</div></div>
       </div>
+      <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
     </div>
   </aside>
 
@@ -355,7 +495,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <h1>Reseller Dashboard</h1>
-        <p>Friday, March 27, 2026</p>
+        <p id="topbar-date">—</p>
       </div>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
@@ -363,12 +503,12 @@
       </div>
     </div>
 
-    <!-- TAB BAR -->
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('open', this)">Open RFQs <span class="tab-count">12</span></button>
-      <button class="tab-btn" onclick="switchTab('mybids', this)">My active bids <span class="tab-count">5</span></button>
-      <button class="tab-btn" onclick="switchTab('won', this)">Won <span class="tab-count">3</span></button>
-      <button class="tab-btn" onclick="switchTab('lost', this)">Lost <span class="tab-count">8</span></button>
+    <!-- NEW RFQ ALERT BANNER -->
+    <div class="new-rfq-banner" id="new-rfq-banner">
+      <div class="new-rfq-banner-icon">🔔</div>
+      <div class="new-rfq-banner-text" id="new-rfq-banner-text"></div>
+      <button class="new-rfq-banner-btn" onclick="scrollToSection('section-open-rfqs'); document.getElementById('new-rfq-banner').classList.remove('visible');">View new RFQs</button>
+      <button class="new-rfq-banner-dismiss" onclick="document.getElementById('new-rfq-banner').classList.remove('visible')">×</button>
     </div>
 
     <!-- PAGE BODY -->
@@ -376,46 +516,43 @@
 
       <!-- STAT CARDS -->
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card clickable" onclick="scrollToSection('section-open-rfqs')">
           <div class="stat-label">Open RFQs available</div>
-          <div class="stat-value accent">12</div>
+          <div class="stat-value accent" id="stat-open-rfqs">—</div>
           <div class="stat-sub up">↑ 3 new today</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" onclick="scrollToSection('section-my-bids'); setTimeout(function(){ setMyBidsFilter('active', document.getElementById('mybids-pill-active')); }, 300);">
           <div class="stat-label">Active bids submitted</div>
-          <div class="stat-value">5</div>
-          <div class="stat-sub warn">2 need attention</div>
+          <div class="stat-value" id="stat-active-bids">—</div>
+          <div class="stat-sub" id="stat-active-bids-sub"></div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" onclick="scrollToSection('section-won-lost')" style="cursor:pointer;">
           <div class="stat-label">Win rate this quarter</div>
-          <div class="stat-value gold">37%</div>
-          <div class="stat-sub">3 of 8 bids won</div>
+          <div class="stat-value gold" id="stat-win-rate">—</div>
+          <div class="stat-sub" id="stat-win-rate-sub">—</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Revenue won (Q1)</div>
-          <div class="stat-value">$412k</div>
-          <div class="stat-sub up">↑ 18% vs last quarter</div>
+          <div class="stat-value" id="stat-revenue">—</div>
+          <div class="stat-sub" id="stat-revenue-sub"></div>
         </div>
       </div>
 
       <!-- RANK CHANGE ALERT -->
-      <div class="rank-change-alert" id="rank-alert">
+      <div class="rank-change-alert" id="rank-alert" style="display:none;">
         <span style="font-size:18px;">⚠️</span>
-        <div style="flex:1;">
-          <strong>Your rank changed on 2 RFQs.</strong> A new reseller has outbid you on the Cisco Austin HQ project. You are now in 2nd place. Bid deadline is in 2 days.
-        </div>
-        <button class="btn-revise" onclick="switchTab('mybids', document.querySelectorAll('.tab-btn')[1]); document.getElementById('rank-alert').style.display='none';" style="white-space:nowrap;">Review bids →</button>
+        <div style="flex:1;" id="rank-alert-text"></div>
+        <button class="btn-revise" onclick="scrollToSection('section-my-bids'); document.getElementById('rank-alert').style.display='none';" style="white-space:nowrap;">Review bids →</button>
       </div>
 
-      <!-- ── OPEN RFQs TAB ── -->
-      <div id="tab-open">
-        <div class="filters-row">
-          <div class="filter-pill active" onclick="setFilter(this,'all')">All vendors</div>
-          <div class="filter-pill" onclick="setFilter(this,'cisco')">Cisco</div>
-          <div class="filter-pill" onclick="setFilter(this,'fortinet')">Fortinet</div>
-          <div class="filter-pill" onclick="setFilter(this,'palo')">Palo Alto</div>
-          <div class="filter-pill" onclick="setFilter(this,'aruba')">Aruba</div>
-          <div class="filters-right">
+      <!-- ── NEEDS ATTENTION ── -->
+      <div class="attn-strip" id="attn-strip" style="display:none;"></div>
+
+      <!-- ── OPEN RFQs SECTION ── -->
+      <div class="page-section" id="section-open-rfqs">
+        <div class="section-header">
+          <div class="section-title">Open RFQs <span class="section-count accent" id="section-count-open">—</span></div>
+          <div class="section-header-right">
             <div class="sort-wrap">
               <select class="sort-select" onchange="sortOpenRFQs(this.value)">
                 <option value="newest">Newest first</option>
@@ -425,34 +562,59 @@
             </div>
           </div>
         </div>
-
+        <div class="filters-row" id="filters-row">
+          <div class="filter-pill active all-pill" onclick="setFilter(this,'all')">All RFQs</div>
+          <div class="filter-pill unsubmitted-pill" onclick="setFilter(this,'unsubmitted')">Not submitted yet</div>
+          <div class="filter-pill submitted-pill" onclick="setFilter(this,'submitted')">Submitted</div>
+        </div>
         <div class="rfq-grid" id="open-rfq-grid">
           <!-- Populated by JS -->
         </div>
       </div>
 
-      <!-- ── MY BIDS TAB ── -->
-      <div id="tab-mybids" style="display:none;">
-        <div id="my-bids-list">
+      <!-- ── MY BIDS SECTION ── -->
+      <div class="page-section" id="section-my-bids">
+        <div class="section-header">
+          <div class="section-title">My Bids <span class="section-count" id="section-count-bids">—</span></div>
+        </div>
+        <div class="filters-row" style="margin-bottom:20px;">
+          <div class="filter-pill active all-pill" id="mybids-pill-all" onclick="setMyBidsFilter('all',this)">All bids</div>
+          <div class="filter-pill" id="mybids-pill-active" onclick="setMyBidsFilter('active',this)">Active</div>
+          <div class="filter-pill" id="mybids-pill-won" onclick="setMyBidsFilter('won',this)">Won</div>
+          <div class="filter-pill" id="mybids-pill-lost" onclick="setMyBidsFilter('lost',this)">Lost</div>
+          <div class="filter-pill" id="mybids-pill-cancelled" onclick="setMyBidsFilter('cancelled',this)" style="border-color:rgba(255,107,107,0.2);color:#FF6B6B;">Cancelled</div>
+        </div>
+        <div id="my-bids-list" style="display:flex;flex-direction:column;gap:14px;">
           <!-- Populated by JS -->
         </div>
       </div>
 
-      <!-- ── WON TAB ── -->
-      <div id="tab-won" style="display:none;">
-        <div class="empty-state" style="padding:40px 0;">
-          <div style="font-size:48px;margin-bottom:16px;">🏆</div>
-          <h3>3 deals won this quarter</h3>
-          <p style="color:var(--slate-light);margin-top:8px;">Total value: <strong style="color:var(--accent);">$412,400</strong></p>
+      <!-- ── WON / LOST SECTION ── -->
+      <div class="page-section" id="section-won-lost">
+        <div class="section-header">
+          <div class="section-title">Closed Deals <span class="section-count" id="section-count-closed">—</span></div>
         </div>
+        <div id="won-list"></div>
+        <div id="lost-list" style="margin-top:14px;"></div>
       </div>
 
-      <!-- ── LOST TAB ── -->
-      <div id="tab-lost" style="display:none;">
-        <div class="empty-state" style="padding:40px 0;">
-          <div style="font-size:48px;margin-bottom:16px;">📊</div>
-          <h3>8 bids not selected</h3>
-          <p>Keep refining your pricing. Your win rate is trending up — 37% this quarter vs 28% last quarter.</p>
+      <!-- ── MESSAGES SECTION ── -->
+      <div class="page-section" id="section-messages">
+        <div class="section-header">
+          <div class="section-title">Messages <span class="section-count" id="section-count-messages" style="display:none;"></span></div>
+          <span style="font-size:13px;color:var(--slate);">All conversations with buyers</span>
+        </div>
+        <div class="msg-inbox">
+          <div class="msg-thread-list" id="msg-inbox-threads">
+            <div class="msg-thread-empty">Loading conversations…</div>
+          </div>
+          <div class="msg-conversation" id="msg-inbox-conv">
+            <div class="msg-conv-empty">
+              <div style="font-size:36px;">💬</div>
+              <div>Select a conversation</div>
+              <div style="font-size:12px;color:var(--slate);">Choose a thread on the left to read and reply</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -503,6 +665,488 @@
 </div>
 
 <script>
+  /* ─── SUPABASE ─── */
+  const { createClient: _createClient } = supabase;
+  const _supabase = _createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  async function signOut() {
+    await _supabase.auth.signOut();
+    window.location.href = 'bidbridge-auth_1.html';
+  }
+
+  async function loadDashboard(session) {
+    const userId = session.user.id;
+    _resellerUserId = userId;
+
+    const { data: profile } = await _supabase
+      .from('reseller_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (!profile) { window.location.href = 'bidbridge-reseller-apply_1.html'; return; }
+    if (profile.status !== 'approved') { showPendingScreen(profile); return; }
+
+    document.getElementById('sidebar-company').textContent = profile.company;
+    document.getElementById('sidebar-name').textContent = (profile.contact_first || '') + ' ' + (profile.contact_last || '');
+    document.getElementById('sidebar-avatar').textContent = (profile.contact_first?.[0] || '') + (profile.contact_last?.[0] || '');
+    document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+    // Load ALL notifications (read + unread) + rfq_cancelled for cancellation reason display
+    _notifDismissedKey = 'bb_dismissed_notifs_' + userId;
+    _notifDismissed = JSON.parse(localStorage.getItem(_notifDismissedKey) || '[]');
+
+    const [{ data: allNotifRows }, { data: cancelNotifRows }] = await Promise.all([
+      _supabase.from('notifications').select('id, type, message, rfq_id, read, created_at')
+        .eq('user_id', userId).order('created_at', { ascending: false }).limit(60),
+      _supabase.from('notifications').select('rfq_id, message')
+        .eq('user_id', userId).eq('type', 'rfq_cancelled')
+    ]);
+    _ALL_NOTIFS = allNotifRows || [];
+
+    // Build map of rfq_id -> cancellation reason message
+    window._cancelReasonMap = {};
+    (cancelNotifRows || []).forEach(function(n) {
+      if (n.rfq_id) window._cancelReasonMap[n.rfq_id] = n.message;
+    });
+    const unreadNotifs = _ALL_NOTIFS.filter(function(n) { return !n.read && !_notifDismissed.includes(n.id); });
+
+    function dismissNotif(ids) {
+      _notifDismissed = [...new Set([..._notifDismissed, ...ids])];
+      localStorage.setItem(_notifDismissedKey, JSON.stringify(_notifDismissed));
+      _supabase.from('notifications').update({ read: true }).in('id', ids);
+      // Update in-memory list
+      ids.forEach(function(id) {
+        const n = _ALL_NOTIFS.find(function(x) { return x.id === id; });
+        if (n) n.read = true;
+      });
+      updateNotifBadge();
+    }
+
+    updateNotifBadge();
+    // Show win/loss notification toasts if any unread
+    if (unreadNotifs.length > 0) {
+      const wonNotif = unreadNotifs.find(n => n.type === 'bid_won');
+      const lostNotifs = unreadNotifs.filter(n => n.type === 'bid_lost');
+      if (wonNotif) {
+        const rankAlert = document.getElementById('rank-alert');
+        const rankText = document.getElementById('rank-alert-text');
+        if (rankAlert && rankText) {
+          rankAlert.style.display = 'flex';
+          rankAlert.style.background = 'rgba(0,200,150,0.08)';
+          rankAlert.style.borderColor = 'rgba(0,200,150,0.25)';
+          rankText.innerHTML = '<strong style="color:var(--accent);">🏆 You won a bid!</strong> ' + wonNotif.message;
+          rankAlert.querySelector('button').textContent = 'View →';
+          rankAlert.querySelector('button').onclick = function() {
+            scrollToSection('section-won-lost');
+            rankAlert.style.display = 'none';
+            dismissNotif([wonNotif.id]);
+          };
+        }
+      } else if (lostNotifs.length > 0) {
+        const rankAlert = document.getElementById('rank-alert');
+        const rankText = document.getElementById('rank-alert-text');
+        if (rankAlert && rankText) {
+          rankAlert.style.display = 'flex';
+          rankText.innerHTML = '<strong style="color:var(--slate-light);">📋 Bid update:</strong> ' + lostNotifs[0].message;
+          rankAlert.querySelector('button').textContent = 'View →';
+          rankAlert.querySelector('button').onclick = function() {
+            scrollToSection('section-won-lost');
+            rankAlert.style.display = 'none';
+            dismissNotif(lostNotifs.map(n => n.id));
+          };
+        }
+      } else {
+        const updatedNotifs = unreadNotifs.filter(function(n) { return n.type === 'rfq_updated'; });
+        const cancelledNotifs = unreadNotifs.filter(function(n) { return n.type === 'rfq_cancelled'; });
+        if (updatedNotifs.length > 0) {
+          const rankAlert = document.getElementById('rank-alert');
+          const rankText = document.getElementById('rank-alert-text');
+          if (rankAlert && rankText) {
+            rankAlert.style.display = 'flex';
+            rankAlert.style.background = 'rgba(245,200,66,0.06)';
+            rankAlert.style.borderColor = 'rgba(245,200,66,0.25)';
+            rankText.innerHTML = '<strong style="color:var(--gold);">📋 RFQ Updated:</strong> ' + updatedNotifs[0].message;
+            rankAlert.querySelector('button').textContent = 'Revise bid →';
+            rankAlert.querySelector('button').onclick = function() {
+              const rfqId = updatedNotifs[0].rfq_id;
+              rankAlert.style.display = 'none';
+              dismissNotif(updatedNotifs.map(function(n) { return n.id; }));
+              scrollToSection('section-open-rfqs');
+              setTimeout(function() {
+                const rfq = (window._ALL_VENDOR_RFQS || OPEN_RFQS).find(function(r) { return r.id === rfqId; });
+                if (rfq) openBidForm(rfqId, rfq.title);
+              }, 300);
+            };
+          }
+        } else if (cancelledNotifs.length > 0) {
+          const rankAlert = document.getElementById('rank-alert');
+          const rankText = document.getElementById('rank-alert-text');
+          if (rankAlert && rankText) {
+            rankAlert.style.display = 'flex';
+            rankAlert.style.background = 'rgba(255,107,107,0.06)';
+            rankAlert.style.borderColor = 'rgba(255,107,107,0.25)';
+            rankText.innerHTML = '<strong style="color:#FF6B6B;">🚫 RFQ Cancelled:</strong> ' + cancelledNotifs[0].message;
+            rankAlert.querySelector('button').textContent = 'View bids →';
+            rankAlert.querySelector('button').onclick = function() {
+              scrollToSection('section-my-bids');
+              rankAlert.style.display = 'none';
+              dismissNotif(cancelledNotifs.map(function(n) { return n.id; }));
+            };
+          }
+        }
+      }
+    }
+
+    const { data: myVendors } = await _supabase
+      .from('reseller_vendors')
+      .select('vendor, tier')
+      .eq('reseller_id', userId)
+      .eq('verified', true);
+
+    const tiersEl = document.getElementById('sidebar-tiers');
+    if (myVendors?.length) {
+      tiersEl.innerHTML = myVendors.map(v => {
+        const tc = v.tier === 'platinum' ? 'platinum' : v.tier === 'gold' ? 'gold' : 'silver';
+        const ti = v.tier === 'platinum' ? '💠' : v.tier === 'gold' ? '⭐' : '◈';
+        const tl = v.tier.charAt(0).toUpperCase() + v.tier.slice(1);
+        return `<div class="profile-tier-row"><span class="profile-tier-vendor">${v.vendor}</span><span class="tier-chip ${tc}">${ti} ${tl}</span></div>`;
+      }).join('');
+    }
+
+    _MY_AUTHORIZED_VENDORS = myVendors || [];
+    const vendorNames = _MY_AUTHORIZED_VENDORS.map(v => v.vendor);
+    console.log('[RFQ] vendorNames:', vendorNames);
+
+    let _allVendorRfqIds = []; // hoisted so extraRfqMap can reuse the same vendor-access path
+
+if (vendorNames.length > 0) {
+      const { data: items, error: itemsErr } = await _supabase
+        .from('rfq_items')
+        .select('rfq_id, vendor')
+        .in('vendor', vendorNames);
+
+      console.log('[RFQ] rfq_items result:', items, 'error:', itemsErr);
+
+      if (items?.length) {
+        const rfqIds = [...new Set(items.map(i => i.rfq_id))];
+        _allVendorRfqIds = rfqIds;
+        const vendorsByRfq = {};
+        items.forEach(i => {
+          if (!vendorsByRfq[i.rfq_id]) vendorsByRfq[i.rfq_id] = new Set();
+          vendorsByRfq[i.rfq_id].add(i.vendor);
+        });
+
+        const { data: rfqRows, error: rfqErr } = await _supabase
+          .from('rfqs')
+          .select('*')
+          .in('id', rfqIds); // fetch all statuses; filter open/active in JS below
+
+        console.log('[RFQ] rfqs result:', rfqRows, 'error:', rfqErr);
+
+        if (rfqRows?.length) {
+          const today = new Date();
+          const allMapped = rfqRows.map(r => ({
+              id: r.id,
+              title: r.title || 'Untitled RFQ',
+              vendor: [...(vendorsByRfq[r.id] || [])].join(' · '),
+              strategy: r.strategy || 'sole',
+              tierReq: r.tier_filter || 'Silver',
+              budget: r.budget || null,
+              deadline: r.deadline ? r.deadline.slice(0, 10) : null,
+              location: r.hq_location || '—',
+              bids: r.bid_count ?? 0,
+              isNew: r.created_at && (today - new Date(r.created_at)) < 2 * 86400000,
+              description: r.notes || r.description || '',
+              status: r.status,
+              buyerId: r.buyer_id || null,
+            }));
+
+          // ALL_VENDOR_RFQS used for title lookups on won/lost bids (includes awarded/closed)
+          window._ALL_VENDOR_RFQS = allMapped;
+
+          // OPEN_RFQS only shows open/active for the Open RFQs tab, filtered by tier requirement
+          OPEN_RFQS = allMapped.filter(r => {
+            if (r.status !== 'open' && r.status !== 'active') return false;
+            // Check tier requirement — reseller must meet or exceed the RFQ's minimum tier
+            const reqLevel = TIER_ORDER[(r.tierReq || 'authorized').toLowerCase()] ?? 0;
+            if (reqLevel === 0) return true; // 'authorized' = any tier
+            const rfqVendorSet = vendorsByRfq[r.id] || new Set();
+            const myMaxLevel = Math.max(
+              ..._MY_AUTHORIZED_VENDORS
+                .filter(v => rfqVendorSet.has(v.vendor))
+                .map(v => TIER_ORDER[v.tier] ?? 0),
+              -1
+            );
+            return myMaxLevel >= reqLevel;
+          });
+          document.getElementById('stat-open-rfqs').textContent = OPEN_RFQS.length;
+          const sectionCountOpen = document.getElementById('section-count-open');
+          if (sectionCountOpen) sectionCountOpen.textContent = OPEN_RFQS.length;
+          const badgeRfqs = document.getElementById('badge-rfqs');
+          if (OPEN_RFQS.length > 0) { badgeRfqs.textContent = OPEN_RFQS.length; badgeRfqs.style.display = ''; }
+          renderOpenRFQs(OPEN_RFQS); // render immediately so cards show even if bids block fails
+        }
+      }
+    }
+
+    // Build dynamic filter pills from verified vendors
+    buildFilterPills(myVendors || []);
+
+    const { data: bidRows, error: bidErr } = await _supabase
+      .from('bids')
+      .select('id, rfq_id, total_price, notes, status, created_at, line_items')
+      .eq('reseller_id', userId)
+      .order('created_at', { ascending: false });
+
+
+
+    try {
+      if (bidRows?.length) {
+        const myBidRfqIds = [...new Set(bidRows.map(b => b.rfq_id))];
+        const { data: allBidsOnMyRfqs } = await _supabase
+          .from('bids').select('rfq_id, total_price').in('rfq_id', myBidRfqIds);
+
+        // Build lookup map from all vendor RFQs (including awarded/closed) fetched earlier
+        const extraRfqMap = {};
+        (window._ALL_VENDOR_RFQS || []).forEach(function(r) { extraRfqMap[r.id] = r; });
+
+        const rankMap = {};
+        myBidRfqIds.forEach(function(rfqId) {
+          const allPrices = (allBidsOnMyRfqs || [])
+            .filter(function(b) { return b.rfq_id === rfqId; })
+            .map(function(b) { return b.total_price; })
+            .sort(function(a, b) { return a - b; });
+          const myBid = bidRows.find(function(b) { return b.rfq_id === rfqId; });
+          const myPrice = myBid ? (myBid.total_price || 0) : 0;
+          const rank = allPrices.indexOf(myPrice) + 1 || 1;
+          rankMap[rfqId] = { rank: rank, totalBids: allPrices.length, myPrice: myPrice };
+        });
+
+        MY_BIDS = bidRows.map(function(b) {
+          const rfq = OPEN_RFQS.find(function(r) { return r.id === b.rfq_id; }) || extraRfqMap[b.rfq_id];
+          return {
+            id: b.id,
+            rfqId: b.rfq_id,
+            title: rfq ? rfq.title : ('RFQ #' + b.rfq_id.slice(0,8).toUpperCase()),
+            vendor: rfq ? rfq.vendor : '—',
+            location: rfq ? rfq.location : '—',
+            budget: rfq ? rfq.budget : null,
+            bids: rfq ? rfq.bids : 0,
+            tierReq: rfq ? rfq.tierReq : '—',
+            strategy: rfq ? rfq.strategy : 'sole',
+            deadline: rfq ? rfq.deadline : null,
+            isNew: rfq ? rfq.isNew : false,
+            description: rfq ? rfq.description : '',
+            myPrice: b.total_price || 0,
+            rank: rankMap[b.rfq_id] ? rankMap[b.rfq_id].rank : 1,
+            totalBids: rankMap[b.rfq_id] ? rankMap[b.rfq_id].totalBids : 1,
+            status: (function() {
+              // If the RFQ itself is cancelled, treat bid as cancelled regardless of bid status
+              const rfqStatus = (window._ALL_VENDOR_RFQS || []).find(function(r) { return r.id === b.rfq_id; })?.status;
+              if (rfqStatus === 'cancelled') return 'cancelled';
+              return b.status === 'accepted' ? 'won' : b.status === 'rejected' ? 'lost' : b.status === 'cancelled' ? 'cancelled' : 'pending';
+            })(),
+            buyerId: rfq ? rfq.buyerId : null,
+            unreadMessages: 0,
+            submittedAt: b.created_at ? b.created_at.slice(0, 10) : null,
+            lineItems: b.line_items || null,
+            notes: b.notes || '',
+            cancelReason: (window._cancelReasonMap || {})[b.rfq_id] || null,
+          };
+        });
+
+        OPEN_RFQS = OPEN_RFQS.map(function(rfq) {
+          return Object.assign({}, rfq, { myBid: rankMap[rfq.id] || null });
+        });
+
+        // Fetch unread message counts per rfq
+        const myBidRfqIds2 = MY_BIDS.map(b => b.rfqId);
+        if (myBidRfqIds2.length > 0) {
+          const { data: unreadMsgs } = await _supabase
+            .from('messages')
+            .select('rfq_id')
+            .in('rfq_id', myBidRfqIds2)
+            .eq('recipient_id', _resellerUserId)
+            .eq('read', false);
+          const unreadByRfq = {};
+          (unreadMsgs || []).forEach(function(m) {
+            unreadByRfq[m.rfq_id] = (unreadByRfq[m.rfq_id] || 0) + 1;
+          });
+          MY_BIDS = MY_BIDS.map(function(b) {
+            return Object.assign({}, b, { unreadMessages: unreadByRfq[b.rfqId] || 0 });
+          });
+          // Show badge in sidebar if any unread
+          const totalUnread = Object.values(unreadByRfq).reduce(function(a,b){ return a+b; }, 0);
+          if (totalUnread > 0) {
+            const badgeMsgs = document.getElementById('badge-messages');
+            if (badgeMsgs) { badgeMsgs.textContent = totalUnread; badgeMsgs.style.display = ''; }
+          }
+        }
+
+        const activeBids = MY_BIDS.filter(function(b) { return b.status === 'pending'; });
+        const wonBids = MY_BIDS.filter(function(b) { return b.status === 'won'; });
+        const lostBids = MY_BIDS.filter(function(b) { return b.status === 'lost'; });
+
+        const statBids = document.getElementById('stat-active-bids');
+        const sectionCountBids = document.getElementById('section-count-bids');
+        if (statBids) statBids.textContent = activeBids.length;
+        if (sectionCountBids) sectionCountBids.textContent = MY_BIDS.length;
+        if (MY_BIDS.length > 0) {
+          const badgeBids = document.getElementById('badge-bids');
+          if (badgeBids) { badgeBids.textContent = MY_BIDS.length; badgeBids.style.display = ''; }
+        }
+
+        // Stat: Active bids sub-label
+        const statActiveSub = document.getElementById('stat-active-bids-sub');
+        if (statActiveSub) {
+          const needAttention = MY_BIDS.filter(function(b) { return b.status === 'pending' && b.rank > 1; }).length;
+          if (needAttention > 0) { statActiveSub.textContent = needAttention + ' need attention'; statActiveSub.className = 'stat-sub warn'; }
+          else if (activeBids.length > 0) { statActiveSub.textContent = 'All bids in good standing'; statActiveSub.className = 'stat-sub up'; }
+          else { statActiveSub.textContent = 'No active bids'; statActiveSub.className = 'stat-sub'; }
+        }
+
+        // Stat: Win rate
+        const totalDecided = wonBids.length + lostBids.length;
+        const winRate = totalDecided > 0 ? Math.round((wonBids.length / totalDecided) * 100) : 0;
+        const statWinRate = document.getElementById('stat-win-rate');
+        const statWinRateSub = document.getElementById('stat-win-rate-sub');
+        if (statWinRate) statWinRate.textContent = winRate + '%';
+        if (statWinRateSub) statWinRateSub.textContent = wonBids.length + ' of ' + (totalDecided || MY_BIDS.length) + ' bids won';
+
+        // Stat: Revenue won
+        const revenueWon = wonBids.reduce(function(sum, b) { return sum + (b.myPrice || 0); }, 0);
+        const statRevenue = document.getElementById('stat-revenue');
+        const statRevenueSub = document.getElementById('stat-revenue-sub');
+        if (statRevenue) {
+          if (revenueWon >= 1000000) statRevenue.textContent = '$' + (revenueWon / 1000000).toFixed(1) + 'M';
+          else if (revenueWon >= 1000) statRevenue.textContent = '$' + Math.round(revenueWon / 1000) + 'k';
+          else statRevenue.textContent = '$' + revenueWon.toLocaleString();
+        }
+        if (statRevenueSub) {
+          statRevenueSub.textContent = wonBids.length > 0 ? wonBids.length + ' deal' + (wonBids.length !== 1 ? 's' : '') + ' closed' : 'No deals closed yet';
+          statRevenueSub.className = revenueWon > 0 ? 'stat-sub up' : 'stat-sub';
+        }
+
+        renderMyBids();
+        renderWonLost(wonBids, lostBids);
+        renderOpenRFQs(OPEN_RFQS);
+        renderNeedsAttention();
+        loadMsgThreads();
+
+        // Show new RFQ alert banner only for new RFQs with no bid yet
+        const newUnbid = OPEN_RFQS.filter(r => r.isNew && !r.myBid);
+        const banner = document.getElementById('new-rfq-banner');
+        const bannerText = document.getElementById('new-rfq-banner-text');
+        if (newUnbid.length > 0) {
+          const names = newUnbid.slice(0, 2).map(r => '<strong>' + r.title + '</strong>').join(', ');
+          const extra = newUnbid.length > 2 ? ' and ' + (newUnbid.length - 2) + ' more' : '';
+          bannerText.innerHTML = newUnbid.length === 1
+            ? 'New RFQ available: ' + names + ' — be the first to submit a bid!'
+            : newUnbid.length + ' new RFQs available: ' + names + extra + ' — get your bids in early!';
+          banner.classList.add('visible');
+        } else {
+          banner.classList.remove('visible');
+        }
+      } else {
+        renderWonLost([], []);
+        document.getElementById('new-rfq-banner').classList.remove('visible');
+        const elWR = document.getElementById('stat-win-rate'); if (elWR) elWR.textContent = '0%';
+        const elWRS = document.getElementById('stat-win-rate-sub'); if (elWRS) elWRS.textContent = '0 of 0 bids won';
+        const elRev = document.getElementById('stat-revenue'); if (elRev) elRev.textContent = '$0';
+        const elRevS = document.getElementById('stat-revenue-sub'); if (elRevS) { elRevS.textContent = 'No deals closed yet'; elRevS.className = 'stat-sub'; }
+        const elAS = document.getElementById('stat-active-bids-sub'); if (elAS) { elAS.textContent = 'No active bids'; elAS.className = 'stat-sub'; }
+      }
+    } catch(e) {
+      console.error('Bids load error:', e);
+    }
+  }
+
+  function buildFilterPills(vendors) {
+    // Static pills only: All RFQs, Not submitted yet, Submitted — no vendor pills
+  }
+
+  function renderWonLost(wonBids, lostBids) {
+    const wonEl = document.getElementById('won-list');
+    const lostEl = document.getElementById('lost-list');
+
+    if (!wonBids.length) {
+      wonEl.innerHTML = '<div class="empty-state" style="padding:40px 0;"><div style="font-size:48px;margin-bottom:16px;">🏆</div><h3>No won deals yet</h3><p style="color:var(--slate-light);margin-top:8px;">Win your first bid to see it here.</p></div>';
+    } else {
+      wonEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;">' + wonBids.map(function(b) {
+        const myPrice = b.myPrice || 0;
+        const vendorTags = b.vendor && b.vendor !== '—' ? b.vendor.split(' · ').map(function(v) { return '<span class="rfq-tag vendor">' + v + '</span>'; }).join('') : '';
+        const budgetLabel = b.budget ? '$' + b.budget.toLocaleString() : 'Not disclosed';
+        return '<div class="rfq-card" style="border-color:rgba(0,200,150,0.4);background:rgba(0,200,150,0.03);cursor:pointer;" onclick="openBidReadOnly(MY_BIDS.find(function(x){return x.id===\'' + b.id + '\';}))">' +
+          '<div class="new-tag" style="background:var(--accent);color:var(--navy);">&#127942; WON</div>' +
+          '<div class="rfq-card-top"><div>' +
+            '<div class="rfq-card-title">RFQ #' + String(b.rfqId).slice(0,8).toUpperCase() + ' &mdash; ' + b.title + '</div>' +
+            '<div class="rfq-card-sub">' + (b.description || '') + '</div>' +
+          '</div></div>' +
+          '<div class="bid-status-bar" style="background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2);display:flex;justify-content:space-between;">' +
+            '<span style="font-size:13px;color:var(--accent);font-weight:600;">&#10003; Your bid was selected!</span>' +
+            '<span style="font-size:12px;color:var(--slate-light);">Winning bid: <strong style="color:var(--accent);">$' + myPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> &middot; Submitted ' + (b.submittedAt || '—') + '</span>' +
+          '</div>' +
+          '<div class="rfq-card-meta">' +
+            '<div class="rfq-meta-item">&#128205; <strong>' + (b.location || '—') + '</strong></div>' +
+            '<div class="rfq-meta-item">&#128176; Budget: <strong>' + budgetLabel + '</strong></div>' +
+          '</div>' +
+          '<div class="rfq-card-footer"><div class="rfq-tags">' + vendorTags + '</div>' +
+            '<span style="font-size:13px;color:var(--accent);font-weight:600;">Bid closed — awarded to you</span>' +
+          '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+    }
+
+    if (!lostBids.length) {
+      lostEl.innerHTML = '<div class="empty-state" style="padding:40px 0;"><div style="font-size:48px;margin-bottom:16px;">📊</div><h3>No lost bids yet</h3><p style="color:var(--slate-light);margin-top:8px;">Bids not selected will appear here.</p></div>';
+    } else {
+      lostEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;">' + lostBids.map(function(b) {
+        const myPrice = b.myPrice || 0;
+        const vendorTags = b.vendor && b.vendor !== '—' ? b.vendor.split(' · ').map(function(v) { return '<span class="rfq-tag vendor">' + v + '</span>'; }).join('') : '';
+        const budgetLabel = b.budget ? '$' + b.budget.toLocaleString() : 'Not disclosed';
+        return '<div class="rfq-card" style="border-color:rgba(136,150,169,0.25);opacity:0.8;cursor:pointer;" onclick="openBidReadOnly(MY_BIDS.find(function(x){return x.id===\'' + b.id + '\';}))">' +
+          '<div class="new-tag" style="background:rgba(136,150,169,0.3);color:var(--slate-light);">NOT SELECTED</div>' +
+          '<div class="rfq-card-top"><div>' +
+            '<div class="rfq-card-title">RFQ #' + String(b.rfqId).slice(0,8).toUpperCase() + ' &mdash; ' + b.title + '</div>' +
+            '<div class="rfq-card-sub">' + (b.description || '') + '</div>' +
+          '</div></div>' +
+          '<div class="bid-status-bar" style="background:rgba(136,150,169,0.05);border-color:rgba(136,150,169,0.15);display:flex;justify-content:space-between;">' +
+            '<span style="font-size:13px;color:var(--slate-light);">This RFQ was awarded to another reseller</span>' +
+            '<span style="font-size:12px;color:var(--slate);">Your bid: <strong style="color:var(--slate-light);">$' + myPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> &middot; Submitted ' + (b.submittedAt || '—') + '</span>' +
+          '</div>' +
+          '<div class="rfq-card-meta">' +
+            '<div class="rfq-meta-item">&#128205; <strong>' + (b.location || '—') + '</strong></div>' +
+            '<div class="rfq-meta-item">&#128176; Budget: <strong>' + budgetLabel + '</strong></div>' +
+          '</div>' +
+          '<div class="rfq-card-footer"><div class="rfq-tags">' + vendorTags + '</div>' +
+            '<span style="font-size:13px;color:var(--slate);">Bid closed</span>' +
+          '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+    }
+
+    const closedCountEl = document.getElementById('section-count-closed');
+    if (closedCountEl) closedCountEl.textContent = wonBids.length + lostBids.length;
+  }
+
+  function showPendingScreen(profile) {
+    document.querySelector('.app-shell').innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;background:var(--navy);">
+        <div style="max-width:480px;text-align:center;">
+          <div style="font-size:56px;margin-bottom:24px;">⏳</div>
+          <h2 style="font-family:var(--font-head);font-size:28px;font-weight:700;margin-bottom:12px;">Application under review</h2>
+          <p style="color:var(--slate-light);font-size:16px;line-height:1.7;margin-bottom:28px;">Your application is currently <strong style="color:var(--gold);">${profile.status}</strong>. Our admin team will review your vendor authorizations and notify you by email.</p>
+          <p style="color:var(--slate);font-size:13px;">Applied: ${new Date(profile.applied_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</p>
+          <button onclick="signOut()" style="margin-top:28px;padding:12px 28px;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--slate-light);font-family:var(--font-body);font-size:14px;cursor:pointer;">Sign out</button>
+        </div>
+      </div>
+    `;
+  }
+
   /* ═══════════════════════════════════════════════
      MOCK DATA
      ─────────────────────────────────────────────
@@ -520,13 +1164,9 @@
      - RFQ is still open (deadline not passed)
      - Reseller has not already been disqualified
   ═══════════════════════════════════════════════ */
-  const OPEN_RFQS = [
-    { id: 4822, title: 'Fortinet SD-WAN — 12 branch offices', vendor: 'Fortinet', strategy: 'sole', tierReq: 'Gold', budget: 280000, deadline: '2026-03-29', location: 'Dallas, TX', bids: 4, isNew: true, description: 'Full SD-WAN rollout for 12 branch offices. Includes FortiGate 100F units, FortiManager, and 3-year support.' },
-    { id: 4819, title: 'Cisco data center refresh — Phoenix', vendor: 'Cisco', strategy: 'split', tierReq: 'Gold', budget: 540000, deadline: '2026-04-02', location: 'Phoenix, AZ', bids: 6, isNew: true, description: 'Nexus 9000 series core switches and UCS server refresh. Multi-vendor RFQ — Cisco lot only.' },
-    { id: 4815, title: 'Palo Alto NGFW — financial services', vendor: 'Palo Alto Networks', strategy: 'sole', tierReq: 'Platinum', budget: 195000, deadline: '2026-04-05', location: 'New York, NY', bids: 3, isNew: false, description: 'PA-5250 series deployment across 3 data centers. Panorama management and Cortex XDR required.' },
-    { id: 4810, title: 'Aruba wireless — university campus', vendor: 'Aruba', strategy: 'sole', tierReq: 'Silver', budget: 120000, deadline: '2026-04-08', location: 'Austin, TX', bids: 5, isNew: false, description: 'AP-635 access points across 8 campus buildings. ClearPass policy manager required.' },
-    { id: 4806, title: 'Fortinet firewall refresh — healthcare', vendor: 'Fortinet', strategy: 'sole', tierReq: 'Platinum', budget: 310000, deadline: '2026-04-12', location: 'Chicago, IL', bids: 2, isNew: false, description: 'HIPAA-compliant firewall refresh. FortiGate 600F series. Must include FortiAnalyzer.' },
-  ];
+  let OPEN_RFQS = [];
+  let _MY_AUTHORIZED_VENDORS = []; // { vendor, tier } for current reseller — used for tier enforcement and split-bid filtering
+  const TIER_ORDER = { authorized: 0, silver: 1, gold: 2, platinum: 3 };
 
   /*
    * ─────────────────────────────────────────────────────────────
@@ -544,44 +1184,153 @@
    * totalBids = total number of bids on this RFQ
    * ─────────────────────────────────────────────────────────────
    */
-  const MY_BIDS = [
-    { id: 1, rfqId: 4821, title: 'Network infrastructure refresh — Austin HQ', vendor: 'Cisco · Aruba', myPrice: 137200, myDelivery: '2026-04-18', rank: 1, totalBids: 7, status: 'leading', deadline: '2026-03-29', unreadMessages: 2, submittedAt: '2026-03-24' },
-    { id: 2, rfqId: 4818, title: 'Fortinet SD-WAN — retail chain', vendor: 'Fortinet', myPrice: 224500, myDelivery: '2026-04-25', rank: 2, totalBids: 5, status: 'pending', deadline: '2026-03-31', unreadMessages: 1, submittedAt: '2026-03-22' },
-    { id: 3, rfqId: 4812, title: 'Palo Alto refresh — law firm', vendor: 'Palo Alto Networks', myPrice: 88900, myDelivery: '2026-04-20', rank: 3, totalBids: 6, status: 'pending', deadline: '2026-04-03', unreadMessages: 0, submittedAt: '2026-03-21' },
-    { id: 4, rfqId: 4808, title: 'Cisco Meraki — retail rollout', vendor: 'Cisco', myPrice: 156000, myDelivery: '2026-05-01', rank: 1, totalBids: 4, status: 'leading', deadline: '2026-04-06', unreadMessages: 0, submittedAt: '2026-03-20' },
-    { id: 5, rfqId: 4801, title: 'Fortinet ZTNA — enterprise', vendor: 'Fortinet', myPrice: 412000, myDelivery: '2026-05-15', rank: 2, totalBids: 3, status: 'pending', deadline: '2026-04-10', unreadMessages: 0, submittedAt: '2026-03-18' },
-  ];
+  let MY_BIDS = [];
 
-  const MSG_THREADS = {
-    1: [
-      { sender: 'buyer', text: 'Can you confirm your SmartNet coverage includes all 12 switches plus the 4 Aruba APs?', time: '1 day ago' },
-      { sender: 'reseller', text: 'Yes — our bid covers 3-year SmartNet on all Cisco units and 1-year Aruba support. Happy to extend Aruba to 3 years for an additional $3,200.', time: '1 day ago' },
-      { sender: 'buyer', text: 'Great, please include that in your updated bid notes.', time: '18 hours ago' },
-    ],
-    2: [
-      { sender: 'buyer', text: 'Does your bid include on-site installation at all 8 locations?', time: '2 days ago' },
-    ],
-  };
-
-  let activeTab = 'open';
-  let activeMsgBid = null;
+  let _resellerUserId = null;  // set on login, used by messaging functions
+  let activeMsgBid = null;    // stores rfq_id
+  let activeMsgBuyerId = null;
   let activeReviseBid = null;
+  let _ALL_NOTIFS = [];           // all notifications for the current user
+  let _notifDismissedKey = '';
+  let _notifDismissed = [];
+  let _MSG_THREADS = [];          // all conversation threads for the inbox
+  let _ACTIVE_THREAD_RFQ_ID = null;
+  let _ACTIVE_THREAD_BUYER_ID = null;
 
-  /* ─── TAB SWITCHING ─── */
-  function switchTab(tab, btn) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    ['open','mybids','won','lost'].forEach(t => {
-      document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
-    });
-    activeTab = tab;
+  /* ─── SECTION NAVIGATION ─── */
+  function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const sectionNavMap = {
+      'section-open-rfqs': 'nav-browse',
+      'section-my-bids': 'nav-mybids',
+      'section-won-lost': 'nav-won',
+      'section-messages': 'nav-messages',
+    };
+    document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
+    const navId = sectionNavMap[id] || 'nav-dashboard';
+    const navEl = document.getElementById(navId);
+    if (navEl) navEl.classList.add('active');
+  }
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
+    const navEl = document.getElementById('nav-dashboard');
+    if (navEl) navEl.classList.add('active');
+  }
+
+  /* ─── NOTIFICATION PANEL ─── */
+  function updateNotifBadge() {
+    const unread = _ALL_NOTIFS.filter(function(n) { return !n.read && !_notifDismissed.includes(n.id); });
+    const badge1 = document.getElementById('notif-badge');
+    const badge2 = document.getElementById('notif-drawer-badge');
+    const label = document.getElementById('notif-unread-label');
+    if (badge1) { badge1.textContent = unread.length; badge1.style.display = unread.length > 0 ? '' : 'none'; }
+    if (badge2) { badge2.textContent = unread.length; badge2.style.display = unread.length > 0 ? '' : 'none'; }
+    if (label) label.textContent = unread.length > 0 ? unread.length + ' unread' : 'All caught up';
+  }
+
+  function getNotifIcon(type) {
+    const icons = { bid_won: '🏆', bid_lost: '📋', bid_submitted: '💼', rfq_updated: '✏️', rfq_cancelled: '🚫', new_message: '💬', rank_changed: '📈' };
+    return icons[type] || '🔔';
+  }
+
+  function getNotifAccent(type) {
+    if (type === 'bid_won' || type === 'new_message') return 'accent';
+    if (type === 'rfq_cancelled' || type === 'bid_lost') return 'error';
+    return 'gold';
+  }
+
+  function notifTimeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return days + 'd ago';
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function renderNotifList() {
+    const list = document.getElementById('notif-list');
+    if (!list) return;
+    if (_ALL_NOTIFS.length === 0) {
+      list.innerHTML = '<div class="notif-empty"><div class="notif-empty-icon">🔔</div>No notifications yet</div>';
+      return;
+    }
+    list.innerHTML = _ALL_NOTIFS.map(function(n) {
+      const isUnread = !n.read && !_notifDismissed.includes(n.id);
+      const accent = getNotifAccent(n.type);
+      const accentClass = isUnread ? ' unread-' + accent : '';
+      const unreadClass = isUnread ? ' unread' : '';
+      return '<div class="notif-item' + unreadClass + accentClass + '" onclick="handleNotifClick(\'' + n.id + '\', \'' + n.type + '\', \'' + (n.rfq_id || '') + '\')">' +
+        (isUnread ? '<div class="notif-dot ' + (accent !== 'accent' ? accent : '') + '"></div>' : '<div style="width:7px;flex-shrink:0;"></div>') +
+        '<div class="notif-icon">' + getNotifIcon(n.type) + '</div>' +
+        '<div class="notif-body">' +
+          '<div class="notif-msg">' + (n.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+          '<div class="notif-time">' + notifTimeAgo(n.created_at) + '</div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function openNotifPanel() {
+    document.getElementById('notif-drawer').classList.add('open');
+    document.getElementById('notif-backdrop').classList.add('open');
+    updateNotifBadge();
+    renderNotifList();
+  }
+
+  function closeNotifPanel() {
+    document.getElementById('notif-drawer').classList.remove('open');
+    document.getElementById('notif-backdrop').classList.remove('open');
+  }
+
+  function handleNotifClick(id, type, rfqId) {
+    // Mark as read
+    const notif = _ALL_NOTIFS.find(function(n) { return n.id === id; });
+    if (notif && !notif.read) {
+      notif.read = true;
+      _notifDismissed = [...new Set([..._notifDismissed, id])];
+      localStorage.setItem(_notifDismissedKey, JSON.stringify(_notifDismissed));
+      _supabase.from('notifications').update({ read: true }).eq('id', id);
+      updateNotifBadge();
+      renderNotifList();
+    }
+    // Navigate to relevant section
+    closeNotifPanel();
+    if (type === 'bid_won' || type === 'bid_lost') { scrollToSection('section-won-lost'); }
+    else if (type === 'rfq_updated' || type === 'rfq_cancelled') { scrollToSection('section-open-rfqs'); }
+    else if (type === 'new_message') {
+      // Open the message thread for this RFQ if we can find it
+      const bid = MY_BIDS.find(function(b) { return b.rfqId === rfqId; });
+      if (bid) { setTimeout(function() { openMsg(bid.rfqId, bid.title); }, 200); }
+      else { scrollToSection('section-my-bids'); }
+    }
+    else { scrollToSection('section-my-bids'); }
+  }
+
+  function markAllNotifsRead() {
+    const unreadIds = _ALL_NOTIFS.filter(function(n) { return !n.read; }).map(function(n) { return n.id; });
+    if (unreadIds.length === 0) return;
+    _ALL_NOTIFS.forEach(function(n) { n.read = true; });
+    _notifDismissed = [...new Set([..._notifDismissed, ...unreadIds])];
+    localStorage.setItem(_notifDismissedKey, JSON.stringify(_notifDismissed));
+    _supabase.from('notifications').update({ read: true }).in('id', unreadIds);
+    updateNotifBadge();
+    renderNotifList();
   }
 
   /* ─── FILTER ─── */
   function setFilter(el, vendor) {
     document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
-    renderOpenRFQs(vendor === 'all' ? OPEN_RFQS : OPEN_RFQS.filter(r => r.vendor.toLowerCase().includes(vendor)));
+    if (vendor === 'all') renderOpenRFQs(OPEN_RFQS);
+    else if (vendor === 'unsubmitted') renderOpenRFQs(OPEN_RFQS.filter(r => !r.myBid));
+    else if (vendor === 'submitted') renderOpenRFQs(OPEN_RFQS.filter(r => !!r.myBid));
+    else renderOpenRFQs(OPEN_RFQS.filter(r => r.vendor.toLowerCase().includes(vendor)));
   }
 
   function handleSearch() {
@@ -600,171 +1349,414 @@
   /* ─── RENDER OPEN RFQs ─── */
   function renderOpenRFQs(data) {
     const grid = document.getElementById('open-rfq-grid');
-    if (!data.length) { grid.innerHTML = '<div class="empty-state"><h3>No RFQs match your filters</h3><p>Try adjusting your vendor filter or search.</p></div>'; return; }
+    if (!data.length) { grid.innerHTML = '<div class="empty-state"><h3>No open RFQs available</h3><p style="color:var(--slate-light);">There are no open RFQs for your authorized vendors right now. Check back soon — new RFQs are posted regularly.</p></div>'; return; }
 
-    grid.innerHTML = data.map(rfq => {
+    grid.innerHTML = data.map(function(rfq) {
       const days = daysUntil(rfq.deadline);
       const dlClass = days <= 2 ? 'deadline-urgent' : days <= 5 ? 'deadline-soon' : 'deadline-ok';
-      const dlLabel = days <= 0 ? 'Deadline passed' : days === 1 ? 'Closes tomorrow' : `${days} days left`;
+      const dlLabel = days <= 0 ? 'Deadline passed' : days === 1 ? 'Closes tomorrow' : (days + ' days left');
       const budgetLabel = rfq.budget ? '$' + rfq.budget.toLocaleString() : 'Not disclosed';
+      const hasBid = !!rfq.myBid;
+      const rank = hasBid ? (rfq.myBid.rank || 1) : 0;
+      const totalBids = hasBid ? (rfq.myBid.totalBids || 1) : 0;
+      const myPrice = hasBid ? (rfq.myBid.myPrice || 0) : 0;
+      const rankLabel = rank === 1 ? "You're #1 — lowest bid" : rank === 2 ? "You're in 2nd place" : ("You're ranked #" + rank);
+      const rankNudge = rank === 1 ? 'Looking good!' : rank === 2 ? 'One bid ahead of yours.' : 'Consider revising.';
+      const safeTitle = rfq.title.replace(/'/g, '&#39;');
 
-      return `
-        <div class="rfq-card ${rfq.isNew ? 'new-rfq' : ''}">
-          ${rfq.isNew ? '<div class="new-tag">NEW</div>' : ''}
-          <div class="rfq-card-top">
-            <div>
-              <div class="rfq-card-title">RFQ #${rfq.id} — ${rfq.title}</div>
-              <div class="rfq-card-sub">${rfq.description}</div>
-            </div>
-          </div>
-          <div class="rfq-card-meta">
-            <div class="rfq-meta-item">📍 <strong>${rfq.location}</strong></div>
-            <div class="rfq-meta-item">💰 Budget: <strong>${budgetLabel}</strong></div>
-            <div class="rfq-meta-item">👥 <strong>${rfq.bids}</strong> bids so far</div>
-            <div class="rfq-meta-item">⭐ Min. tier: <strong>${rfq.tierReq}</strong></div>
-          </div>
-          <div class="rfq-card-footer">
-            <div class="rfq-tags">
-              ${rfq.vendor.split(' · ').map(v => `<span class="rfq-tag vendor">${v}</span>`).join('')}
-              <span class="rfq-tag strategy">${rfq.strategy === 'split' ? 'Split bid' : 'Sole source'}</span>
-              <span class="rfq-tag tier-req">Min: ${rfq.tierReq}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:16px;">
-              <span class="deadline-label ${dlClass}">⏱ ${dlLabel}</span>
-              <button class="btn-bid" onclick="openBidForm(${rfq.id}, '${rfq.title}')">Submit bid →</button>
-            </div>
-          </div>
-        </div>
-      `;
+      const isLeading = hasBid && rank === 1;
+      const bidColor = isLeading ? 'var(--accent)' : 'var(--gold)';
+      const bidColorRgb = isLeading ? '0,200,150' : '245,200,66';
+      const newTag = rfq.isNew && !hasBid ? '<div class="new-tag">NEW</div>' : '';
+      const bidTag = hasBid ? '<div class="new-tag" style="background:rgba(' + bidColorRgb + ',1);color:var(--navy);">BID SUBMITTED</div>' : '';
+      const bidBar = hasBid ? (
+        '<div class="bid-status-bar" style="background:rgba(' + bidColorRgb + ',0.06);border-color:rgba(' + bidColorRgb + ',0.2);">' +
+          '<div class="bid-status-left">' +
+            '<span class="bid-status-badge" style="background:rgba(' + bidColorRgb + ',0.12);color:' + bidColor + ';border-color:rgba(' + bidColorRgb + ',0.3);">&#10003; Bid submitted</span>' +
+            '<span class="bid-rank-pill">' + rankLabel + ' <span style="color:var(--slate);margin-left:4px;">&#183; ' + rankNudge + '</span></span>' +
+          '</div>' +
+          '<span style="font-size:12px;color:var(--slate-light);">Your bid: <strong style="color:var(--white);">$' + myPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> &#183; ' + totalBids + ' total bid' + (totalBids !== 1 ? 's' : '') + '</span>' +
+        '</div>'
+      ) : '';
+      const vendorTags = rfq.vendor.split(' · ').map(function(v) { return '<span class="rfq-tag vendor">' + v + '</span>'; }).join('');
+      const btnStyle = hasBid ? 'background:transparent;border:1px solid rgba(' + bidColorRgb + ',0.4);color:' + bidColor + ';' : '';
+      const btnLabel = hasBid ? '&#8635; Revise bid' : 'Submit bid &rarr;';
+      const cardClass = 'rfq-card' + (rfq.isNew && !hasBid ? ' new-rfq' : '') + (hasBid ? ' bid-submitted' : '');
+
+      const cardBorderStyle = hasBid ? 'border-color:rgba(' + bidColorRgb + ',0.3);' : '';
+      return '<div class="' + cardClass + '" style="' + cardBorderStyle + '" onclick="openBidForm(\'' + rfq.id + '\', \'' + safeTitle + '\')">' +
+        newTag + bidTag +
+        '<div class="rfq-card-top"><div>' +
+          '<div class="rfq-card-title">RFQ #' + rfq.id.slice(0,8).toUpperCase() + ' &mdash; ' + rfq.title + '</div>' +
+          '<div class="rfq-card-sub">' + rfq.description + '</div>' +
+        '</div></div>' +
+        bidBar +
+        '<div class="rfq-card-meta">' +
+          '<div class="rfq-meta-item">&#11088; Min. tier: <strong>' + rfq.tierReq + '</strong></div>' +
+        '</div>' +
+        '<div class="rfq-card-footer">' +
+          '<div class="rfq-tags">' + vendorTags +
+            '<span class="rfq-tag strategy">' + (rfq.strategy === 'split' ? 'Split bid' : 'Sole source') + '</span>' +
+            '<span class="rfq-tag tier-req">Min: ' + rfq.tierReq + '</span>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:16px;">' +
+            '<span class="deadline-label ' + dlClass + '">&#9201; ' + dlLabel + '</span>' +
+            '<button class="btn-bid" style="' + btnStyle + '" onclick="event.stopPropagation();openBidForm(\'' + rfq.id + '\', \'' + safeTitle + '\')">' + btnLabel + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     }).join('');
+  }
+
+  let _myBidsFilter = 'all';
+  function setMyBidsFilter(filter, el) {
+    _myBidsFilter = filter;
+    document.querySelectorAll('#section-my-bids .filter-pill').forEach(p => p.classList.remove('active'));
+    if (el) el.classList.add('active');
+    renderMyBids();
   }
 
   /* ─── RENDER MY BIDS ─── */
   function renderMyBids() {
     const list = document.getElementById('my-bids-list');
-    list.innerHTML = MY_BIDS.map(bid => {
-      const rankConfig = bid.rank === 1
-        ? { cls: 'first', emoji: '🥇', label: '1st place', sub: `Lowest of ${bid.totalBids} bids`, nudge: null }
-        : bid.rank === 2
-        ? { cls: 'second', emoji: '🥈', label: '2nd place', sub: `${bid.totalBids - 1} others have bid`, nudge: 'One reseller is ahead of you. Consider revising.' }
-        : { cls: 'third', emoji: '🥉', label: `${bid.rank}${bid.rank===3?'rd':'th'} place`, sub: `${bid.totalBids} total bids`, nudge: 'You are not in the top 2. Consider revising your bid.' };
+    const filterStatus = _myBidsFilter === 'active' ? 'pending' : _myBidsFilter;
+    const filtered = _myBidsFilter === 'all' ? MY_BIDS : MY_BIDS.filter(function(b) { return b.status === filterStatus; });
 
-      const statusMap = {
-        leading: ['status-leading', 'Leading'],
-        pending: ['status-pending', 'Bid submitted'],
-        won: ['status-won', 'Won ✓'],
-        lost: ['status-lost', 'Not selected'],
-      };
-      const [statusCls, statusLabel] = statusMap[bid.status] || ['status-pending','Submitted'];
+    if (!filtered.length) {
+      const emptyLabel = _myBidsFilter === 'active' ? 'active' : _myBidsFilter === 'won' ? 'won' : _myBidsFilter === 'lost' ? 'lost' : '';
+      list.innerHTML = '<div class="empty-state" style="padding:40px 0;"><h3>No ' + emptyLabel + ' bids</h3></div>';
+      return;
+    }
 
-      const unread = bid.unreadMessages > 0
-        ? `<span class="unread-badge">${bid.unreadMessages}</span>` : '';
-
+    list.innerHTML = filtered.map(function(bid) {
       const days = daysUntil(bid.deadline);
-      const dlClass = days <= 2 ? 'deadline-urgent' : days <= 5 ? 'deadline-soon' : 'deadline-ok';
+      const budgetLabel = bid.budget ? '$' + bid.budget.toLocaleString() : 'Not disclosed';
+      const myPrice = bid.myPrice || 0;
+      const safeTitle = bid.title.replace(/'/g, '&#39;');
+      const vendorTags = bid.vendor.split(' · ').map(function(v) { return '<span class="rfq-tag vendor">' + v + '</span>'; }).join('');
 
-      return `
-        <div class="active-bid-card">
-          <div class="active-bid-header">
-            <div>
-              <div class="active-bid-title">RFQ #${bid.rfqId} — ${bid.title}</div>
-              <div class="active-bid-sub">${bid.vendor}</div>
-            </div>
-            <div class="rank-block">
-              <div class="rank-badge ${rankConfig.cls}">${rankConfig.emoji} ${rankConfig.label}</div>
-              <div class="rank-sub">${rankConfig.sub}</div>
-              ${rankConfig.nudge ? `<div class="rank-nudge">⚠ ${rankConfig.nudge}</div>` : ''}
-            </div>
-          </div>
-          <div class="active-bid-details">
-            <div class="bid-detail">
-              <div class="bid-detail-label">Your bid</div>
-              <div class="bid-detail-value price">$${bid.myPrice.toLocaleString()}</div>
-            </div>
-            <div class="bid-detail">
-              <div class="bid-detail-label">Delivery</div>
-              <div class="bid-detail-value">${formatDate(bid.myDelivery)}</div>
-            </div>
-            <div class="bid-detail">
-              <div class="bid-detail-label">Submitted</div>
-              <div class="bid-detail-value">${formatDate(bid.submittedAt)}</div>
-            </div>
-            <div class="bid-detail">
-              <div class="bid-detail-label">Deadline</div>
-              <div class="bid-detail-value ${dlClass}">${days <= 1 ? 'Tomorrow' : days + ' days left'}</div>
-            </div>
-          </div>
-          <div class="active-bid-footer">
-            <span class="bid-status-badge ${statusCls}">${statusLabel}</span>
-            <div class="bid-footer-actions">
-              <button class="btn-msg-small" onclick="openMsg(${bid.id}, '${bid.title}')">💬 Message buyer ${unread}</button>
-              ${bid.status !== 'won' && bid.status !== 'lost' ? `<button class="btn-revise" onclick="openRevise(${bid.id}, '${bid.title}', ${bid.myPrice}, ${bid.rank})">Revise bid</button>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
+      if (bid.status === 'won') {
+        return '<div class="rfq-card" style="border-color:rgba(0,200,150,0.4);background:rgba(0,200,150,0.03);cursor:pointer;" onclick="openBidReadOnly(MY_BIDS.find(function(b){return b.id===\'' + bid.id + '\';}))">' +
+          '<div class="new-tag" style="background:var(--accent);color:var(--navy);">&#127942; WON</div>' +
+          '<div class="rfq-card-top"><div>' +
+            '<div class="rfq-card-title">RFQ #' + bid.rfqId.slice(0,8).toUpperCase() + ' &mdash; ' + bid.title + '</div>' +
+            '<div class="rfq-card-sub">' + bid.description + '</div>' +
+          '</div></div>' +
+          '<div class="bid-status-bar" style="background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.2);">' +
+            '<span style="font-size:13px;color:var(--accent);font-weight:600;">&#10003; Your bid was selected!</span>' +
+            '<span style="font-size:12px;color:var(--slate-light);">Winning bid: <strong style="color:var(--accent);">$' + myPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> &middot; Submitted ' + (bid.submittedAt || '—') + '</span>' +
+          '</div>' +
+          '<div class="rfq-card-footer"><div class="rfq-tags">' + vendorTags + '</div>' +
+            '<span style="font-size:13px;color:var(--accent);font-weight:600;">Bid closed — awarded to you</span>' +
+          '</div>' +
+        '</div>';
+      }
+
+      if (bid.status === 'lost') {
+        return '<div class="rfq-card" style="border-color:rgba(136,150,169,0.25);opacity:0.8;cursor:pointer;" onclick="openBidReadOnly(MY_BIDS.find(function(b){return b.id===\'' + bid.id + '\';}))">' +
+          '<div class="new-tag" style="background:rgba(136,150,169,0.3);color:var(--slate-light);">NOT SELECTED</div>' +
+          '<div class="rfq-card-top"><div>' +
+            '<div class="rfq-card-title">RFQ #' + bid.rfqId.slice(0,8).toUpperCase() + ' &mdash; ' + bid.title + '</div>' +
+            '<div class="rfq-card-sub">' + bid.description + '</div>' +
+          '</div></div>' +
+          '<div class="bid-status-bar" style="background:rgba(136,150,169,0.05);border-color:rgba(136,150,169,0.15);">' +
+            '<span style="font-size:13px;color:var(--slate-light);">This RFQ was awarded to another reseller</span>' +
+            '<span style="font-size:12px;color:var(--slate);">Your bid: <strong style="color:var(--slate-light);">$' + myPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> &middot; Submitted ' + (bid.submittedAt || '—') + '</span>' +
+          '</div>' +
+          '<div class="rfq-card-footer"><div class="rfq-tags">' + vendorTags + '</div>' +
+            '<span style="font-size:13px;color:var(--slate);">Bid closed</span>' +
+          '</div>' +
+        '</div>';
+      }
+
+      if (bid.status === 'cancelled') {
+        return '<div class="rfq-card" style="border-color:rgba(255,107,107,0.25);opacity:0.75;cursor:pointer;" onclick="openBidReadOnly(MY_BIDS.find(function(b){return b.id===\'' + bid.id + '\';}))">' +
+          '<div class="new-tag" style="background:rgba(255,107,107,0.2);color:#FF6B6B;">CANCELLED</div>' +
+          '<div class="rfq-card-top"><div>' +
+            '<div class="rfq-card-title">RFQ #' + bid.rfqId.slice(0,8).toUpperCase() + ' &mdash; ' + bid.title + '</div>' +
+            '<div class="rfq-card-sub">' + bid.description + '</div>' +
+          '</div></div>' +
+          '<div class="bid-status-bar" style="background:rgba(255,107,107,0.05);border-color:rgba(255,107,107,0.2);flex-direction:column;align-items:flex-start;gap:6px;">' +
+            '<div style="display:flex;justify-content:space-between;width:100%;align-items:center;">' +
+              '<span style="font-size:13px;color:#FF6B6B;">&#x1F6AB; This RFQ was cancelled by the buyer</span>' +
+              '<span style="font-size:12px;color:var(--slate);">Your bid: <strong style="color:var(--slate-light);">$' + myPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> &middot; Submitted ' + (bid.submittedAt || '—') + '</span>' +
+            '</div>' +
+            (bid.cancelReason ? '<div style="font-size:12px;color:var(--slate-light);border-top:1px solid rgba(255,107,107,0.15);padding-top:6px;width:100%;">Reason: ' + bid.cancelReason.replace(/^.*?Reason:\s*/i, '') + '</div>' : '') +
+          '</div>' +
+          '<div class="rfq-card-footer"><div class="rfq-tags">' + vendorTags + '</div>' +
+            '<span style="font-size:13px;color:#FF6B6B;">RFQ cancelled</span>' +
+          '</div>' +
+        '</div>';
+      }
+
+      // Active/pending bid
+      const rank = bid.rank || 1;
+      const totalBids = bid.totalBids || 1;
+      const isLeading = rank === 1;
+      const bidColor = isLeading ? 'var(--accent)' : 'var(--gold)';
+      const bidColorRgb = isLeading ? '0,200,150' : '245,200,66';
+      const rankLabel = rank === 1 ? "You're #1 — lowest bid" : rank === 2 ? "You're in 2nd place" : ("You're ranked #" + rank);
+      const rankNudge = rank === 1 ? 'Looking good!' : rank === 2 ? 'One bid ahead of yours.' : 'Consider revising.';
+      const dlClass = days <= 2 ? 'deadline-urgent' : days <= 5 ? 'deadline-soon' : 'deadline-ok';
+      const dlLabel = days <= 0 ? 'Deadline passed' : days === 1 ? 'Closes tomorrow' : (days + ' days left');
+
+      return '<div class="rfq-card bid-submitted" style="border-color:rgba(' + bidColorRgb + ',0.3);" onclick="openBidForm(\'' + bid.rfqId + '\', \'' + safeTitle + '\')">' +
+        '<div class="new-tag" style="background:rgba(' + bidColorRgb + ',1);color:var(--navy);">BID SUBMITTED</div>' +
+        '<div class="rfq-card-top"><div>' +
+          '<div class="rfq-card-title">RFQ #' + bid.rfqId.slice(0,8).toUpperCase() + ' &mdash; ' + bid.title + '</div>' +
+          '<div class="rfq-card-sub">' + bid.description + '</div>' +
+        '</div></div>' +
+        '<div class="bid-status-bar" style="background:rgba(' + bidColorRgb + ',0.06);border-color:rgba(' + bidColorRgb + ',0.2);">' +
+          '<div class="bid-status-left">' +
+            '<span class="bid-status-badge" style="background:rgba(' + bidColorRgb + ',0.12);color:' + bidColor + ';border-color:rgba(' + bidColorRgb + ',0.3);">&#10003; Bid submitted</span>' +
+            '<span class="bid-rank-pill">' + rankLabel + ' <span style="color:var(--slate);margin-left:4px;">&#183; ' + rankNudge + '</span></span>' +
+          '</div>' +
+          '<span style="font-size:12px;color:var(--slate-light);">Your bid: <strong style="color:var(--white);">$' + myPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> &#183; ' + totalBids + ' total bid' + (totalBids !== 1 ? 's' : '') + ' &#183; Submitted ' + (bid.submittedAt || '—') + '</span>' +
+        '</div>' +
+        '<div class="rfq-card-meta">' +
+          '<div class="rfq-meta-item">&#11088; Min. tier: <strong>' + bid.tierReq + '</strong></div>' +
+        '</div>' +
+        '<div class="rfq-card-footer">' +
+          '<div class="rfq-tags">' + vendorTags +
+            '<span class="rfq-tag strategy">' + (bid.strategy === 'split' ? 'Split bid' : 'Sole source') + '</span>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<span class="deadline-label ' + dlClass + '">&#9201; ' + dlLabel + '</span>' +
+            '<button class="btn-bid" style="background:transparent;border:1px solid rgba(' + bidColorRgb + ',0.4);color:' + bidColor + ';" onclick="event.stopPropagation();openBidForm(\'' + bid.rfqId + '\', \'' + safeTitle + '\')">&#8635; Revise bid</button>' +
+            '<button class="btn-msg-small" onclick="event.stopPropagation();openMsg(\'' + bid.rfqId + '\', \'' + safeTitle + '\')">&#x1F4AC; Message' + (bid.unreadMessages > 0 ? ' <span class="unread-badge">' + bid.unreadMessages + '</span>' : '') + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     }).join('');
   }
 
-  /* ─── MESSAGING ─── */
-  function openMsg(bidId, rfqTitle) {
-    activeMsgBid = bidId;
-    document.getElementById('msg-title').textContent = 'Message buyer — ' + rfqTitle;
-    const thread = document.getElementById('msg-thread');
-    const msgs = MSG_THREADS[bidId] || [];
-    if (!msgs.length) {
-      thread.innerHTML = `<div style="text-align:center;padding:32px;color:var(--slate);font-size:13px;">No messages yet. Ask the buyer a question about this RFQ.</div>`;
-    } else {
-      thread.innerHTML = msgs.map(m => `
-        <div>
-          <div class="msg-sender">${m.sender === 'reseller' ? 'You (NetStar Solutions)' : 'Buyer #4821 (anonymous)'}</div>
-          <div class="msg-bubble ${m.sender}">${m.text}</div>
-          <div class="msg-time">${m.time}</div>
-        </div>
-      `).join('');
+  /* ─── NEEDS ATTENTION ─── */
+  function renderNeedsAttention() {
+    const strip = document.getElementById('attn-strip');
+    if (!strip) return;
+    const items = [];
+
+    // Unread messages
+    const unreadBids = MY_BIDS.filter(function(b) { return b.unreadMessages > 0; });
+    if (unreadBids.length > 0) {
+      const total = unreadBids.reduce(function(s, b) { return s + b.unreadMessages; }, 0);
+      const firstUnread = unreadBids[0];
+      items.push('<div class="attn-item msg" onclick="scrollToSection(\'section-messages\'); setTimeout(function(){ selectMsgThread(\'' + firstUnread.rfqId + '\'); }, 350);">' +
+        '<span class="attn-icon">💬</span>' +
+        '<div class="attn-text"><strong>' + total + ' unread message' + (total !== 1 ? 's' : '') + '</strong> from buyer' + (unreadBids.length > 1 ? 's across ' + unreadBids.length + ' RFQs' : ' on "' + firstUnread.title + '"') + '</div>' +
+        '<span class="attn-cta">Open thread →</span></div>');
     }
-    thread.scrollTop = thread.scrollHeight;
-    document.getElementById('msg-overlay').classList.add('open');
+
+    // Outbid (rank > 1 on active/pending bids)
+    const outbid = MY_BIDS.filter(function(b) { return b.status === 'pending' && b.rank > 1; });
+    if (outbid.length > 0) {
+      items.push('<div class="attn-item" onclick="scrollToSection(\'section-my-bids\'); setTimeout(function(){setMyBidsFilter(\'active\', document.getElementById(\'mybids-pill-active\'));}, 300);">' +
+        '<span class="attn-icon">⚠️</span>' +
+        '<div class="attn-text">You\'re outbid on <strong>' + outbid.length + ' RFQ' + (outbid.length !== 1 ? 's' : '') + '</strong> — consider revising your price</div>' +
+        '<span class="attn-cta">Review bids →</span></div>');
+    }
+
+    // Deadlines ≤ 3 days on open bids you haven't submitted
+    const urgentOpen = OPEN_RFQS.filter(function(r) { return !r.myBid && daysUntil(r.deadline) <= 3 && daysUntil(r.deadline) >= 0; });
+    if (urgentOpen.length > 0) {
+      const names = urgentOpen.slice(0,2).map(function(r) { return '<strong>' + r.title + '</strong>'; }).join(', ');
+      const extra = urgentOpen.length > 2 ? ' and ' + (urgentOpen.length - 2) + ' more' : '';
+      items.push('<div class="attn-item urgent" onclick="scrollToSection(\'section-open-rfqs\')">' +
+        '<span class="attn-icon">⏰</span>' +
+        '<div class="attn-text">Deadline in ≤ 3 days — no bid submitted: ' + names + extra + '</div>' +
+        '<span class="attn-cta">Submit bid →</span></div>');
+    }
+
+    if (items.length === 0) { strip.style.display = 'none'; return; }
+    strip.style.display = 'flex';
+    strip.innerHTML = items.join('');
   }
 
-  function closeMsg() { document.getElementById('msg-overlay').classList.remove('open'); }
+  /* ─── MESSAGES INBOX ─── */
+  function openUnreadMessage() {
+    scrollToSection('section-messages');
+    const unreadBid = MY_BIDS.find(function(b) { return b.unreadMessages > 0; });
+    if (unreadBid) setTimeout(function() { selectMsgThread(unreadBid.rfqId); }, 350);
+  }
+
+  // Called by "Message" buttons on bid cards — redirects to inbox
+  function openMsg(rfqId, rfqTitle) {
+    scrollToSection('section-messages');
+    setTimeout(function() { selectMsgThread(rfqId); }, 350);
+  }
+
+  async function loadMsgThreads() {
+    const myRfqIds = MY_BIDS.map(function(b) { return b.rfqId; });
+    if (!_resellerUserId || myRfqIds.length === 0) { renderMsgThreadList(); return; }
+
+    const [{ data: directMsgs }, { data: broadcasts }] = await Promise.all([
+      _supabase.from('messages')
+        .select('id, rfq_id, sender_id, recipient_id, sender_role, content, is_broadcast, read, created_at')
+        .or('sender_id.eq.' + _resellerUserId + ',recipient_id.eq.' + _resellerUserId)
+        .eq('is_broadcast', false)
+        .order('created_at', { ascending: false }),
+      _supabase.from('messages')
+        .select('id, rfq_id, sender_id, sender_role, content, is_broadcast, read, created_at')
+        .in('rfq_id', myRfqIds)
+        .eq('is_broadcast', true)
+        .order('created_at', { ascending: false }),
+    ]);
+
+    const allMsgs = [...(directMsgs || []), ...(broadcasts || [])];
+    const threadMap = {};
+    allMsgs.forEach(function(m) {
+      if (!threadMap[m.rfq_id]) threadMap[m.rfq_id] = { msgs: [], unread: 0 };
+      threadMap[m.rfq_id].msgs.push(m);
+      if (!m.read && !m.is_broadcast && m.sender_id !== _resellerUserId) threadMap[m.rfq_id].unread++;
+    });
+
+    _MSG_THREADS = Object.keys(threadMap).map(function(rfqId) {
+      const { msgs, unread } = threadMap[rfqId];
+      const sorted = msgs.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+      const last = sorted[0];
+      const bid = MY_BIDS.find(function(b) { return b.rfqId === rfqId; });
+      const rfqObj = (window._ALL_VENDOR_RFQS || []).find(function(r) { return r.id === rfqId; });
+      const rfqTitle = (bid ? bid.title : null) || (rfqObj ? rfqObj.title : 'RFQ #' + rfqId.slice(0,8).toUpperCase());
+      const preview = last.is_broadcast ? '📢 ' + last.content : (last.sender_id === _resellerUserId ? 'You: ' + last.content : 'Buyer: ' + last.content);
+      return { rfqId, rfqTitle, lastMsg: preview, lastMsgTime: last.created_at, unreadCount: unread, buyerId: bid ? bid.buyerId : null };
+    }).sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
+
+    // Update section badge
+    const totalUnread = _MSG_THREADS.reduce(function(s, t) { return s + t.unreadCount; }, 0);
+    const badge = document.getElementById('section-count-messages');
+    if (badge) { if (totalUnread > 0) { badge.textContent = totalUnread + ' unread'; badge.style.display = ''; badge.classList.add('warn'); } else { badge.style.display = 'none'; } }
+
+    renderMsgThreadList();
+  }
+
+  function renderMsgThreadList() {
+    const listEl = document.getElementById('msg-inbox-threads');
+    if (!listEl) return;
+    if (_MSG_THREADS.length === 0) {
+      listEl.innerHTML = '<div class="msg-thread-empty">No conversations yet.<br><span style="font-size:12px;">Use the Message button on your active bids to start a conversation.</span></div>';
+      return;
+    }
+    listEl.innerHTML = _MSG_THREADS.map(function(t) {
+      const isActive = t.rfqId === _ACTIVE_THREAD_RFQ_ID;
+      const hasUnread = t.unreadCount > 0;
+      const timeLabel = notifTimeAgo(t.lastMsgTime);
+      const preview = (t.lastMsg || '').length > 55 ? t.lastMsg.slice(0, 52) + '…' : (t.lastMsg || '');
+      return '<div class="msg-thread-item' + (isActive ? ' active' : '') + (hasUnread ? ' unread' : '') + '" onclick="selectMsgThread(\'' + t.rfqId + '\')">' +
+        '<div class="msg-thread-meta">' +
+          '<div class="msg-thread-rfq">' + t.rfqTitle.replace(/</g,'&lt;') + '</div>' +
+          '<div style="display:flex;align-items:center;gap:5px;">' +
+            (hasUnread ? '<span class="msg-thread-unread-badge">' + t.unreadCount + '</span>' : '') +
+            '<span class="msg-thread-time">' + timeLabel + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="msg-thread-preview">' + preview.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function selectMsgThread(rfqId) {
+    _ACTIVE_THREAD_RFQ_ID = rfqId;
+    const thread = _MSG_THREADS.find(function(t) { return t.rfqId === rfqId; });
+    _ACTIVE_THREAD_BUYER_ID = thread ? thread.buyerId : null;
+    renderMsgThreadList();
+
+    const convEl = document.getElementById('msg-inbox-conv');
+    if (!convEl) return;
+    const rfqTitle = thread ? thread.rfqTitle : 'Conversation';
+
+    convEl.innerHTML =
+      '<div class="msg-conv-header"><div class="msg-conv-title">' + rfqTitle.replace(/</g,'&lt;') + '</div><div class="msg-conv-sub">Buyer is anonymous — their identity is protected</div></div>' +
+      '<div class="msg-conv-thread-area" id="msg-conv-thread"><div style="text-align:center;padding:32px;color:var(--slate);font-size:13px;">Loading…</div></div>' +
+      '<div class="msg-conv-compose">' +
+        '<textarea class="msg-textarea" id="msg-inbox-input" placeholder="Type a message to the buyer…" rows="2"></textarea>' +
+        '<button class="btn-send" onclick="sendInboxMsg()" style="white-space:nowrap;flex-shrink:0;">Send →</button>' +
+      '</div>';
+
+    if (!_ACTIVE_THREAD_BUYER_ID) {
+      document.getElementById('msg-conv-thread').innerHTML = '<div style="text-align:center;padding:32px;color:var(--slate);font-size:13px;">Could not load thread — buyer ID missing.</div>';
+      return;
+    }
+
+    const [{ data: directMsgs }, { data: broadcasts }] = await Promise.all([
+      _supabase.from('messages')
+        .select('id, sender_id, sender_role, content, is_broadcast, created_at, read')
+        .eq('rfq_id', rfqId).eq('is_broadcast', false)
+        .or('and(sender_id.eq.' + _resellerUserId + ',recipient_id.eq.' + _ACTIVE_THREAD_BUYER_ID + '),and(sender_id.eq.' + _ACTIVE_THREAD_BUYER_ID + ',recipient_id.eq.' + _resellerUserId + ')')
+        .order('created_at', { ascending: true }),
+      _supabase.from('messages')
+        .select('id, sender_id, sender_role, content, is_broadcast, created_at, read')
+        .eq('rfq_id', rfqId).eq('is_broadcast', true)
+        .order('created_at', { ascending: true }),
+    ]);
+
+    const msgs = [...(directMsgs || []), ...(broadcasts || [])].sort(function(a, b) { return new Date(a.created_at) - new Date(b.created_at); });
+
+    // Mark unread buyer→me messages as read
+    const toRead = (directMsgs || []).filter(function(m) { return m.sender_id === _ACTIVE_THREAD_BUYER_ID && !m.read; });
+    if (toRead.length > 0) {
+      await _supabase.from('messages').update({ read: true }).eq('rfq_id', rfqId).eq('sender_id', _ACTIVE_THREAD_BUYER_ID).eq('recipient_id', _resellerUserId).eq('read', false);
+      if (thread) thread.unreadCount = 0;
+      const bid = MY_BIDS.find(function(b) { return b.rfqId === rfqId; });
+      if (bid) bid.unreadMessages = 0;
+      const totalUnread = MY_BIDS.reduce(function(s, b) { return s + b.unreadMessages; }, 0);
+      const badgeMsgs = document.getElementById('badge-messages');
+      if (badgeMsgs) { if (totalUnread === 0) badgeMsgs.style.display = 'none'; else badgeMsgs.textContent = totalUnread; }
+      const badge = document.getElementById('section-count-messages');
+      if (badge) { if (totalUnread === 0) badge.style.display = 'none'; else badge.textContent = totalUnread + ' unread'; }
+      renderMsgThreadList();
+      renderNeedsAttention();
+    }
+
+    const threadEl = document.getElementById('msg-conv-thread');
+    if (!threadEl) return;
+
+    if (!msgs.length) {
+      threadEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--slate);font-size:13px;">No messages yet — start the conversation below.</div>';
+      return;
+    }
+
+    threadEl.innerHTML = msgs.map(function(m) {
+      const isMine = m.sender_id === _resellerUserId && !m.is_broadcast;
+      const senderLabel = m.is_broadcast ? '📢 Buyer (broadcast to all bidders)' : isMine ? 'You' : 'Buyer (anonymous)';
+      const bubbleClass = m.is_broadcast ? 'broadcast' : isMine ? 'reseller' : 'buyer';
+      const ts = new Date(m.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+      return '<div><div class="msg-sender">' + senderLabel + '</div><div class="msg-bubble ' + bubbleClass + '">' + m.content.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div><div class="msg-time">' + ts + '</div></div>';
+    }).join('');
+    threadEl.scrollTop = threadEl.scrollHeight;
+  }
+
+  async function sendInboxMsg() {
+    const input = document.getElementById('msg-inbox-input');
+    const text = input ? input.value.trim() : '';
+    if (!text || !_ACTIVE_THREAD_RFQ_ID || !_ACTIVE_THREAD_BUYER_ID) return;
+    const sendBtn = document.querySelector('#msg-inbox-conv .btn-send');
+    if (sendBtn) sendBtn.disabled = true;
+
+    const { error } = await _supabase.from('messages').insert({
+      rfq_id: _ACTIVE_THREAD_RFQ_ID, sender_id: _resellerUserId, recipient_id: _ACTIVE_THREAD_BUYER_ID,
+      sender_role: 'reseller', content: text, is_broadcast: false, read: false,
+    });
+    if (error) { alert('Failed to send. Please try again.'); if (sendBtn) sendBtn.disabled = false; return; }
+    if (input) input.value = '';
+    if (sendBtn) sendBtn.disabled = false;
+
+    // Notify buyer
+    const bid = MY_BIDS.find(function(b) { return b.rfqId === _ACTIVE_THREAD_RFQ_ID; });
+    const rfqTitle = bid ? bid.title : 'your RFQ';
+    const snippet = text.length > 60 ? text.slice(0, 57) + '…' : text;
+    await _supabase.from('notifications').insert({ user_id: _ACTIVE_THREAD_BUYER_ID, type: 'new_message', message: '💬 New message from a reseller on "' + rfqTitle + '": "' + snippet + '"', rfq_id: _ACTIVE_THREAD_RFQ_ID, read: false });
+
+    // Update thread list preview
+    const t = _MSG_THREADS.find(function(x) { return x.rfqId === _ACTIVE_THREAD_RFQ_ID; });
+    if (t) { t.lastMsg = 'You: ' + text; t.lastMsgTime = new Date().toISOString(); }
+    _MSG_THREADS.sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
+
+    selectMsgThread(_ACTIVE_THREAD_RFQ_ID);
+  }
+
+
+  function closeMsg() { const o = document.getElementById('msg-overlay'); if (o) o.classList.remove('open'); }
   function closeMsgIfOutside(e) { if (e.target === document.getElementById('msg-overlay')) closeMsg(); }
-
-  function sendMsg() {
-    const input = document.getElementById('msg-input');
-    const text = input.value.trim();
-    if (!text) return;
-
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — Reseller sends message
-     *
-     * await fetch('/api/rfq/message', {
-     *   method: 'POST',
-     *   headers: {
-     *     'Content-Type': 'application/json',
-     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
-     *   },
-     *   body: JSON.stringify({
-     *     rfqId: activeMsgBid,
-     *     type: 'direct',
-     *     message: text,
-     *     senderType: 'reseller'
-     *   })
-     * });
-     * ─────────────────────────────────────────────────────────────
-     */
-    const thread = document.getElementById('msg-thread');
-    const el = document.createElement('div');
-    el.innerHTML = `
-      <div class="msg-sender">You (NetStar Solutions)</div>
-      <div class="msg-bubble reseller">${text}</div>
-      <div class="msg-time">Just now</div>
-    `;
-    thread.appendChild(el);
-    thread.scrollTop = thread.scrollHeight;
-    input.value = '';
-  }
 
   /* ─── REVISE BID ─── */
   function openRevise(bidId, title, currentPrice, rank) {
@@ -816,16 +1808,455 @@
   }
 
   /* ─── BID FORM ─── */
-  function openBidForm(rfqId, title) {
-    alert(`Opening bid form for RFQ #${rfqId}: ${title}\n\nThis will link to the Submit Bid page (to be built next).`);
+  let _currentBidRfqId = null;
+  let _currentBidItems = [];
+
+  async function openBidForm(rfqId, title) {
+    _currentBidRfqId = rfqId;
+    _currentBidItems = [];
+
+    const modal = document.getElementById('bid-modal');
+    const body = document.getElementById('bid-modal-body');
+    const footer = document.getElementById('bid-modal-footer');
+
+    // Check if this is a revision (existing bid in MY_BIDS)
+    const existingBid = MY_BIDS.find(function(b) { return b.rfqId === rfqId; });
+    const isRevision = !!existingBid;
+
+    document.getElementById('bid-modal-title').textContent = isRevision ? 'Revise Bid' : 'Submit Bid';
+    document.getElementById('bid-modal-subtitle').textContent = 'RFQ — ' + title;
+    body.innerHTML = '<p style="color:var(--slate-light);font-size:13px;">Loading line items…</p>';
+    footer.style.display = 'none';
+    modal.classList.remove('hidden');
+
+    // Fetch line items + sku_updated_at + strategy for this RFQ
+    const [{ data: rawItems, error }, { data: rfqMeta }] = await Promise.all([
+      _supabase.from('rfq_items').select('id, vendor, sku, quantity, description').eq('rfq_id', rfqId).order('vendor'),
+      _supabase.from('rfqs').select('sku_updated_at, strategy, notes').eq('id', rfqId).single(),
+    ]);
+
+    if (error || !rawItems?.length) {
+      body.innerHTML = '<p style="color:var(--error);">Could not load line items. Please try again.</p>';
+      footer.innerHTML = '<button class="btn-cancel-bid" onclick="closeBidModal()">Close</button>';
+      footer.style.display = 'flex';
+      return;
+    }
+
+    // For split-bid RFQs, only show items for vendors this reseller is authorized to sell
+    const isSplitBid = rfqMeta?.strategy === 'split';
+    const myVendorNames = _MY_AUTHORIZED_VENDORS.map(v => v.vendor);
+    const items = isSplitBid
+      ? rawItems.filter(i => myVendorNames.includes(i.vendor))
+      : rawItems;
+
+    if (isSplitBid && items.length === 0) {
+      body.innerHTML = '<p style="color:var(--slate-light);font-size:13px;">This is a split-bid RFQ. None of the vendors in this RFQ match your authorized vendor list.</p>';
+      footer.innerHTML = '<button class="btn-cancel-bid" onclick="closeBidModal()">Close</button>';
+      footer.style.display = 'flex';
+      return;
+    }
+
+    if (isSplitBid) {
+      document.getElementById('bid-modal-title').textContent = isRevision ? 'Revise Bid — Split' : 'Submit Bid — Your Vendors Only';
+    }
+
+    _currentBidItems = items;
+    footer.style.display = 'flex';
+    footer.querySelector('#bid-error').style.display = 'none';
+
+    const skuUpdatedAt = rfqMeta?.sku_updated_at ? new Date(rfqMeta.sku_updated_at) : null;
+
+    // Build rank nudge banner for revisions
+    const rank = existingBid ? (existingBid.rank || 1) : 1;
+    const totalBids = existingBid ? (existingBid.totalBids || 1) : 1;
+    const prevPrice = existingBid ? existingBid.myPrice : 0;
+    let nudgeBanner = '';
+    if (isRevision) {
+      const isLeading = rank === 1;
+      const nudgeColor = isLeading ? '0,200,150' : '245,200,66';
+      const nudgeMsg = isLeading
+        ? 'You\'re currently <strong>#1 — the lowest bid</strong> at $' + prevPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '. Update your prices below or keep them the same.'
+        : 'You\'re currently <strong>ranked #' + rank + ' of ' + totalBids + ' bids</strong>. Your last bid was $' + prevPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '. Submit a lower price to move up.';
+      nudgeBanner = '<div style="background:rgba(' + nudgeColor + ',0.07);border:1px solid rgba(' + nudgeColor + ',0.2);border-radius:9px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--slate-light);">' +
+        '<span style="color:rgba(' + nudgeColor + ',1);font-weight:600;margin-right:6px;">' + (isLeading ? '✓' : '⚠') + '</span>' + nudgeMsg +
+        '</div>';
+    }
+
+    // Build previous price map by vendor|sku (IDs change on edit/reinsert)
+    const prevPriceMap = {}; // key: "vendor|sku" -> unit_price
+    const prevQtyMap = {};   // key: "vendor|sku" -> old quantity
+    let lastBidItems = [];
+    if (existingBid && existingBid.lineItems) {
+      lastBidItems = existingBid.lineItems;
+      existingBid.lineItems.forEach(function(li) {
+        const key = (li.vendor || '') + '|' + (li.sku || '');
+        prevPriceMap[key] = li.unit_price;
+        prevQtyMap[key] = li.quantity;
+      });
+    }
+
+    // Determine which items are new or have changed qty since last bid
+    const rfqChangesBanner = (function() {
+      if (!isRevision || !skuUpdatedAt) return '';
+      const lastBidDate = existingBid && existingBid.submittedAt ? new Date(existingBid.submittedAt + 'T00:00:00') : null;
+      // Only show if the SKU update happened after the reseller's last bid
+      if (!lastBidDate || skuUpdatedAt <= lastBidDate) return '';
+      const changeLines = [];
+      items.forEach(function(item) {
+        const key = item.vendor + '|' + item.sku;
+        if (!prevPriceMap[key]) {
+          changeLines.push('➕ <strong>' + item.vendor + ' — ' + (item.sku || 'item') + '</strong> added (× ' + item.quantity + ')');
+        } else if (prevQtyMap[key] && parseInt(prevQtyMap[key]) !== parseInt(item.quantity)) {
+          changeLines.push('✏️ <strong>' + item.vendor + ' — ' + (item.sku || 'item') + '</strong> qty changed: ' + prevQtyMap[key] + ' → ' + item.quantity);
+        }
+      });
+      lastBidItems.forEach(function(li) {
+        const key = (li.vendor || '') + '|' + (li.sku || '');
+        const stillExists = items.some(function(i) { return (i.vendor + '|' + i.sku) === key; });
+        if (!stillExists) changeLines.push('➖ <strong>' + (li.vendor || '') + ' — ' + (li.sku || 'item') + '</strong> removed from RFQ');
+      });
+      if (!changeLines.length) return '';
+      return '<div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.25);border-radius:9px;padding:14px 16px;margin-bottom:16px;">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">📋 RFQ Updated — review changes before repricing</div>' +
+        changeLines.map(function(l) { return '<div style="font-size:13px;color:var(--slate-light);margin-bottom:4px;">' + l + '</div>'; }).join('') +
+      '</div>';
+    })();
+
+    // Split items into existing (reseller has priced before) and new (added since last bid)
+    const existingItems = items.filter(function(i) { return !!prevPriceMap[i.vendor + '|' + i.sku]; });
+    const newItems = items.filter(function(i) { return !prevPriceMap[i.vendor + '|' + i.sku]; });
+    const orderedItems = existingItems.concat(newItems); // existing first, new at bottom
+    _currentBidItems = orderedItems;
+
+    function buildSkuRows(subset, startIdx, isNew) {
+      return subset.map(function(item, i) {
+        const idx = startIdx + i;
+        const key = item.vendor + '|' + item.sku;
+        const prevVal = prevPriceMap[key] ? prevPriceMap[key].toFixed(2) : '';
+        const oldQty = prevQtyMap[key];
+        const qtyChanged = oldQty && parseInt(oldQty) !== parseInt(item.quantity);
+        const qtyCell = qtyChanged
+          ? item.quantity.toLocaleString() + ' <span style="font-size:11px;color:var(--gold);" title="Was ' + oldQty + '">← was ' + oldQty + '</span>'
+          : item.quantity.toLocaleString();
+        const prevPriceHint = prevVal
+          ? '<div style="font-size:11px;color:var(--slate);margin-top:3px;">Last bid: $' + parseFloat(prevVal).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + ' ea</div>'
+          : '';
+        const newBadge = isNew ? '<span style="display:inline-block;font-size:10px;font-weight:700;background:rgba(0,200,150,0.15);color:var(--accent);border:1px solid rgba(0,200,150,0.3);padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle;">NEW</span>' : '';
+        return '<tr' + (isNew ? ' style="background:rgba(0,200,150,0.03);"' : '') + '>' +
+          '<td style="color:var(--slate-light);font-size:12px;">' + item.vendor + '</td>' +
+          '<td><span class="sku-part">' + item.sku + '</span>' + newBadge + (item.description ? '<div style="font-size:11px;color:var(--slate);margin-top:4px;">' + item.description + '</div>' : '') + '</td>' +
+          '<td class="sku-qty">' + qtyCell + '</td>' +
+          '<td><div class="sku-price-wrap"><span style="color:var(--slate);font-size:13px;">$</span>' +
+            '<input class="sku-price-input" id="price-' + idx + '" type="number" min="0" step="0.01" placeholder="0.00" value="' + prevVal + '" oninput="recalcBidTotal()" />' +
+          '</div>' + prevPriceHint + '</td>' +
+          '<td class="sku-line-total" id="line-total-' + idx + '">' + (prevVal ? '$' + (parseFloat(prevVal) * item.quantity).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) : '—') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    const existingRowsHtml = buildSkuRows(existingItems, 0, false);
+    const newRowsHtml = newItems.length > 0
+      ? '<tr><td colspan="5" style="padding:12px 0 6px;font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.07em;border-top:1px solid rgba(0,200,150,0.2);">New items added to this RFQ</td></tr>' +
+        buildSkuRows(newItems, existingItems.length, true)
+      : '';
+
+    const rfqObj = (window._ALL_VENDOR_RFQS || []).find(function(r) { return r.id === rfqId; });
+    const modalBudgetLabel = rfqObj?.budget ? '$' + Number(rfqObj.budget).toLocaleString() : 'Not disclosed';
+    const rfqDetailStrip = rfqObj
+      ? '<div style="display:flex;gap:20px;flex-wrap:wrap;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:var(--slate-light);">' +
+          '<span>&#128205; <strong style="color:var(--text);">' + (rfqObj.location || '—') + '</strong></span>' +
+          '<span>&#128176; Budget: <strong style="color:var(--text);">' + modalBudgetLabel + '</strong></span>' +
+          '<span>&#128101; <strong style="color:var(--text);">' + (rfqObj.bids || 0) + '</strong> bids so far</span>' +
+        '</div>'
+      : '';
+
+    const buyerNotes = rfqMeta?.notes;
+    const buyerNotesHtml = buyerNotes
+      ? '<div style="background:rgba(0,200,150,0.05);border:1px solid rgba(0,200,150,0.18);border-radius:9px;padding:12px 16px;margin-bottom:18px;">' +
+          '<div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Buyer Notes</div>' +
+          '<div style="font-size:13px;color:var(--slate-light);white-space:pre-wrap;">' + buyerNotes.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+        '</div>'
+      : '';
+
+    body.innerHTML = nudgeBanner + rfqChangesBanner + rfqDetailStrip + buyerNotesHtml +
+      '<p style="font-size:13px;color:var(--slate-light);margin-bottom:20px;">' +
+        (isRevision ? 'Update your unit prices below. The net total updates automatically.' : 'Enter your unit price for each line item. The net total updates automatically.') +
+      '</p>' +
+      '<table class="sku-table"><thead><tr>' +
+        '<th>Vendor</th><th>Part #</th><th style="text-align:center;">Qty</th><th class="right">Unit price</th><th class="right">Line total</th>' +
+      '</tr></thead><tbody>' +
+      existingRowsHtml + newRowsHtml +
+      '</tbody></table>' +
+      '<hr class="bid-divider">' +
+      '<div class="bid-total-row"><span class="bid-total-label">Net total</span><span class="bid-total-value" id="bid-net-total">$0.00</span></div>' +
+      '<hr class="bid-divider">' +
+      '<div style="margin-top:16px;"><div class="bid-notes-label">Notes to buyer (optional)</div>' +
+        '<textarea class="bid-notes-input" id="bid-notes" placeholder="Lead time, availability, warranty terms, etc.">' + (existingBid ? (existingBid.notes || '') : '') + '</textarea>' +
+      '</div>' +
+      (isRevision ? '<div id="bid-history-section"><p style="color:var(--slate);font-size:12px;margin-top:24px;">Loading bid history…</p></div>' : '');
+
+    recalcBidTotal();
+
+    // Fetch and render bid history for revisions
+    if (isRevision) {
+      const { data: { session: _sess } } = await _supabase.auth.getSession();
+      if (_sess) {
+        const { data: histRows } = await _supabase
+          .from('bid_history')
+          .select('total_price, submitted_at, line_items')
+          .eq('rfq_id', rfqId)
+          .eq('reseller_id', _sess.user.id)
+          .order('submitted_at', { ascending: false });
+
+        const histSection = document.getElementById('bid-history-section');
+        if (histSection) {
+          if (histRows && histRows.length > 0) {
+            const ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+            // histRows is newest-first; build rows HTML tracking where RFQ update falls
+            const rowsHtml = histRows.map(function(h, i) {
+              const label = ordinals[histRows.length - 1 - i] || ((histRows.length - i) + 'th');
+              const isCurrent = i === 0;
+              const date = h.submitted_at ? new Date(h.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+              const prevRow = histRows[i + 1];
+              const prevTotal = prevRow ? prevRow.total_price : null;
+
+              // Suppress delta if the RFQ was updated between this bid and the previous one
+              const thisBidDate = h.submitted_at ? new Date(h.submitted_at) : null;
+              const prevBidDate = prevRow && prevRow.submitted_at ? new Date(prevRow.submitted_at) : null;
+              const rfqChangedBetween = skuUpdatedAt && thisBidDate && prevBidDate
+                && thisBidDate > skuUpdatedAt && prevBidDate < skuUpdatedAt;
+
+              const delta = (prevTotal !== null && !rfqChangedBetween) ? h.total_price - prevTotal : null;
+              const deltaHtml = delta !== null
+                ? ' <span style="font-size:11px;color:' + (delta < 0 ? 'var(--accent)' : 'var(--error)') + ';">' + (delta < 0 ? '\u25bc' : '\u25b2') + ' $' + Math.abs(delta).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</span>'
+                : '';
+
+              // Insert RFQ change divider just before this row if the update falls between this and the previous bid
+              const rfqChangeDivider = rfqChangedBetween
+                ? '<div style="display:flex;align-items:center;gap:10px;margin:10px 0 8px;padding:8px 14px;background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;">' +
+                    '<span style="font-size:12px;color:var(--gold);">&#x270F;&#xFE0F; RFQ updated by buyer</span>' +
+                    '<span style="font-size:11px;color:var(--slate);">SKUs or quantities changed &mdash; price comparison across this line is not meaningful</span>' +
+                  '</div>'
+                : '';
+
+              return rfqChangeDivider +
+                '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,' + (isCurrent ? '0.05' : '0.02') + ');border:1px solid rgba(255,255,255,' + (isCurrent ? '0.1' : '0.05') + ');border-radius:8px;margin-bottom:6px;">' +
+                  '<div style="display:flex;align-items:center;gap:10px;">' +
+                    '<span style="font-size:12px;color:var(--slate-light);min-width:36px;">' + label + '</span>' +
+                    '<span style="font-size:12px;color:var(--slate);">' + date + '</span>' +
+                    (isCurrent ? '<span style="font-size:10px;font-weight:700;background:var(--accent);color:var(--navy);padding:2px 8px;border-radius:999px;">CURRENT</span>' : '') +
+                  '</div>' +
+                  '<div style="font-weight:600;font-size:14px;color:' + (isCurrent ? 'var(--accent)' : 'var(--white)') + ';">$' + h.total_price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + deltaHtml + '</div>' +
+                '</div>';
+            }).join('');
+
+            histSection.innerHTML =
+              '<hr class="bid-divider" style="margin-top:24px;">' +
+              '<div style="margin-top:16px;">' +
+                '<div class="bid-notes-label" style="margin-bottom:12px;">Your bid history</div>' +
+                rowsHtml +
+              '</div>';
+          } else {
+            histSection.innerHTML = '';
+          }
+        }
+      }
+    }
+  }
+
+  function recalcBidTotal() {
+    let total = 0;
+    _currentBidItems.forEach((item, idx) => {
+      const unit = parseFloat(document.getElementById('price-' + idx)?.value) || 0;
+      const lineTotal = unit * item.quantity;
+      const el = document.getElementById('line-total-' + idx);
+      if (el) el.textContent = unit > 0 ? '$' + lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+      total += lineTotal;
+    });
+    const totalEl = document.getElementById('bid-net-total');
+    if (totalEl) totalEl.textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  async function submitBid() {
+    const btn = document.getElementById('bid-submit-btn');
+    const errEl = document.getElementById('bid-error');
+    errEl.style.display = 'none';
+
+    // Validate all prices entered
+    const prices = _currentBidItems.map((item, idx) => parseFloat(document.getElementById('price-' + idx)?.value) || 0);
+    if (prices.some(p => p <= 0)) {
+      errEl.textContent = 'Please enter a price for every line item.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const netTotal = prices.reduce((sum, p, idx) => sum + p * _currentBidItems[idx].quantity, 0);
+    const notes = document.getElementById('bid-notes')?.value?.trim() || null;
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const { data: { session } } = await _supabase.auth.getSession();
+
+    // Build line items JSON for the bid
+    const lineItems = _currentBidItems.map((item, idx) => ({
+      rfq_item_id: item.id,
+      vendor: item.vendor,
+      sku: item.sku,
+      quantity: item.quantity,
+      unit_price: prices[idx],
+      line_total: prices[idx] * item.quantity,
+    }));
+
+    const { data: upsertResult, error } = await _supabase.from('bids').upsert({
+      rfq_id: _currentBidRfqId,
+      reseller_id: session.user.id,
+      total_price: netTotal,
+      notes,
+      line_items: lineItems,
+      status: 'pending',
+    }, { onConflict: 'rfq_id,reseller_id' }).select('id').single();
+
+    if (error) {
+      btn.disabled = false;
+      btn.textContent = 'Submit bid →';
+      errEl.textContent = 'Error: ' + error.message;
+      errEl.style.display = 'block';
+      return;
+    }
+
+    // Record to bid_history so buyer sees revision activity
+    if (upsertResult?.id) {
+      await _supabase.from('bid_history').insert({
+        bid_id: upsertResult.id,
+        rfq_id: _currentBidRfqId,
+        reseller_id: session.user.id,
+        total_price: netTotal,
+        line_items: lineItems,
+      });
+    }
+
+    // Notify the buyer
+    try {
+      const rfqTitle = (window._ALL_VENDOR_RFQS || []).find(r => r.id === _currentBidRfqId)?.title || 'your RFQ';
+      const { data: rfqRow } = await _supabase
+        .from('rfqs')
+        .select('buyer_id')
+        .eq('id', _currentBidRfqId)
+        .single();
+      if (rfqRow?.buyer_id) {
+        await _supabase.from('notifications').insert({
+          user_id: rfqRow.buyer_id,
+          type: 'bid_submitted',
+          rfq_id: _currentBidRfqId,
+          message: `A new bid of $${netTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} was submitted on "${rfqTitle}".`,
+          read: false,
+        });
+      }
+    } catch (e) { /* non-blocking */ }
+
+    // Show success state
+    document.getElementById('bid-modal-footer').style.display = 'none';
+    document.getElementById('bid-modal-body').innerHTML = `
+      <div class="bid-success">
+        <div class="bid-success-icon">✅</div>
+        <div class="bid-success-title">Bid submitted!</div>
+        <div class="bid-success-sub">Your bid of <strong style="color:var(--accent);">$${netTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> has been sent to the buyer.<br>You'll be notified when they respond.</div>
+        <button class="btn-submit-bid" style="margin-top:24px;" onclick="closeBidModal()">Done</button>
+      </div>
+    `;
+  }
+
+  function closeBidModal() {
+    document.getElementById('bid-modal').classList.add('hidden');
+    _currentBidRfqId = null;
+    _currentBidItems = [];
+  }
+
+  function openBidReadOnly(bid) {
+    const modal = document.getElementById('bid-modal');
+    const body = document.getElementById('bid-modal-body');
+    const footer = document.getElementById('bid-modal-footer');
+
+    const statusLabel = bid.status === 'won' ? '🏆 Won' : bid.status === 'cancelled' ? '🚫 Cancelled' : '📋 Submitted';
+    const statusColor = bid.status === 'won' ? 'var(--accent)' : bid.status === 'cancelled' ? '#FF6B6B' : 'var(--gold)';
+
+    document.getElementById('bid-modal-title').textContent = 'Bid Summary';
+    document.getElementById('bid-modal-subtitle').textContent = 'RFQ #' + bid.rfqId.slice(0,8).toUpperCase() + ' — ' + bid.title;
+    footer.innerHTML = '<button class="btn-cancel-bid" onclick="closeBidModal()">Close</button>';
+    footer.style.display = 'flex';
+
+    const lineItems = bid.lineItems;
+    let tableHtml = '';
+    if (lineItems && Array.isArray(lineItems) && lineItems.length > 0) {
+      const rows = lineItems.map(function(item) {
+        const qty = item.quantity || item.qty || 1;
+        const unitPrice = item.unit_price || item.unitPrice || item.price || 0;
+        const lineTotal = item.line_total || item.lineTotal || (qty * unitPrice) || 0;
+        return '<tr>' +
+          '<td style="padding:10px 8px;color:var(--slate-light);font-size:13px;">' + (item.vendor || '—') + '</td>' +
+          '<td style="padding:10px 8px;color:var(--accent);font-size:13px;font-weight:500;">' + (item.sku || item.part_number || '—') + '</td>' +
+          '<td style="padding:10px 8px;color:var(--white);text-align:center;">' + qty + '</td>' +
+          '<td style="padding:10px 8px;color:var(--white);text-align:right;">$' + parseFloat(unitPrice).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+          '<td style="padding:10px 8px;color:var(--white);text-align:right;font-weight:600;">$' + parseFloat(lineTotal).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+        '</tr>';
+      }).join('');
+      tableHtml = '<table style="width:100%;border-collapse:collapse;">' +
+        '<thead><tr style="border-bottom:1px solid rgba(255,255,255,0.08);">' +
+          '<th style="padding:8px;text-align:left;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;">Vendor</th>' +
+          '<th style="padding:8px;text-align:left;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;">Part #</th>' +
+          '<th style="padding:8px;text-align:center;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;">Qty</th>' +
+          '<th style="padding:8px;text-align:right;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;">Unit Price</th>' +
+          '<th style="padding:8px;text-align:right;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;">Line Total</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody>' +
+      '</table>';
+    } else {
+      tableHtml = '<p style="color:var(--slate);font-size:13px;">No line item detail available for this bid.</p>';
+    }
+
+    const roRfqObj = (window._ALL_VENDOR_RFQS || []).find(function(r) { return r.id === bid.rfqId; });
+    const roBudgetLabel = roRfqObj?.budget ? '$' + Number(roRfqObj.budget).toLocaleString() : 'Not disclosed';
+    const roDetailStrip = roRfqObj
+      ? '<div style="display:flex;gap:20px;flex-wrap:wrap;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:var(--slate-light);">' +
+          '<span>&#128205; <strong style="color:var(--text);">' + (roRfqObj.location || '—') + '</strong></span>' +
+          '<span>&#128176; Budget: <strong style="color:var(--text);">' + roBudgetLabel + '</strong></span>' +
+          '<span>&#128101; <strong style="color:var(--text);">' + (roRfqObj.bids || 0) + '</strong> bids so far</span>' +
+        '</div>'
+      : '';
+
+    body.innerHTML = roDetailStrip +
+      '<div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">' +
+        '<div style="flex:1;min-width:120px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;">' +
+          '<div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Status</div>' +
+          '<div style="font-size:15px;font-weight:600;color:' + statusColor + ';">' + statusLabel + '</div>' +
+        '</div>' +
+        '<div style="flex:1;min-width:120px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;">' +
+          '<div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Total Bid</div>' +
+          '<div style="font-size:18px;font-weight:700;font-family:var(--font-head);color:var(--accent);">$' + (bid.myPrice || 0).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
+        '</div>' +
+        '<div style="flex:1;min-width:120px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 16px;">' +
+          '<div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Submitted</div>' +
+          '<div style="font-size:15px;font-weight:500;color:var(--white);">' + (bid.submittedAt || '—') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">Line-by-line quote</div>' +
+      '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden;padding:4px 8px;">' +
+        tableHtml +
+        '<div style="border-top:1px solid rgba(255,255,255,0.08);padding:10px 8px;text-align:right;font-size:14px;color:var(--slate);">Net total: <strong style="color:var(--accent);font-size:16px;margin-left:8px;">$' + (bid.myPrice || 0).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong></div>' +
+      '</div>' +
+      (bid.notes ? '<div style="margin-top:16px;"><div style="font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Notes</div><div style="font-size:13px;color:var(--slate-light);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:10px 14px;">' + bid.notes + '</div></div>' : '');
+
+    modal.classList.remove('hidden');
   }
 
   /* ─── DATE HELPERS ─── */
   function formatDate(str) {
+    if (!str) return 'TBD';
     const d = new Date(str + 'T00:00:00');
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
   function daysUntil(str) {
+    if (!str) return 999;
     const now = new Date(); now.setHours(0,0,0,0);
     return Math.ceil((new Date(str + 'T00:00:00') - now) / 86400000);
   }
@@ -833,7 +2264,52 @@
   /* ─── INIT ─── */
   renderOpenRFQs(OPEN_RFQS);
   renderMyBids();
+
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+    await loadDashboard(session);
+  })();
 </script>
+
+<!-- ─── NOTIFICATION DRAWER ─── -->
+<div class="notif-backdrop" id="notif-backdrop" onclick="closeNotifPanel()"></div>
+<div class="notif-drawer" id="notif-drawer">
+  <div class="notif-drawer-header">
+    <div class="notif-drawer-title">🔔 Notifications <span class="nav-badge gold" id="notif-drawer-badge" style="display:none"></span></div>
+    <button class="notif-drawer-close" onclick="closeNotifPanel()">×</button>
+  </div>
+  <div class="notif-drawer-actions">
+    <span class="notif-unread-count" id="notif-unread-label"></span>
+    <button class="notif-mark-all" onclick="markAllNotifsRead()">Mark all as read</button>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="notif-empty"><div class="notif-empty-icon">🔔</div>Loading…</div>
+  </div>
+</div>
+
+<!-- ─── BID MODAL ─── -->
+<div class="modal-overlay hidden" id="bid-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="bid-modal-title">Submit Bid</div>
+        <div class="modal-subtitle" id="bid-modal-subtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeBidModal()">×</button>
+    </div>
+    <div class="modal-body" id="bid-modal-body">
+      <!-- filled by JS -->
+    </div>
+    <div class="modal-footer" id="bid-modal-footer">
+      <span class="bid-error" id="bid-error"></span>
+      <div style="display:flex;gap:10px;margin-left:auto;">
+        <button class="btn-cancel-bid" onclick="closeBidModal()">Cancel</button>
+        <button class="btn-submit-bid" id="bid-submit-btn" onclick="submitBid()">Submit bid →</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

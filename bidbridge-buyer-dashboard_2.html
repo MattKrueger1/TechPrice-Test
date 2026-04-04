@@ -174,6 +174,8 @@
     background: var(--navy-mid);
     border: 1px solid var(--card-border);
     border-radius: 14px; padding: 22px 24px;
+    min-height: 110px;
+    display: flex; flex-direction: column; justify-content: space-between;
     transition: border-color .2s;
   }
   .stat-card:hover { border-color: rgba(255,255,255,0.15); }
@@ -263,6 +265,16 @@
   .rfq-table tbody tr:hover { background: rgba(255,255,255,0.03); }
   .rfq-table tbody tr:last-child td { border-bottom: none; }
 
+  /* ─── RFQ ROW EXPAND ─── */
+  .rfq-expand-row td { padding: 0 !important; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .rfq-expand-row:hover { background: transparent !important; }
+  .rfq-expand-inner { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+  .rfq-expand-inner.open { max-height: 600px; }
+  .rfq-expand-inner .bids-panel-bid-row { border-top: 1px solid rgba(255,255,255,0.05); }
+  .rfq-expand-inner .bids-panel-bid-row:first-child { border-top: none; }
+  .rfq-row-chevron { display:inline-block; transition: transform .2s; margin-left:6px; font-size:11px; color:var(--slate); }
+  .rfq-row-chevron.open { transform: rotate(180deg); }
+
   .rfq-title { font-weight: 500; color: var(--white); margin-bottom: 4px; }
   .rfq-vendors { font-size: 12px; color: var(--slate); }
 
@@ -343,6 +355,57 @@
   .empty-state h3 { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
   .empty-state p { font-size: 14px; color: var(--slate-light); max-width: 360px; margin: 0 auto 28px; }
 
+  /* ─── DASHBOARD PANELS ─── */
+  .dash-panel { display: none; }
+  .dash-panel.active { display: block; }
+
+  /* Active stat card highlight */
+  .stat-card.selected { border-color: var(--accent); background: rgba(0,200,150,0.05); }
+
+  /* Bids received panel */
+  .bids-panel-section { margin-bottom: 16px; }
+  .bids-panel-rfq-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px; cursor: pointer;
+    background: var(--navy-mid); border: 1px solid var(--card-border);
+    border-radius: 12px; margin-bottom: 8px;
+    transition: border-color .2s;
+  }
+  .bids-panel-rfq-header:hover { border-color: rgba(255,255,255,0.15); }
+  .bids-panel-rfq-header.expanded { border-color: var(--accent); border-radius: 12px 12px 0 0; margin-bottom: 0; }
+  .bids-panel-rfq-title { font-weight: 500; font-size: 14px; flex: 1; }
+  .bids-panel-rfq-meta { font-size: 12px; color: var(--slate); }
+  .bids-panel-rfq-chevron { color: var(--slate); font-size: 12px; transition: transform .2s; }
+  .bids-panel-rfq-header.expanded .bids-panel-rfq-chevron { transform: rotate(180deg); }
+  .bids-panel-bid-list {
+    display: none; border: 1px solid var(--accent);
+    border-top: none; border-radius: 0 0 12px 12px;
+    overflow: hidden; margin-bottom: 8px;
+  }
+  .bids-panel-bid-list.open { display: block; }
+  .bids-panel-bid-row {
+    display: grid; grid-template-columns: 1fr auto auto auto;
+    align-items: center; gap: 20px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px; transition: background .15s;
+  }
+  .bids-panel-bid-row:last-child { border-bottom: none; }
+  .bids-panel-bid-row:hover { background: rgba(255,255,255,0.02); }
+
+  /* Awarded panel */
+  .awarded-card {
+    background: var(--navy-mid); border: 1px solid rgba(0,200,150,0.2);
+    border-radius: 14px; padding: 20px 24px; margin-bottom: 12px;
+    display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;
+    cursor: pointer; transition: border-color .2s;
+  }
+  .awarded-card:hover { border-color: var(--accent); }
+  .awarded-card-title { font-weight: 500; margin-bottom: 4px; }
+  .awarded-card-meta { font-size: 12px; color: var(--slate); }
+  .awarded-card-price { font-family: var(--font-head); font-size: 22px; font-weight: 700; color: var(--accent); text-align: right; }
+  .awarded-card-price-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; text-align: right; margin-bottom: 4px; }
+
   /* ─── NOTIFICATION PANEL ─── */
   .notif-section { margin-bottom: 32px; }
 
@@ -374,6 +437,18 @@
     background: var(--accent); margin-top: 6px; flex-shrink: 0;
   }
   .notif-dot.read { background: transparent; border: 1px solid var(--slate); }
+
+  .new-bid-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--accent); color: var(--navy);
+    font-size: 10px; font-weight: 700; padding: 3px 9px;
+    border-radius: 999px; letter-spacing: 0.04em;
+    animation: pulse-badge 2s infinite;
+  }
+  @keyframes pulse-badge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
 
   .notif-text { font-size: 13px; line-height: 1.6; }
   .notif-text strong { color: var(--white); font-weight: 500; }
@@ -430,7 +505,7 @@
   .drawer-sku-part { color: var(--white); font-family: monospace; font-size: 13px; }
   .drawer-sku-qty { color: var(--slate-light); }
   .drawer-loading { text-align: center; padding: 60px 20px; color: var(--slate); font-size: 14px; }
-  .rfq-table tbody tr { cursor: pointer; }
+  .rfq-expand-row { cursor: default !important; }
 </style>
 </head>
 <body>
@@ -486,7 +561,7 @@
     <!-- TOP BAR -->
     <div class="topbar">
       <div class="topbar-left">
-        <h1>Dashboard</h1>
+        <h1>Buyer Dashboard</h1>
         <p id="topbar-greeting">Welcome back</p>
       </div>
 
@@ -505,96 +580,132 @@
 
       <!-- STAT CARDS -->
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card selected" id="stat-card-rfqs" style="cursor:pointer;" onclick="showPanel('rfqs', this)">
           <div class="stat-label">Active RFQs</div>
           <div class="stat-value accent" id="stat-active">—</div>
           <div class="stat-sub up" id="stat-active-sub"></div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" id="stat-bids-card" style="cursor:pointer;position:relative;" onclick="showPanel('bids', this)">
           <div class="stat-label">Total bids received</div>
           <div class="stat-value" id="stat-bids">—</div>
-          <div class="stat-sub">Across all open RFQs</div>
+          <div class="stat-sub" id="stat-bids-sub">Across all open RFQs</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" id="stat-card-review" style="cursor:pointer;" onclick="showPanel('rfqs', document.getElementById('stat-card-rfqs')); setFilter(document.querySelector('#filter-pill-review'), 'review');">
           <div class="stat-label">Awaiting your review</div>
           <div class="stat-value gold" id="stat-review">—</div>
           <div class="stat-sub">Bids ready to compare</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" id="stat-card-awarded" style="cursor:pointer;" onclick="showPanel('awarded', this)">
           <div class="stat-label">Deals awarded</div>
           <div class="stat-value" id="stat-awarded">—</div>
           <div class="stat-sub">This quarter</div>
         </div>
       </div>
 
-      <!-- NOTIFICATIONS -->
+      <!-- Recent activity always visible -->
       <div class="notif-section">
         <div class="notif-header">
           <div class="notif-title">Recent activity</div>
-          <a class="notif-see-all" href="notifications.html">See all</a>
+          <a class="notif-see-all" href="bidbridge-notifications_1.html">See all</a>
         </div>
         <div class="notif-list" id="notif-list">
           <div style="padding:20px;font-size:13px;color:var(--slate);">No recent activity yet. Activity will appear here as resellers bid on your RFQs.</div>
         </div>
       </div>
 
-      <!-- FILTERS -->
-      <div class="filters-row">
-        <div class="filter-pill active" onclick="setFilter(this, 'all')">All RFQs</div>
-        <div class="filter-pill" onclick="setFilter(this, 'active')">Active</div>
-        <div class="filter-pill" onclick="setFilter(this, 'review')">Ready to review</div>
-        <div class="filter-pill" onclick="setFilter(this, 'draft')">Drafts</div>
-        <div class="filter-pill" onclick="setFilter(this, 'closed')">Closed</div>
-        <div class="filter-pill" onclick="setFilter(this, 'awarded')">Awarded</div>
-
-        <div class="filters-right">
-          <div class="sort-wrap">
-            <select class="sort-select" onchange="sortRFQs(this.value)">
-              <option value="newest">Newest first</option>
-              <option value="deadline">Deadline soonest</option>
-              <option value="bids-desc">Most bids</option>
-              <option value="bids-asc">Fewest bids</option>
-            </select>
-          </div>
+      <!-- Activity modal -->
+      <div id="activity-modal-backdrop" onclick="closeActivityDropdown()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;"></div>
+      <div id="activity-dropdown" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:901;width:520px;max-width:92vw;background:var(--navy-mid);border:1px solid rgba(255,255,255,0.1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.5);">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.07);">
+          <span style="font-size:15px;font-weight:600;color:var(--white);">Recent activity</span>
+          <button onclick="closeActivityDropdown()" style="background:none;border:none;color:var(--slate);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;">&times;</button>
         </div>
+        <div id="activity-dropdown-list" style="max-height:calc(80vh - 60px);overflow-y:auto;display:flex;flex-direction:column;"></div>
       </div>
 
-      <!-- RFQ TABLE -->
-      <div class="rfq-table-wrap">
-        <table class="rfq-table" id="rfq-table">
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Status</th>
-              <th>Strategy</th>
-              <th>Bids</th>
-              <th>Deadline</th>
-              <th>Posted</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="rfq-tbody">
-            <!-- Populated by JS -->
-          </tbody>
-        </table>
-
-        <div class="empty-state" id="empty-state">
-          <span class="empty-icon">📋</span>
-          <h3>No RFQs found</h3>
-          <p>Try adjusting your search or filter, or post your first RFQ to get competitive bids.</p>
-          <a href="bidbridge-submit-rfq_2.html" class="btn-new-rfq" style="display:inline-flex;">＋ Post your first RFQ</a>
+      <!-- ══ PANEL: RFQs ══ -->
+      <div class="dash-panel active" id="panel-rfqs">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">My RFQs</div>
         </div>
 
-        <div class="pagination" id="pagination">
-          <span id="pagination-label">Showing 1–6 of 6 RFQs</span>
-          <div class="page-btns">
-            <button class="page-btn">‹</button>
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">›</button>
+        <div class="filters-row" id="filters-row">
+          <div class="filter-pill active" id="filter-pill-all" onclick="setFilter(this, 'all')">All RFQs</div>
+          <div class="filter-pill" id="filter-pill-active" onclick="setFilter(this, 'active')">Active</div>
+          <div class="filter-pill" id="filter-pill-review" onclick="setFilter(this, 'review')">Ready to review</div>
+          <div class="filter-pill" id="filter-pill-draft" onclick="setFilter(this, 'draft')">Drafts</div>
+          <div class="filter-pill" id="filter-pill-closed" onclick="setFilter(this, 'closed')">Closed</div>
+          <div class="filter-pill" id="filter-pill-awarded" onclick="setFilter(this, 'awarded')">Awarded</div>
+          <div class="filter-pill" id="filter-pill-cancelled" onclick="setFilter(this, 'cancelled')">Cancelled</div>
+          <div class="filters-right">
+            <div class="sort-wrap">
+              <select class="sort-select" onchange="sortRFQs(this.value)">
+                <option value="newest">Newest first</option>
+                <option value="deadline">Deadline soonest</option>
+                <option value="bids-desc">Most bids</option>
+                <option value="bids-asc">Fewest bids</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
+
+        <div class="rfq-table-wrap">
+          <table class="rfq-table" id="rfq-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Strategy</th>
+                <th>Bids</th>
+                <th>Savings</th>
+                <th>Deadline</th>
+                <th>Posted</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rfq-tbody"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state">
+            <span class="empty-icon">📋</span>
+            <h3>No RFQs found</h3>
+            <p>Try adjusting your search or filter, or post your first RFQ to get competitive bids.</p>
+            <a href="bidbridge-submit-rfq_2.html" class="btn-new-rfq" style="display:inline-flex;">＋ Post your first RFQ</a>
+          </div>
+          <div class="pagination" id="pagination">
+            <span id="pagination-label">Showing 1–6 of 6 RFQs</span>
+            <div class="page-btns">
+              <button class="page-btn">‹</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">›</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /panel-rfqs -->
+
+      <!-- ══ PANEL: Bids received ══ -->
+      <div class="dash-panel" id="panel-bids">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">Bids received</div>
+          <div style="font-size:13px;color:var(--slate);">Click an RFQ to expand its bids</div>
+        </div>
+        <!-- Filter pills for bids panel -->
+        <div class="filters-row" style="margin-bottom:20px;" id="bids-filter-row">
+          <div class="filter-pill active" id="bids-pill-all" onclick="setBidsFilter('all', this)">All RFQs</div>
+          <div class="filter-pill" id="bids-pill-active" onclick="setBidsFilter('active', this)">Active</div>
+          <div class="filter-pill" id="bids-pill-review" onclick="setBidsFilter('review', this)">Ready to review</div>
+        </div>
+        <div id="bids-panel-body">
+          <div style="padding:40px;text-align:center;color:var(--slate);font-size:13px;">Loading bids…</div>
+        </div>
+      </div><!-- /panel-bids -->
+
+      <!-- ══ PANEL: Awarded ══ -->
+      <div class="dash-panel" id="panel-awarded">
+        <div style="font-family:var(--font-head);font-size:16px;font-weight:600;margin-bottom:16px;">Deals awarded</div>
+        <div id="awarded-panel-body">
+          <div style="padding:40px;text-align:center;color:var(--slate);font-size:13px;">Loading awarded deals…</div>
+        </div>
+      </div><!-- /panel-awarded -->
 
     </div><!-- /page-body -->
   </div><!-- /main-content -->
@@ -612,6 +723,49 @@
   let activeFilter = 'all';
   let activeSearch = '';
   let activeSort = 'newest';
+
+  // Track seen bids by bid_id (more reliable than timestamps)
+  function _seenBidsKey() { return 'itpn_seen_bids'; }
+  function getSeenBids() {
+    try { return new Set(JSON.parse(localStorage.getItem(_seenBidsKey()) || '[]')); } catch { return new Set(); }
+  }
+  function markBidIdsSeen(bidIds) {
+    const seen = getSeenBids();
+    bidIds.forEach(id => seen.add(id));
+    try { localStorage.setItem(_seenBidsKey(), JSON.stringify([...seen])); } catch {}
+  }
+
+  function viewBidsForRFQ(rfqId) {
+    // Mark all bid_ids for this RFQ as seen before navigating
+    const rows = (window._dashHistoryRows || []).filter(h => h.rfq_id === rfqId);
+    markBidIdsSeen(rows.map(h => h.bid_id));
+    window.location.href = 'bidbridge-compare-bids_1.html?rfq=' + rfqId;
+  }
+
+  function refreshNewBadge() {
+    if (!window._dashHistoryRows) return;
+    const seen = getSeenBids();
+    const newEntries = window._dashHistoryRows.filter(h => !seen.has(h.bid_id));
+    const badge = document.getElementById('new-bid-badge');
+    const sub = document.getElementById('stat-bids-sub');
+    if (newEntries.length > 0) {
+      if (badge) badge.textContent = newEntries.length + ' NEW';
+      if (sub) sub.textContent = newEntries.length + ' new since last visit';
+    } else {
+      if (badge) badge.remove();
+      if (sub) sub.textContent = 'All caught up';
+    }
+  }
+
+  function markAllBidsRead(historyRows) {
+    markBidIdsSeen((historyRows || []).map(h => h.bid_id));
+    refreshNewBadge();
+  }
+
+  // Handle back-navigation (bfcache restore) — recalculate badge without full reload
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) refreshNewBadge();
+  });
 
   /* ─── INIT ─── */
   (async () => {
@@ -639,7 +793,7 @@
     /* Load RFQs with items and bid counts */
     const { data: rfqs, error } = await _supabase
       .from('rfqs')
-      .select('id, title, status, deadline, created_at, rfq_items(vendor), bids(id)')
+      .select('id, title, status, deadline, created_at, rfq_items(vendor), bids(id, total_price)')
       .eq('buyer_id', session.user.id)
       .order('created_at', { ascending: false });
 
@@ -657,6 +811,8 @@
       status: rfq.status,
       bidCount: (rfq.bids || []).length,
       maxBids: 10,
+      lowestBid: (rfq.bids || []).length > 0 ? Math.min(...(rfq.bids || []).map(b => b.total_price || 0)) : null,
+      highestEverBid: null,
       deadline: rfq.deadline,
       postedDate: rfq.created_at?.split('T')[0],
       hasNewBids: false,
@@ -664,7 +820,7 @@
 
     /* Render stats */
     const active = allRFQs.filter(r => r.status === 'active').length;
-    const totalBids = allRFQs.reduce((sum, r) => sum + r.bidCount, 0);
+    const totalBids = allRFQs.filter(r => r.status === 'open' || r.status === 'active' || r.status === 'review').reduce((sum, r) => sum + r.bidCount, 0);
     const review = allRFQs.filter(r => r.status === 'review').length;
     const awarded = allRFQs.filter(r => r.status === 'awarded').length;
 
@@ -677,11 +833,264 @@
     /* Sidebar badges — only show if count > 0 */
     const rfqBadge = document.getElementById('badge-rfqs');
     const reviewBadge = document.getElementById('badge-review');
-    if (allRFQs.length > 0) { rfqBadge.textContent = allRFQs.length; rfqBadge.style.display = ''; }
+    if (active > 0) { rfqBadge.textContent = active; rfqBadge.style.display = ''; }
     if (review > 0) { reviewBadge.textContent = review; reviewBadge.style.display = ''; }
 
     applyFilters();
+
+    // ── Bid activity notifications ──
+    // Only track bids on open/active/review RFQs — awarded and closed don't count as "new"
+    const rfqIds = allRFQs.filter(r => r.status === 'open' || r.status === 'active' || r.status === 'review').map(r => r.id);
+    if (rfqIds.length > 0) {
+      const { data: historyRows } = await _supabase
+        .from('bid_history')
+        .select('bid_id, rfq_id, reseller_id, total_price, submitted_at')
+        .in('rfq_id', rfqIds)
+        .order('submitted_at', { ascending: false })
+        .limit(50);
+
+      if (historyRows && historyRows.length > 0) {
+        // Compute highest-ever bid per RFQ for savings display
+        const highestEverByRfq = {};
+        historyRows.forEach(h => {
+          if (!highestEverByRfq[h.rfq_id] || h.total_price > highestEverByRfq[h.rfq_id]) {
+            highestEverByRfq[h.rfq_id] = h.total_price;
+          }
+        });
+        allRFQs = allRFQs.map(rfq => ({
+          ...rfq,
+          highestEverBid: highestEverByRfq[rfq.id] || null,
+        }));
+        applyFilters(); // re-render now that savings data is available
+
+        // Find new entries — bids whose bid_id hasn't been seen yet
+        const seen = getSeenBids();
+        const newEntries = historyRows.filter(h => !seen.has(h.bid_id));
+
+        window._dashHistoryRows = historyRows;
+        if (newEntries.length > 0) {
+          const card = document.getElementById('stat-bids-card');
+          const badge = document.createElement('div');
+          badge.className = 'new-bid-badge';
+          badge.id = 'new-bid-badge';
+          badge.title = 'Click to mark all as read';
+          badge.style.cursor = 'pointer';
+          badge.textContent = newEntries.length + ' NEW';
+          badge.onclick = (e) => { e.stopPropagation(); markAllBidsRead(window._dashHistoryRows); };
+          card.appendChild(badge);
+          document.getElementById('stat-bids-sub').textContent = newEntries.length + ' new since last visit';
+        }
+
+        // Fetch reseller names for activity feed
+        const resellerIds = [...new Set(historyRows.map(h => h.reseller_id))];
+        const { data: profiles } = await _supabase
+          .from('reseller_profiles')
+          .select('id, contact_first, contact_last, company')
+          .in('id', resellerIds);
+        const rpMap = {};
+        (profiles || []).forEach(p => { rpMap[p.id] = p; });
+        window._dashRpMap = rpMap;
+
+        // Build rfq title map
+        const rfqTitleMap = {};
+        allRFQs.forEach(r => { rfqTitleMap[r.id] = r.title; });
+
+        // Populate Recent activity
+        const notifList = document.getElementById('notif-list');
+        const recent = historyRows.slice(0, 20);
+        const SHOW_DEFAULT = 3;
+
+        // Build prior-lowest map: for each bid, what was the lowest price before it was submitted?
+        // historyRows is sorted newest-first, so iterate in reverse (oldest-first) to track running lowest
+        const priorLowestMap = {}; // bid_id -> lowest price among bids submitted strictly before this one
+        const chronological = [...historyRows].reverse();
+        const runningLowest = {}; // rfq_id -> current lowest price seen so far
+        chronological.forEach(h => {
+          priorLowestMap[h.bid_id] = runningLowest[h.rfq_id] !== undefined ? runningLowest[h.rfq_id] : null;
+          if (runningLowest[h.rfq_id] === undefined || h.total_price < runningLowest[h.rfq_id]) {
+            runningLowest[h.rfq_id] = h.total_price;
+          }
+        });
+
+        function buildActivityHTML(items) {
+          const seenNow = getSeenBids();
+          return items.map(h => {
+            const isNew = !seenNow.has(h.bid_id);
+            const rp = rpMap[h.reseller_id];
+            const name = rp ? ((rp.contact_first || '') + ' ' + (rp.contact_last || '')).trim() || rp.company : 'A reseller';
+            const rfqTitle = rfqTitleMap[h.rfq_id] || 'an RFQ';
+            const timeAgo = formatTimeAgo(h.submitted_at);
+            const priorLow = priorLowestMap[h.bid_id];
+            let savingsHtml = '';
+            if (priorLow !== null && h.total_price < priorLow) {
+              const saved = priorLow - h.total_price;
+              savingsHtml = ' <span style="color:#22c55e;font-size:12px;font-weight:600;">↓ $' + saved.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + ' savings</span>';
+            } else if (priorLow !== null && h.total_price >= priorLow) {
+              savingsHtml = ' <span style="color:var(--slate);font-size:12px;">· not lower than current best</span>';
+            }
+            return '<div class="notif-item' + (isNew ? ' unread' : '') + '" onclick="viewBidsForRFQ(\'' + h.rfq_id + '\')">' +
+              '<div class="notif-dot' + (isNew ? '' : ' read') + '"></div>' +
+              '<div><div class="notif-text"><strong>' + name + '</strong> submitted a bid on <strong>' + rfqTitle + '</strong> — <strong style="color:var(--accent);">$' + (h.total_price || 0).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong>' + savingsHtml + '</div>' +
+              '<div class="notif-time">' + timeAgo + '</div></div>' +
+            '</div>';
+          }).join('');
+        }
+
+        window._buildActivityHTML = buildActivityHTML;
+
+        window.openActivityDropdown = function() {
+          const dropList = document.getElementById('activity-dropdown-list');
+          dropList.innerHTML = window._buildActivityHTML(recent);
+          document.getElementById('activity-modal-backdrop').style.display = 'block';
+          document.getElementById('activity-dropdown').style.display = 'block';
+        };
+
+        function renderActivity() {
+          const visible = recent.slice(0, SHOW_DEFAULT);
+          const remaining = recent.length - SHOW_DEFAULT;
+          const showMoreBtn = remaining > 0
+            ? '<div onclick="openActivityDropdown()" style="padding:12px 16px;text-align:center;font-size:13px;color:var(--accent);cursor:pointer;border-top:1px solid rgba(255,255,255,0.05);">Show ' + remaining + ' more ▾</div>'
+            : '';
+          notifList.innerHTML = buildActivityHTML(visible) + showMoreBtn;
+        }
+
+        renderActivity();
+      }
+    }
   })();
+
+  function closeActivityDropdown() {
+    document.getElementById('activity-dropdown').style.display = 'none';
+    document.getElementById('activity-modal-backdrop').style.display = 'none';
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('activity-dropdown');
+    if (dropdown && dropdown.style.display !== 'none') {
+      const section = dropdown.closest('.notif-section');
+      if (section && !section.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    }
+  });
+
+  function formatTimeAgo(isoStr) {
+    if (!isoStr) return '—';
+    const diff = Date.now() - new Date(isoStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+
+  /* ─── PANEL SWITCHING ─── */
+  let _activeBidsFilter = 'all';
+
+  function showPanel(name, cardEl) {
+    // Deselect all stat cards
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('selected'));
+    if (cardEl) cardEl.classList.add('selected');
+    // Hide all panels, show the target
+    document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    // Render panel content if needed
+    if (name === 'bids') renderBidsPanel(_activeBidsFilter);
+    if (name === 'awarded') renderAwardedPanel();
+  }
+
+  function setBidsFilter(filter, el) {
+    _activeBidsFilter = filter;
+    document.querySelectorAll('#bids-filter-row .filter-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    renderBidsPanel(filter);
+  }
+
+  function renderBidsPanel(filter) {
+    const body = document.getElementById('bids-panel-body');
+    let rfqs = allRFQs.filter(r => r.bidCount > 0);
+    if (filter === 'active') rfqs = rfqs.filter(r => r.status === 'active');
+    else if (filter === 'review') rfqs = rfqs.filter(r => r.status === 'review');
+
+    if (rfqs.length === 0) {
+      body.innerHTML = '<div style="padding:60px;text-align:center;color:var(--slate);font-size:13px;"><div style="font-size:40px;margin-bottom:16px;">📭</div><div style="font-size:15px;font-weight:600;color:var(--white);margin-bottom:8px;">No bids yet</div><div>Bids will appear here once resellers respond to your RFQs.</div></div>';
+      return;
+    }
+
+    body.innerHTML = rfqs.map(rfq => {
+      const bidsForRfq = (window._dashHistoryRows || []).filter(h => h.rfq_id === rfq.id);
+      const lowestBid = bidsForRfq.length ? Math.min(...bidsForRfq.map(h => h.total_price || 0)) : null;
+      const statusMap = { active: 'status-active', review: 'status-review', awarded: 'status-awarded', closed: 'status-closed', cancelled: 'status-closed' };
+      const statusLabelMap = { active: 'Accepting bids', review: 'Ready to review', awarded: 'Awarded', closed: 'Closed', cancelled: 'Cancelled' };
+
+      return `
+        <div class="bids-panel-section" id="bids-section-${rfq.id}">
+          <div class="bids-panel-rfq-header" onclick="toggleBidsSection('${rfq.id}')">
+            <div class="bids-panel-rfq-title">${rfq.title}</div>
+            <span class="status-badge ${statusMap[rfq.status] || 'status-draft'}" style="font-size:11px;">${statusLabelMap[rfq.status] || rfq.status}</span>
+            <div class="bids-panel-rfq-meta">${rfq.bidCount} bid${rfq.bidCount !== 1 ? 's' : ''} · ${rfq.vendors.join(' · ')}</div>
+            ${lowestBid !== null ? `<div style="font-size:13px;font-weight:600;color:var(--accent);">From $${lowestBid.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>` : ''}
+            <div class="bids-panel-rfq-chevron">▾</div>
+          </div>
+          <div class="bids-panel-bid-list" id="bid-list-${rfq.id}">
+            ${bidsForRfq.length > 0 ? bidsForRfq.map((h, i) => {
+              const rp = (window._dashRpMap || {})[h.reseller_id];
+              const name = rp ? ((rp.contact_first || '') + ' ' + (rp.contact_last || '')).trim() || rp.company : 'Reseller';
+              const company = rp?.company || '';
+              const submitted = h.submitted_at ? new Date(h.submitted_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+              const isLowest = h.total_price === lowestBid;
+              return `<div class="bids-panel-bid-row" onclick="window.location.href='bidbridge-compare-bids_1.html?rfq=${rfq.id}'">
+                <div>
+                  <div style="font-weight:500;font-size:13px;">${name}${company ? ' <span style="color:var(--slate);font-weight:400;">· ' + company + '</span>' : ''}</div>
+                  <div style="font-size:11px;color:var(--slate);">Submitted ${submitted}</div>
+                </div>
+                ${isLowest ? '<span style="background:rgba(0,200,150,0.1);color:var(--accent);border:1px solid rgba(0,200,150,0.25);font-size:10px;font-weight:700;padding:2px 10px;border-radius:999px;white-space:nowrap;">💰 Lowest</span>' : '<span></span>'}
+                <div style="font-size:14px;font-weight:600;color:var(--white);">$${(h.total_price||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+                <button class="btn-view" onclick="event.stopPropagation();window.location.href='bidbridge-compare-bids_1.html?rfq=${rfq.id}'">Compare bids →</button>
+              </div>`;
+            }).join('') : '<div style="padding:16px 20px;font-size:13px;color:var(--slate);">No bids yet for this RFQ.</div>'}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleBidsSection(rfqId) {
+    const header = document.querySelector(`#bids-section-${rfqId} .bids-panel-rfq-header`);
+    const list = document.getElementById('bid-list-' + rfqId);
+    if (!header || !list) return;
+    const isOpen = list.classList.contains('open');
+    // Close all others
+    document.querySelectorAll('.bids-panel-rfq-header').forEach(h => h.classList.remove('expanded'));
+    document.querySelectorAll('.bids-panel-bid-list').forEach(l => l.classList.remove('open'));
+    if (!isOpen) { header.classList.add('expanded'); list.classList.add('open'); }
+  }
+
+  function renderAwardedPanel() {
+    const body = document.getElementById('awarded-panel-body');
+    const awarded = allRFQs.filter(r => r.status === 'awarded');
+    if (awarded.length === 0) {
+      body.innerHTML = '<div style="padding:60px;text-align:center;color:var(--slate);font-size:13px;"><div style="font-size:40px;margin-bottom:16px;">🏆</div><div style="font-size:15px;font-weight:600;color:var(--white);margin-bottom:8px;">No deals awarded yet</div><div>Awarded RFQs will appear here once you select a winning bid.</div></div>';
+      return;
+    }
+    body.innerHTML = awarded.map(rfq => {
+      const winningBids = (window._dashHistoryRows || []).filter(h => h.rfq_id === rfq.id);
+      const winnerPrice = rfq.lowestBid;
+      return `<div class="awarded-card" onclick="window.location.href='bidbridge-compare-bids_1.html?rfq=${rfq.id}'">
+        <div>
+          <div class="awarded-card-title">${rfq.title}</div>
+          <div class="awarded-card-meta">${rfq.vendors.join(' · ')} · Awarded ${rfq.postedDate ? formatDate(rfq.postedDate) : ''}
+            · ${rfq.bidCount} bid${rfq.bidCount !== 1 ? 's' : ''} received</div>
+        </div>
+        <div>
+          <div class="awarded-card-price-label">Winning bid</div>
+          <div class="awarded-card-price">${winnerPrice !== null ? '$' + winnerPrice.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—'}</div>
+          <div style="text-align:right;margin-top:8px;"><button class="btn-view">View award →</button></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 
   /* ─── RENDER ─── */
   function renderRFQs(data) {
@@ -708,8 +1117,9 @@
         closed: ['status-closed', 'Closed'],
         awarded: ['status-awarded', 'Awarded'],
         draft: ['status-draft', 'Draft'],
+        cancelled: ['status-closed', 'Cancelled'],
       };
-      const [statusClass, statusLabel] = statusMap[rfq.status] || ['status-draft', 'Draft'];
+      const [statusClass, statusLabel] = statusMap[rfq.status] || ['status-draft', rfq.status || 'Draft'];
 
       const vendorList = rfq.vendors.length > 0 ? rfq.vendors.join(' · ') : 'No items';
       const fillPct = Math.min(100, Math.round((rfq.bidCount / rfq.maxBids) * 100));
@@ -720,14 +1130,35 @@
           : `<span class="${daysUntil(rfq.deadline) <= 2 ? 'deadline-urgent' : daysUntil(rfq.deadline) <= 5 ? 'deadline-soon' : 'deadline-ok'}">${daysUntilLabel(rfq.deadline)}</span>`;
 
       const actionLabel = rfq.status === 'review' ? 'Compare bids →'
-        : rfq.status === 'awarded' ? 'View award'
-        : rfq.status === 'closed' ? 'View results'
-        : 'View bids';
+        : rfq.status === 'awarded' ? 'View award →'
+        : rfq.status === 'closed' ? 'View results →'
+        : 'View bids →';
+
+      // Build inline bid rows for expand section
+      const bidsForRfq = (window._dashHistoryRows || []).filter(h => h.rfq_id === rfq.id);
+      const lowestPrice = bidsForRfq.length ? Math.min(...bidsForRfq.map(h => h.total_price || 0)) : null;
+      const bidRowsHtml = bidsForRfq.length > 0
+        ? bidsForRfq.map(h => {
+            const rp = (window._dashRpMap || {})[h.reseller_id];
+            const name = rp ? ((rp.contact_first || '') + ' ' + (rp.contact_last || '')).trim() || rp.company : 'Reseller';
+            const company = rp?.company || '';
+            const submitted = h.submitted_at ? new Date(h.submitted_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+            const isLowest = h.total_price === lowestPrice;
+            return `<div class="bids-panel-bid-row">
+              <div>
+                <div style="font-weight:500;font-size:13px;">${name}${company ? ' <span style="color:var(--slate);font-weight:400;">· ' + company + '</span>' : ''}</div>
+                <div style="font-size:11px;color:var(--slate);">Submitted ${submitted}</div>
+              </div>
+              ${isLowest ? '<span style="background:rgba(0,200,150,0.1);color:var(--accent);border:1px solid rgba(0,200,150,0.25);font-size:10px;font-weight:700;padding:2px 10px;border-radius:999px;white-space:nowrap;">💰 Lowest</span>' : '<span></span>'}
+              <div style="font-size:14px;font-weight:600;color:var(--white);">$${(h.total_price||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+            </div>`;
+          }).join('')
+        : '<div style="padding:16px 20px;font-size:13px;color:var(--slate);">No bids submitted yet.</div>';
 
       return `
-        <tr onclick="openDrawer('${rfq.id}')" data-status="${rfq.status}" data-title="${rfq.title.toLowerCase()}" data-vendors="${rfq.vendors.join(' ').toLowerCase()}">
+        <tr onclick="toggleRfqRow('${rfq.id}')" data-status="${rfq.status}" data-title="${rfq.title.toLowerCase()}" data-vendors="${rfq.vendors.join(' ').toLowerCase()}">
           <td>
-            <div class="rfq-title">${rfq.title}</div>
+            <div class="rfq-title">${rfq.title} <span class="rfq-row-chevron" id="rfq-chev-${rfq.id}">▾</span></div>
             <div class="rfq-vendors">${vendorList}</div>
           </td>
           <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
@@ -738,9 +1169,23 @@
               <div class="bids-bar"><div class="bids-fill" style="width:${fillPct}%"></div></div>
             </div>
           </td>
+          <td>
+            ${rfq.lowestBid !== null && rfq.highestEverBid !== null && rfq.bidCount > 0 && rfq.highestEverBid > rfq.lowestBid
+              ? `<strong style="color:var(--accent);">$${(rfq.highestEverBid - rfq.lowestBid).toLocaleString()}</strong>`
+              : rfq.bidCount > 0
+              ? `<span style="color:var(--slate);font-size:13px;">—</span>`
+              : `<span style="color:var(--slate);font-size:13px;">No bids</span>`}
+          </td>
           <td>${deadlineText}</td>
           <td style="color:var(--slate);font-size:13px;">${rfq.postedDate ? formatDate(rfq.postedDate) : '—'}</td>
-          <td><button class="btn-view" onclick="event.stopPropagation()">${actionLabel}</button></td>
+          <td><button class="btn-view" onclick="event.stopPropagation(); window.location.href='bidbridge-compare-bids_1.html?rfq=${rfq.id}'">${actionLabel}</button></td>
+        </tr>
+        <tr class="rfq-expand-row">
+          <td colspan="8">
+            <div class="rfq-expand-inner" id="rfq-expand-${rfq.id}">
+              ${bidRowsHtml}
+            </div>
+          </td>
         </tr>
       `;
     }).join('');
@@ -752,6 +1197,18 @@
     el.classList.add('active');
     activeFilter = filter;
     applyFilters();
+  }
+
+  function toggleRfqRow(rfqId) {
+    const inner = document.getElementById('rfq-expand-' + rfqId);
+    const chev = document.getElementById('rfq-chev-' + rfqId);
+    if (!inner) return;
+    const isOpen = inner.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.rfq-expand-inner').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.rfq-row-chevron').forEach(el => el.classList.remove('open'));
+    // Toggle clicked
+    if (!isOpen) { inner.classList.add('open'); if (chev) chev.classList.add('open'); }
   }
 
   function filterRFQs() {
@@ -823,8 +1280,9 @@
       awarded: ['status-awarded', 'Awarded'],
       closed: ['status-closed', 'Closed'],
       draft: ['status-draft', 'Draft'],
+      cancelled: ['status-closed', 'Cancelled'],
     };
-    const [statusCls, statusLabel] = statusMap[data.status] || ['status-draft', 'Draft'];
+    const [statusCls, statusLabel] = statusMap[data.status] || ['status-draft', data.status || 'Draft'];
 
     const byVendor = {};
     (data.rfq_items || []).forEach(item => {

@@ -158,16 +158,16 @@
     <div class="sidebar-section-label">Main</div>
     <a class="nav-item" href="bidbridge-buyer-dashboard_2.html"><span class="nav-icon">⊞</span> Dashboard</a>
     <a class="nav-item" href="bidbridge-submit-rfq_2.html"><span class="nav-icon">＋</span> New RFQ</a>
-    <a class="nav-item" href="#"><span class="nav-icon">📋</span> My RFQs</a>
-    <a class="nav-item" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids </a>
+    <a class="nav-item" href="bidbridge-my-rfqs.html"><span class="nav-icon">📋</span> My RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
+    <a class="nav-item" href="bidbridge-compare-bids_1.html"><span class="nav-icon">⚖️</span> Compare bids <span class="nav-badge" id="badge-review" style="display:none"></span></a>
     <div class="sidebar-section-label">Account</div>
-    <a class="nav-item" href="bidbridge-notifications_1.html"><span class="nav-icon">🔔</span> Notifications </a>
-    <a class="nav-item active" href="#"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item" href="bidbridge-notifications_1.html"><span class="nav-icon">🔔</span> Notifications</a>
+    <a class="nav-item active" href="bidbridge-settings.html"><span class="nav-icon">⚙</span> Settings</a>
     <a class="nav-item" href="bidbridge-profile.html"><span class="nav-icon">👤</span> Profile</a>
     <div class="sidebar-footer">
       <div class="user-block">
-        <div class="user-avatar">JM</div>
-        <div><div class="user-name">James M.</div><div class="user-role">Buyer · Acme Corp</div></div>
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div><div class="user-name" id="sidebar-name"></div><div class="user-role" id="sidebar-role"></div></div>
       </div>
       <button class="btn-signout" onclick="signOut()">↪ Sign out</button>
     </div>
@@ -670,6 +670,35 @@
     await _supabase.auth.signOut();
     window.location.href = 'bidbridge-auth_1.html';
   }
+
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+
+    // Populate sidebar profile
+    const { data: profile } = await _supabase
+      .from('profiles')
+      .select('first_name, last_name, company')
+      .eq('id', session.user.id)
+      .single();
+    if (profile) {
+      const name = ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || session.user.email;
+      const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '?';
+      document.getElementById('sidebar-avatar').textContent = initials;
+      document.getElementById('sidebar-name').textContent = name;
+      document.getElementById('sidebar-role').textContent = 'Buyer' + (profile.company ? ' · ' + profile.company : '');
+    }
+
+    // Populate sidebar nav badges
+    const { data: rfqsBadge } = await _supabase
+      .from('rfqs').select('id, status').eq('buyer_id', session.user.id);
+    if (rfqsBadge) {
+      const active = rfqsBadge.filter(r => r.status === 'active').length;
+      const review = rfqsBadge.filter(r => r.status === 'review').length;
+      if (active > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = active; b.style.display = ''; }
+      if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
+    }
+  })();
 </script>
 
 </body>

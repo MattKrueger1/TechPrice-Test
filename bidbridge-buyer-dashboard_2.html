@@ -506,6 +506,40 @@
   .drawer-sku-qty { color: var(--slate-light); }
   .drawer-loading { text-align: center; padding: 60px 20px; color: var(--slate); font-size: 14px; }
   .rfq-expand-row { cursor: default !important; }
+
+  /* ─── MESSAGES INBOX ─── */
+  .msg-inbox { display: grid; grid-template-columns: 300px 1fr; border: 1px solid var(--card-border); border-radius: 14px; overflow: hidden; height: 580px; }
+  .msg-thread-list { background: var(--navy-mid); border-right: 1px solid var(--card-border); overflow-y: auto; display: flex; flex-direction: column; }
+  .msg-thread-empty { padding: 40px 18px; text-align: center; color: var(--slate); font-size: 13px; line-height: 1.7; }
+  .msg-thread-item { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: background .15s; border-left: 3px solid transparent; }
+  .msg-thread-item:hover { background: rgba(255,255,255,0.04); }
+  .msg-thread-item.active { background: rgba(0,200,150,0.07); border-left-color: var(--accent); }
+  .msg-thread-item.unread .msg-thread-rfq { color: var(--white); font-weight: 600; }
+  .msg-thread-item.active .msg-thread-rfq { color: var(--accent); }
+  .msg-thread-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 2px; }
+  .msg-thread-rfq { font-size: 13px; font-weight: 500; color: var(--slate-light); line-height: 1.3; }
+  .msg-thread-sub { font-size: 11px; color: var(--slate); margin-bottom: 3px; }
+  .msg-thread-time { font-size: 11px; color: var(--slate); white-space: nowrap; flex-shrink: 0; }
+  .msg-thread-preview { font-size: 12px; color: var(--slate); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-thread-item.unread .msg-thread-preview { color: var(--slate-light); }
+  .msg-thread-unread-badge { background: var(--accent); color: var(--navy); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; flex-shrink: 0; }
+  .msg-conversation { display: flex; flex-direction: column; background: var(--navy); overflow: hidden; }
+  .msg-conv-header { padding: 16px 20px; border-bottom: 1px solid var(--card-border); background: var(--navy-mid); flex-shrink: 0; }
+  .msg-conv-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; }
+  .msg-conv-sub { font-size: 12px; color: var(--slate-light); margin-top: 2px; }
+  .msg-conv-thread-area { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .msg-conv-compose { padding: 12px 20px; border-top: 1px solid var(--card-border); background: var(--navy-mid); flex-shrink: 0; display: flex; gap: 10px; align-items: flex-end; }
+  .msg-textarea { flex: 1; min-height: 44px; max-height: 100px; resize: none; width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: var(--font-body); font-size: 14px; outline: none; }
+  .msg-textarea:focus { border-color: var(--accent); }
+  .msg-textarea::placeholder { color: var(--slate); }
+  .btn-send { padding: 9px 22px; background: var(--accent); border: none; border-radius: 9px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .btn-send:hover { background: var(--accent-dim); }
+  .msg-bubble { max-width: 85%; padding: 10px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; }
+  .msg-bubble.sent { align-self: flex-end; background: rgba(0,200,150,0.12); border: 1px solid rgba(0,200,150,0.2); }
+  .msg-bubble.received { align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+  .msg-bubble.broadcast { align-self: center; background: rgba(245,200,66,0.07); border: 1px solid rgba(245,200,66,0.15); color: var(--gold); font-size: 12px; max-width: 95%; text-align: center; border-radius: 8px; padding: 8px 16px; }
+  .msg-sender { font-size: 11px; color: var(--slate); margin-bottom: 3px; }
+  .msg-time { font-size: 11px; color: var(--slate); margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -530,6 +564,10 @@
     <a class="nav-item" href="bidbridge-compare-bids_1.html">
       <span class="nav-icon">⚖️</span> Compare bids
       <span class="nav-badge" id="badge-review" style="display:none"></span>
+    </a>
+    <a class="nav-item" id="nav-messages" href="#" onclick="showPanel('messages', this); return false;">
+      <span class="nav-icon">💬</span> Messages
+      <span class="nav-badge" id="badge-messages" style="display:none"></span>
     </a>
 
     <div class="sidebar-section-label">Account</div>
@@ -707,6 +745,27 @@
         </div>
       </div><!-- /panel-awarded -->
 
+      <!-- ══ PANEL: Messages ══ -->
+      <div class="dash-panel" id="panel-messages">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">Messages</div>
+        </div>
+        <div class="filters-row" style="margin-bottom:16px;" id="msg-rfq-filter-row">
+          <div class="filter-pill active" onclick="filterMsgByRfq(null, this)">All RFQs</div>
+        </div>
+        <div class="msg-inbox">
+          <div class="msg-thread-list" id="msg-inbox-threads">
+            <div class="msg-thread-empty">Loading conversations…</div>
+          </div>
+          <div class="msg-conversation" id="msg-inbox-conv">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--slate);">
+              <div style="font-size:36px;">💬</div>
+              <div style="font-size:14px;">Select a conversation to view messages</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /panel-messages -->
+
     </div><!-- /page-body -->
   </div><!-- /main-content -->
 </div><!-- /app-shell -->
@@ -723,6 +782,14 @@
   let activeFilter = 'all';
   let activeSearch = '';
   let activeSort = 'newest';
+
+  // ── Messaging state ──
+  let _buyerUserId = null;
+  let _BUYER_MSG_THREADS = [];
+  let _ACTIVE_THREAD_RFQ_ID = null;
+  let _ACTIVE_THREAD_RESELLER_ID = null;
+  let _BUYER_RESELLER_MAP = {};
+  let _MSG_RFQ_FILTER = null; // null = all RFQs
 
   // Track seen bids by bid_id (more reliable than timestamps)
   function _seenBidsKey() { return 'itpn_seen_bids'; }
@@ -774,6 +841,7 @@
       window.location.href = 'bidbridge-auth_1.html';
       return;
     }
+    _buyerUserId = session.user.id;
 
     /* Load profile */
     const { data: profile } = await _supabase
@@ -957,7 +1025,242 @@
         renderActivity();
       }
     }
+
+    // Load message threads after RFQs are ready
+    loadBuyerMsgThreads();
   })();
+
+  /* ══════════════════════════════════════════════════════
+     BUYER MESSAGING
+  ══════════════════════════════════════════════════════ */
+
+  async function loadBuyerMsgThreads() {
+    if (!_buyerUserId) return;
+    const myRfqIds = allRFQs.map(function(r) { return r.id; });
+    if (myRfqIds.length === 0) { renderBuyerMsgThreadList(); return; }
+
+    const [{ data: directMsgs }, { data: broadcasts }] = await Promise.all([
+      _supabase.from('messages')
+        .select('id, rfq_id, sender_id, recipient_id, sender_role, content, is_broadcast, read, created_at')
+        .or('sender_id.eq.' + _buyerUserId + ',recipient_id.eq.' + _buyerUserId)
+        .eq('is_broadcast', false)
+        .in('rfq_id', myRfqIds)
+        .order('created_at', { ascending: false }),
+      _supabase.from('messages')
+        .select('id, rfq_id, sender_id, sender_role, content, is_broadcast, read, created_at')
+        .in('rfq_id', myRfqIds)
+        .eq('is_broadcast', true)
+        .order('created_at', { ascending: false }),
+    ]);
+
+    // Group direct messages by (rfq_id + reseller_id)
+    const threadMap = {};
+    (directMsgs || []).forEach(function(m) {
+      const resellerId = m.sender_id === _buyerUserId ? m.recipient_id : m.sender_id;
+      const key = m.rfq_id + '|' + resellerId;
+      if (!threadMap[key]) threadMap[key] = { rfqId: m.rfq_id, resellerId: resellerId, msgs: [], unread: 0 };
+      threadMap[key].msgs.push(m);
+      if (!m.read && m.sender_id !== _buyerUserId) threadMap[key].unread++;
+    });
+
+    // Add broadcasts under a synthetic "broadcast" thread per RFQ
+    (broadcasts || []).forEach(function(m) {
+      const key = m.rfq_id + '|broadcast';
+      if (!threadMap[key]) threadMap[key] = { rfqId: m.rfq_id, resellerId: 'broadcast', msgs: [], unread: 0 };
+      threadMap[key].msgs.push(m);
+    });
+
+    // Fetch reseller company names
+    const resellerIds = [...new Set(Object.values(threadMap).map(function(t) { return t.resellerId; }).filter(function(id) { return id !== 'broadcast'; }))];
+    if (resellerIds.length > 0) {
+      const { data: rps } = await _supabase.from('reseller_profiles').select('id, company, contact_first, contact_last').in('id', resellerIds);
+      (rps || []).forEach(function(p) {
+        _BUYER_RESELLER_MAP[p.id] = p.company || ((p.contact_first || '') + ' ' + (p.contact_last || '')).trim() || 'Reseller';
+      });
+    }
+
+    _BUYER_MSG_THREADS = Object.keys(threadMap).map(function(key) {
+      const { rfqId, resellerId, msgs, unread } = threadMap[key];
+      const sorted = msgs.slice().sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+      const last = sorted[0];
+      const rfq = allRFQs.find(function(r) { return r.id === rfqId; });
+      const rfqTitle = rfq ? rfq.title : 'RFQ #' + rfqId.slice(0, 8).toUpperCase();
+      const resellerName = resellerId === 'broadcast' ? 'Broadcast' : (_BUYER_RESELLER_MAP[resellerId] || 'Reseller');
+      let preview = '';
+      if (last.is_broadcast) preview = '📢 ' + last.content;
+      else if (last.sender_id === _buyerUserId) preview = 'You: ' + last.content;
+      else preview = resellerName + ': ' + last.content;
+      return { key, rfqId, resellerId, rfqTitle, resellerName, lastMsg: preview, lastMsgTime: last.created_at, unreadCount: unread };
+    }).sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
+
+    // Update sidebar badge
+    const totalUnread = _BUYER_MSG_THREADS.reduce(function(s, t) { return s + t.unreadCount; }, 0);
+    const badge = document.getElementById('badge-messages');
+    if (badge) { if (totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = ''; } else { badge.style.display = 'none'; } }
+
+    // Build RFQ filter pills
+    buildMsgRfqFilterPills();
+    renderBuyerMsgThreadList();
+  }
+
+  function buildMsgRfqFilterPills() {
+    const row = document.getElementById('msg-rfq-filter-row');
+    if (!row) return;
+    const rfqIds = [...new Set(_BUYER_MSG_THREADS.map(function(t) { return t.rfqId; }))];
+    const allPill = '<div class="filter-pill' + (_MSG_RFQ_FILTER === null ? ' active' : '') + '" onclick="filterMsgByRfq(null, this)">All RFQs</div>';
+    const pills = rfqIds.map(function(rfqId) {
+      const t = _BUYER_MSG_THREADS.find(function(x) { return x.rfqId === rfqId; });
+      const label = t ? (t.rfqTitle.length > 28 ? t.rfqTitle.slice(0, 25) + '…' : t.rfqTitle) : rfqId.slice(0, 8).toUpperCase();
+      const isActive = _MSG_RFQ_FILTER === rfqId;
+      return '<div class="filter-pill' + (isActive ? ' active' : '') + '" onclick="filterMsgByRfq(\'' + rfqId + '\', this)">' + label.replace(/</g, '&lt;') + '</div>';
+    });
+    row.innerHTML = allPill + pills.join('');
+  }
+
+  function filterMsgByRfq(rfqId, el) {
+    _MSG_RFQ_FILTER = rfqId;
+    document.querySelectorAll('#msg-rfq-filter-row .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    renderBuyerMsgThreadList();
+  }
+
+  function renderBuyerMsgThreadList() {
+    const listEl = document.getElementById('msg-inbox-threads');
+    if (!listEl) return;
+    const filtered = _MSG_RFQ_FILTER
+      ? _BUYER_MSG_THREADS.filter(function(t) { return t.rfqId === _MSG_RFQ_FILTER; })
+      : _BUYER_MSG_THREADS;
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div class="msg-thread-empty">No conversations yet.<br><span style="font-size:12px;">Messages from resellers will appear here when they reach out about your RFQs.</span></div>';
+      return;
+    }
+    listEl.innerHTML = filtered.map(function(t) {
+      const isActive = t.rfqId === _ACTIVE_THREAD_RFQ_ID && t.resellerId === _ACTIVE_THREAD_RESELLER_ID;
+      const hasUnread = t.unreadCount > 0;
+      const timeLabel = formatTimeAgo(t.lastMsgTime);
+      const preview = (t.lastMsg || '').length > 50 ? t.lastMsg.slice(0, 47) + '…' : (t.lastMsg || '');
+      return '<div class="msg-thread-item' + (isActive ? ' active' : '') + (hasUnread ? ' unread' : '') + '" onclick="selectBuyerMsgThread(\'' + t.rfqId + '\', \'' + t.resellerId + '\')">' +
+        '<div class="msg-thread-meta">' +
+          '<div class="msg-thread-rfq">' + t.rfqTitle.replace(/</g, '&lt;') + '</div>' +
+          '<div style="display:flex;align-items:center;gap:5px;">' +
+            (hasUnread ? '<span class="msg-thread-unread-badge">' + t.unreadCount + '</span>' : '') +
+            '<span class="msg-thread-time">' + timeLabel + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="msg-thread-sub">' + t.resellerName.replace(/</g, '&lt;') + '</div>' +
+        '<div class="msg-thread-preview">' + preview.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function selectBuyerMsgThread(rfqId, resellerId) {
+    _ACTIVE_THREAD_RFQ_ID = rfqId;
+    _ACTIVE_THREAD_RESELLER_ID = resellerId;
+    renderBuyerMsgThreadList();
+
+    const convEl = document.getElementById('msg-inbox-conv');
+    if (!convEl) return;
+    const thread = _BUYER_MSG_THREADS.find(function(t) { return t.rfqId === rfqId && t.resellerId === resellerId; });
+    const rfqTitle = thread ? thread.rfqTitle : 'Conversation';
+    const resellerName = thread ? thread.resellerName : 'Reseller';
+    const isBroadcast = resellerId === 'broadcast';
+
+    convEl.innerHTML =
+      '<div class="msg-conv-header">' +
+        '<div class="msg-conv-title">' + rfqTitle.replace(/</g, '&lt;') + '</div>' +
+        '<div class="msg-conv-sub">' + (isBroadcast ? '📢 Broadcast messages sent to all bidders' : resellerName.replace(/</g, '&lt;')) + '</div>' +
+      '</div>' +
+      '<div class="msg-conv-thread-area" id="msg-conv-thread"><div style="text-align:center;padding:32px;color:var(--slate);font-size:13px;">Loading…</div></div>' +
+      (isBroadcast ? '' :
+        '<div class="msg-conv-compose">' +
+          '<textarea class="msg-textarea" id="msg-inbox-input" placeholder="Reply to ' + resellerName.replace(/</g, '&lt;') + '…" rows="2"></textarea>' +
+          '<button class="btn-send" onclick="sendBuyerMsg()">Send →</button>' +
+        '</div>'
+      );
+
+    // Fetch messages
+    let msgs = [];
+    if (isBroadcast) {
+      const { data: bcast } = await _supabase.from('messages')
+        .select('id, sender_id, sender_role, content, is_broadcast, created_at')
+        .eq('rfq_id', rfqId).eq('is_broadcast', true)
+        .order('created_at', { ascending: true });
+      msgs = bcast || [];
+    } else {
+      const [{ data: direct }, { data: bcast }] = await Promise.all([
+        _supabase.from('messages')
+          .select('id, sender_id, sender_role, content, is_broadcast, read, created_at')
+          .eq('rfq_id', rfqId).eq('is_broadcast', false)
+          .or('and(sender_id.eq.' + _buyerUserId + ',recipient_id.eq.' + resellerId + '),and(sender_id.eq.' + resellerId + ',recipient_id.eq.' + _buyerUserId + ')')
+          .order('created_at', { ascending: true }),
+        _supabase.from('messages')
+          .select('id, sender_id, sender_role, content, is_broadcast, created_at')
+          .eq('rfq_id', rfqId).eq('is_broadcast', true)
+          .order('created_at', { ascending: true }),
+      ]);
+      msgs = [...(direct || []), ...(bcast || [])].sort(function(a, b) { return new Date(a.created_at) - new Date(b.created_at); });
+
+      // Mark reseller→buyer messages as read
+      const toRead = (direct || []).filter(function(m) { return m.sender_id === resellerId && !m.read; });
+      if (toRead.length > 0) {
+        await _supabase.from('messages').update({ read: true })
+          .eq('rfq_id', rfqId).eq('sender_id', resellerId).eq('recipient_id', _buyerUserId).eq('read', false);
+        if (thread) thread.unreadCount = 0;
+        const totalUnread = _BUYER_MSG_THREADS.reduce(function(s, t) { return s + t.unreadCount; }, 0);
+        const badge = document.getElementById('badge-messages');
+        if (badge) { if (totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = ''; } else { badge.style.display = 'none'; } }
+        renderBuyerMsgThreadList();
+      }
+    }
+
+    const threadEl = document.getElementById('msg-conv-thread');
+    if (!threadEl) return;
+    if (!msgs.length) {
+      threadEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--slate);font-size:13px;">No messages yet.</div>';
+      return;
+    }
+    threadEl.innerHTML = msgs.map(function(m) {
+      const isMine = m.sender_id === _buyerUserId && !m.is_broadcast;
+      const senderLabel = m.is_broadcast ? '📢 Broadcast (sent to all bidders)' : isMine ? 'You' : resellerName;
+      const bubbleClass = m.is_broadcast ? 'broadcast' : isMine ? 'sent' : 'received';
+      const ts = new Date(m.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      return '<div><div class="msg-sender">' + senderLabel.replace(/</g, '&lt;') + '</div><div class="msg-bubble ' + bubbleClass + '">' + m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div><div class="msg-time">' + ts + '</div></div>';
+    }).join('');
+    threadEl.scrollTop = threadEl.scrollHeight;
+  }
+
+  async function sendBuyerMsg() {
+    const input = document.getElementById('msg-inbox-input');
+    const text = input ? input.value.trim() : '';
+    if (!text || !_ACTIVE_THREAD_RFQ_ID || !_ACTIVE_THREAD_RESELLER_ID || _ACTIVE_THREAD_RESELLER_ID === 'broadcast') return;
+    const sendBtn = document.querySelector('#msg-inbox-conv .btn-send');
+    if (sendBtn) sendBtn.disabled = true;
+
+    const { error } = await _supabase.from('messages').insert({
+      rfq_id: _ACTIVE_THREAD_RFQ_ID,
+      sender_id: _buyerUserId,
+      recipient_id: _ACTIVE_THREAD_RESELLER_ID,
+      sender_role: 'buyer',
+      content: text,
+      is_broadcast: false,
+      read: false,
+    });
+    if (error) { alert('Failed to send. Please try again.'); if (sendBtn) sendBtn.disabled = false; return; }
+    if (input) input.value = '';
+    if (sendBtn) sendBtn.disabled = false;
+
+    // Notify reseller
+    const thread = _BUYER_MSG_THREADS.find(function(t) { return t.rfqId === _ACTIVE_THREAD_RFQ_ID && t.resellerId === _ACTIVE_THREAD_RESELLER_ID; });
+    const rfqTitle = thread ? thread.rfqTitle : 'an RFQ';
+    const snippet = text.length > 60 ? text.slice(0, 57) + '…' : text;
+    await _supabase.from('notifications').insert({ user_id: _ACTIVE_THREAD_RESELLER_ID, type: 'new_message', message: '💬 New message from the buyer on "' + rfqTitle + '": "' + snippet + '"', rfq_id: _ACTIVE_THREAD_RFQ_ID, read: false });
+
+    // Update thread preview
+    if (thread) { thread.lastMsg = 'You: ' + text; thread.lastMsgTime = new Date().toISOString(); }
+    _BUYER_MSG_THREADS.sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
+
+    selectBuyerMsgThread(_ACTIVE_THREAD_RFQ_ID, _ACTIVE_THREAD_RESELLER_ID);
+  }
 
   function closeActivityDropdown() {
     document.getElementById('activity-dropdown').style.display = 'none';
@@ -990,15 +1293,18 @@
   let _activeBidsFilter = 'all';
 
   function showPanel(name, cardEl) {
-    // Deselect all stat cards
+    // Deselect all stat cards and sidebar nav-items that act as panel triggers
     document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('selected'));
-    if (cardEl) cardEl.classList.add('selected');
+    document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
+    if (cardEl && cardEl.classList.contains('stat-card')) cardEl.classList.add('selected');
+    if (cardEl && cardEl.classList.contains('nav-item')) cardEl.classList.add('active');
     // Hide all panels, show the target
     document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + name).classList.add('active');
     // Render panel content if needed
     if (name === 'bids') renderBidsPanel(_activeBidsFilter);
     if (name === 'awarded') renderAwardedPanel();
+    if (name === 'messages') renderBuyerMsgThreadList();
   }
 
   function setBidsFilter(filter, el) {

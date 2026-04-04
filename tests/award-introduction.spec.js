@@ -48,11 +48,11 @@ test('Reseller profiles stored in window._rpMap with contact fields', async ({ p
     return;
   }
 
-  // Each entry should have contact fields (may be null if not filled in, but key must exist)
+  // Each entry should have contact fields that exist in the DB schema
   const first = entries[0];
-  expect('contact_email' in first).toBe(true);
-  expect('contact_phone' in first).toBe(true);
-  console.log('✅ rpMap has', entries.length, 'reseller(s), contact_email field present');
+  expect('contact_phone' in first).toBe(true); // contact_email is not a column — phone is
+  expect('company' in first).toBe(true);
+  console.log('✅ rpMap has', entries.length, 'reseller(s):', first.company || first.contact_first);
 });
 
 test('Award confirmation modal shows correct text', async ({ page }) => {

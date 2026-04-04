@@ -829,7 +829,7 @@ if (!rawBids || rawBids.length === 0) {
     const resellerIds = [...new Set(rawBids.map(b => b.reseller_id))];
     const { data: resellerProfiles } = await _supabase
       .from('reseller_profiles')
-      .select('id, contact_first, contact_last, company, contact_email, contact_phone')
+      .select('id, contact_first, contact_last, company, contact_phone, city, state')
       .in('id', resellerIds);
     const rpMap = {};
     (resellerProfiles || []).forEach(rp => { rpMap[rp.id] = rp; });
@@ -1617,37 +1617,33 @@ if (!rawBids || rawBids.length === 0) {
     const rp = (window._rpMap || {})[resellerId];
     const contactName = rp ? (`${rp.contact_first || ''} ${rp.contact_last || ''}`).trim() || rp.company : 'the reseller';
     const company = rp?.company || '';
-    const email = rp?.contact_email || '';
     const phone = rp?.contact_phone || '';
+    const location = (rp?.city && rp?.state) ? `${rp.city}, ${rp.state}` : (rp?.city || rp?.state || '');
     const buyer = window._buyerProfile || {};
 
-    const emailRow = email
-      ? `<div class="intro-contact-row">📧 <a href="mailto:${email}">${email}</a></div>`
-      : '';
     const phoneRow = phone
       ? `<div class="intro-contact-row">📞 <a href="tel:${phone}">${phone}</a></div>`
       : '';
-    const noContactFallback = !email && !phone
-      ? `<div style="font-size:13px;color:var(--slate);margin-top:4px;">Contact details not on file — check your Messages for their intro message.</div>`
+    const locationRow = location
+      ? `<div class="intro-contact-row">📍 ${location.replace(/</g,'&lt;')}</div>`
       : '';
 
     document.getElementById('intro-modal-body').innerHTML = `
       <div class="intro-header">
         <span class="intro-icon">🤝</span>
         <h3>You're connected!</h3>
-        <p class="intro-sub">The deal has been awarded. Here's how to reach <strong style="color:var(--accent);">${contactName.replace(/</g,'&lt;')}</strong> to close it out.</p>
+        <p class="intro-sub">The deal has been awarded. An intro message has been sent to <strong style="color:var(--accent);">${contactName.replace(/</g,'&lt;')}</strong> with your contact details.</p>
       </div>
       <div class="intro-contact-card">
-        <div class="intro-contact-label">Winner — Reseller contact</div>
+        <div class="intro-contact-label">Winner — Reseller</div>
         <div class="intro-contact-name">${contactName.replace(/</g,'&lt;')}</div>
         ${company ? `<div class="intro-contact-company">${company.replace(/</g,'&lt;')}</div>` : ''}
-        ${emailRow}
         ${phoneRow}
-        ${noContactFallback}
+        ${locationRow}
+        ${!phone && !location ? '<div style="font-size:13px;color:var(--slate);margin-top:4px;">Continue the conversation via Messages below.</div>' : ''}
       </div>
       <p class="intro-note">
-        An intro message has been sent to ${contactName.replace(/</g,'&lt;')} via the Messages inbox with your contact details
-        (${buyer.email || 'your email'}).
+        Your contact info (${buyer.email || 'your email'}${buyer.name ? ' — ' + buyer.name.replace(/</g,'&lt;') : ''}) has been shared with ${contactName.replace(/</g,'&lt;')} in their Messages inbox.
         All other resellers have been notified they were not selected.
       </p>
       <div class="intro-actions">

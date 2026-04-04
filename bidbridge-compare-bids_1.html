@@ -410,6 +410,26 @@
   .btn-cancel { padding: 13px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 15px; cursor: pointer; transition: all .2s; }
   .btn-cancel:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
 
+  /* ─── INTRODUCTION SCREEN (post-award) ─── */
+  .intro-modal { background: var(--navy-mid); border: 1px solid rgba(0,200,150,0.3); border-radius: 20px; padding: 40px; width: 100%; max-width: 520px; animation: slideUp .25s ease; }
+  .intro-header { text-align: center; margin-bottom: 28px; }
+  .intro-icon { font-size: 52px; display: block; margin-bottom: 12px; }
+  .intro-modal h3 { font-family: var(--font-head); font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .intro-modal .intro-sub { font-size: 14px; color: var(--slate-light); line-height: 1.6; }
+  .intro-contact-card { background: rgba(0,200,150,0.06); border: 1px solid rgba(0,200,150,0.2); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; }
+  .intro-contact-label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .intro-contact-name { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .intro-contact-company { font-size: 13px; color: var(--slate-light); margin-bottom: 14px; }
+  .intro-contact-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--slate-light); margin-bottom: 8px; }
+  .intro-contact-row a { color: var(--accent); text-decoration: none; }
+  .intro-contact-row a:hover { text-decoration: underline; }
+  .intro-note { font-size: 12px; color: var(--slate); text-align: center; line-height: 1.6; margin-bottom: 24px; }
+  .intro-actions { display: flex; gap: 12px; justify-content: center; }
+  .btn-intro-done { padding: 13px 32px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 15px; font-weight: 500; cursor: pointer; transition: background .2s; }
+  .btn-intro-done:hover { background: var(--accent-dim); }
+  .btn-intro-msg { padding: 13px 24px; background: transparent; border: 1px solid rgba(0,200,150,0.3); border-radius: 10px; color: var(--accent); font-family: var(--font-body); font-size: 15px; cursor: pointer; transition: all .2s; }
+  .btn-intro-msg:hover { background: rgba(0,200,150,0.07); }
+
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
 
   @media (max-width: 1024px) {
@@ -603,11 +623,18 @@
     <h3>Award this bid?</h3>
     <p>You're about to select <strong id="award-reseller-name" style="color:var(--accent);"></strong> as the winner for this RFQ.</p>
     <span class="award-price-display" id="award-price"></span>
-    <p style="font-size:13px;color:var(--slate);margin-bottom:28px;">IT Pricing Network will notify all resellers of the outcome and facilitate the introduction.</p>
+    <p style="font-size:13px;color:var(--slate);margin-bottom:28px;">Both parties will receive each other's contact details so you can close the deal directly.</p>
     <div class="award-actions">
       <button class="btn-cancel" onclick="closeAward()">Cancel</button>
-      <button class="btn-confirm-award" onclick="confirmAward()">Confirm award →</button>
+      <button class="btn-confirm-award" id="btn-confirm-award" onclick="confirmAward()">Confirm award →</button>
     </div>
+  </div>
+</div>
+
+<!-- INTRODUCTION SCREEN (shown after award is confirmed) -->
+<div class="award-overlay" id="intro-overlay">
+  <div class="intro-modal" id="intro-modal-body">
+    <!-- populated by showIntroduction() -->
   </div>
 </div>
 
@@ -632,6 +659,13 @@
       document.getElementById('user-name').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
       document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
     }
+    // Store buyer identity for post-award introduction
+    window._buyerProfile = {
+      name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '',
+      company: profile?.company || '',
+      email: session.user.email,
+      userId: session.user.id,
+    };
 
     const { data: rfqsBadge } = await _supabase
       .from('rfqs').select('id, status').eq('buyer_id', session.user.id);
@@ -795,10 +829,11 @@ if (!rawBids || rawBids.length === 0) {
     const resellerIds = [...new Set(rawBids.map(b => b.reseller_id))];
     const { data: resellerProfiles } = await _supabase
       .from('reseller_profiles')
-      .select('id, contact_first, contact_last, company')
+      .select('id, contact_first, contact_last, company, contact_email, contact_phone')
       .in('id', resellerIds);
     const rpMap = {};
     (resellerProfiles || []).forEach(rp => { rpMap[rp.id] = rp; });
+    window._rpMap = rpMap;
 
     /* Load bid history for revision counts and history view */
     const { data: historyRows } = await _supabase
@@ -1441,9 +1476,12 @@ if (!rawBids || rawBids.length === 0) {
 
   function closeAward() { document.getElementById('award-overlay').classList.remove('open'); }
   function closeAwardIfOutside(e) { if (e.target === document.getElementById('award-overlay')) closeAward(); }
+  function closeIntro() { document.getElementById('intro-overlay').classList.remove('open'); }
 
   async function confirmAward() {
     if (!pendingAward) return;
+    const btn = document.getElementById('btn-confirm-award');
+    if (btn) { btn.disabled = true; btn.textContent = 'Awarding…'; }
     const { bidId, vendor } = pendingAward;
     const rfqTitle = currentRFQ.title || ('RFQ #' + currentRFQ.id.slice(0,8).toUpperCase());
     const isSplit = currentRFQ.strategy === 'split' && !!vendor;
@@ -1472,16 +1510,30 @@ if (!rawBids || rawBids.length === 0) {
         });
       }
 
-      // Notify winner
+      // Notify winner with buyer contact info
+      const buyer = window._buyerProfile || {};
+      const buyerContact = buyer.name ? `${buyer.name}${buyer.company ? ' at ' + buyer.company : ''} — ${buyer.email}` : buyer.email || 'the buyer';
       if (winnerBid) {
         notifRows.push({
           user_id: winnerBid.resellerId,
           type: 'bid_won',
           rfq_id: currentRFQ.id,
           bid_id: bidId,
-          message: `Congratulations! Your bid for the ${vendor} portion of "${rfqTitle}" has been selected.`,
+          message: `🏆 Congratulations! Your bid for the ${vendor} portion of "${rfqTitle}" has been selected. The buyer's contact: ${buyerContact}`,
           read: false,
         });
+        // Send a direct message from buyer to winner as a formal introduction
+        if (buyer.userId) {
+          await _supabase.from('messages').insert({
+            rfq_id: currentRFQ.id,
+            sender_id: buyer.userId,
+            recipient_id: winnerBid.resellerId,
+            sender_role: 'buyer',
+            content: `Hi! I've awarded the ${vendor} portion of "${rfqTitle}" to you. Looking forward to working together. You can reach me at ${buyer.email}${buyer.name ? ' — ' + buyer.name : ''}.`,
+            is_broadcast: false,
+            read: false,
+          });
+        }
       }
 
       // Track vendor award in state
@@ -1498,6 +1550,7 @@ if (!rawBids || rawBids.length === 0) {
 
       closeAward();
       renderSplitCards();
+      if (winnerBid) showIntroduction(winnerBid.resellerId, rfqTitle);
 
     } else {
       /* ── SOLE SOURCE: award entire RFQ to one winner ── */
@@ -1512,15 +1565,29 @@ if (!rawBids || rawBids.length === 0) {
         winner_price: pendingAward.price,
       }).eq('id', currentRFQ.id);
 
+      const buyer = window._buyerProfile || {};
+      const buyerContact = buyer.name ? `${buyer.name}${buyer.company ? ' at ' + buyer.company : ''} — ${buyer.email}` : buyer.email || 'the buyer';
       if (winnerBid) {
         notifRows.push({
           user_id: winnerBid.resellerId,
           type: 'bid_won',
           rfq_id: currentRFQ.id,
           bid_id: bidId,
-          message: 'Congratulations! Your bid for "' + rfqTitle + '" has been selected. The buyer will be in touch shortly.',
+          message: `🏆 Congratulations! Your bid for "${rfqTitle}" has been selected. The buyer's contact: ${buyerContact}`,
           read: false,
         });
+        // Send a direct message as a formal introduction
+        if (buyer.userId) {
+          await _supabase.from('messages').insert({
+            rfq_id: currentRFQ.id,
+            sender_id: buyer.userId,
+            recipient_id: winnerBid.resellerId,
+            sender_role: 'buyer',
+            content: `Hi! I've awarded "${rfqTitle}" to you. Looking forward to working together. You can reach me at ${buyer.email}${buyer.name ? ' — ' + buyer.name : ''}.`,
+            is_broadcast: false,
+            read: false,
+          });
+        }
       }
       loserBids.forEach(function(lb) {
         notifRows.push({
@@ -1538,9 +1605,57 @@ if (!rawBids || rawBids.length === 0) {
       closeAward();
       if (currentView === 'card') renderCards(bids);
       else renderTable(bids);
+      if (winnerBid) showIntroduction(winnerBid.resellerId, rfqTitle);
     }
 
     pendingAward = null;
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirm award →'; }
+  }
+
+  /* ─── POST-AWARD INTRODUCTION ─── */
+  function showIntroduction(resellerId, rfqTitle) {
+    const rp = (window._rpMap || {})[resellerId];
+    const contactName = rp ? (`${rp.contact_first || ''} ${rp.contact_last || ''}`).trim() || rp.company : 'the reseller';
+    const company = rp?.company || '';
+    const email = rp?.contact_email || '';
+    const phone = rp?.contact_phone || '';
+    const buyer = window._buyerProfile || {};
+
+    const emailRow = email
+      ? `<div class="intro-contact-row">📧 <a href="mailto:${email}">${email}</a></div>`
+      : '';
+    const phoneRow = phone
+      ? `<div class="intro-contact-row">📞 <a href="tel:${phone}">${phone}</a></div>`
+      : '';
+    const noContactFallback = !email && !phone
+      ? `<div style="font-size:13px;color:var(--slate);margin-top:4px;">Contact details not on file — check your Messages for their intro message.</div>`
+      : '';
+
+    document.getElementById('intro-modal-body').innerHTML = `
+      <div class="intro-header">
+        <span class="intro-icon">🤝</span>
+        <h3>You're connected!</h3>
+        <p class="intro-sub">The deal has been awarded. Here's how to reach <strong style="color:var(--accent);">${contactName.replace(/</g,'&lt;')}</strong> to close it out.</p>
+      </div>
+      <div class="intro-contact-card">
+        <div class="intro-contact-label">Winner — Reseller contact</div>
+        <div class="intro-contact-name">${contactName.replace(/</g,'&lt;')}</div>
+        ${company ? `<div class="intro-contact-company">${company.replace(/</g,'&lt;')}</div>` : ''}
+        ${emailRow}
+        ${phoneRow}
+        ${noContactFallback}
+      </div>
+      <p class="intro-note">
+        An intro message has been sent to ${contactName.replace(/</g,'&lt;')} via the Messages inbox with your contact details
+        (${buyer.email || 'your email'}).
+        All other resellers have been notified they were not selected.
+      </p>
+      <div class="intro-actions">
+        <a class="btn-intro-msg" href="bidbridge-buyer-dashboard_2.html#messages">Open Messages →</a>
+        <button class="btn-intro-done" onclick="closeIntro()">Done</button>
+      </div>
+    `;
+    document.getElementById('intro-overlay').classList.add('open');
   }
 
   /* ─── DATE ─── */

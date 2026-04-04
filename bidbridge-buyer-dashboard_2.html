@@ -511,14 +511,27 @@
   .msg-inbox { display: grid; grid-template-columns: 300px 1fr; border: 1px solid var(--card-border); border-radius: 14px; overflow: hidden; height: 580px; }
   .msg-thread-list { background: var(--navy-mid); border-right: 1px solid var(--card-border); overflow-y: auto; display: flex; flex-direction: column; }
   .msg-thread-empty { padding: 40px 18px; text-align: center; color: var(--slate); font-size: 13px; line-height: 1.7; }
-  .msg-thread-item { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: background .15s; border-left: 3px solid transparent; }
+
+  /* RFQ group header row */
+  .msg-rfq-group-header { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background .15s; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .msg-rfq-group-header:hover { background: rgba(255,255,255,0.04); }
+  .msg-rfq-group-header.expanded { background: rgba(0,200,150,0.05); border-left: 2px solid var(--accent); }
+  .msg-rfq-group-title { font-size: 13px; font-weight: 600; color: var(--white); flex: 1; line-height: 1.3; }
+  .msg-rfq-group-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .msg-rfq-group-chevron { font-size: 10px; color: var(--slate); transition: transform .2s; }
+  .msg-rfq-group-header.expanded .msg-rfq-group-chevron { transform: rotate(180deg); }
+  .msg-rfq-group-unread { background: var(--accent); color: var(--navy); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+
+  /* Reseller thread rows (nested under RFQ group) */
+  .msg-reseller-list { display: none; }
+  .msg-reseller-list.open { display: block; }
+  .msg-thread-item { padding: 10px 18px 10px 28px; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background .15s; border-left: 3px solid transparent; }
   .msg-thread-item:hover { background: rgba(255,255,255,0.04); }
   .msg-thread-item.active { background: rgba(0,200,150,0.07); border-left-color: var(--accent); }
-  .msg-thread-item.unread .msg-thread-rfq { color: var(--white); font-weight: 600; }
-  .msg-thread-item.active .msg-thread-rfq { color: var(--accent); }
-  .msg-thread-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 2px; }
+  .msg-thread-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 2px; }
   .msg-thread-rfq { font-size: 13px; font-weight: 500; color: var(--slate-light); line-height: 1.3; }
-  .msg-thread-sub { font-size: 11px; color: var(--slate); margin-bottom: 3px; }
+  .msg-thread-item.active .msg-thread-rfq { color: var(--accent); }
+  .msg-thread-item.unread .msg-thread-rfq { color: var(--white); font-weight: 600; }
   .msg-thread-time { font-size: 11px; color: var(--slate); white-space: nowrap; flex-shrink: 0; }
   .msg-thread-preview { font-size: 12px; color: var(--slate); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .msg-thread-item.unread .msg-thread-preview { color: var(--slate-light); }
@@ -749,9 +762,7 @@
       <div class="dash-panel" id="panel-messages">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
           <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">Messages</div>
-        </div>
-        <div class="filters-row" style="margin-bottom:16px;" id="msg-rfq-filter-row">
-          <div class="filter-pill active" onclick="filterMsgByRfq(null, this)">All RFQs</div>
+          <div style="font-size:13px;color:var(--slate);">Click an RFQ to see conversations by reseller</div>
         </div>
         <div class="msg-inbox">
           <div class="msg-thread-list" id="msg-inbox-threads">
@@ -785,11 +796,11 @@
 
   // ── Messaging state ──
   let _buyerUserId = null;
-  let _BUYER_MSG_THREADS = [];
+  let _BUYER_MSG_GROUPS = [];  // [ { rfqId, rfqTitle, totalUnread, threads: [ {resellerId, resellerName, lastMsg, lastMsgTime, unreadCount} ] } ]
   let _ACTIVE_THREAD_RFQ_ID = null;
   let _ACTIVE_THREAD_RESELLER_ID = null;
   let _BUYER_RESELLER_MAP = {};
-  let _MSG_RFQ_FILTER = null; // null = all RFQs
+  let _EXPANDED_RFQ_ID = null; // which RFQ group is open in left pane
 
   // Track seen bids by bid_id (more reliable than timestamps)
   function _seenBidsKey() { return 'itpn_seen_bids'; }
@@ -1053,115 +1064,132 @@
         .order('created_at', { ascending: false }),
     ]);
 
-    // Group direct messages by (rfq_id + reseller_id)
-    const threadMap = {};
+    // Build a map: rfqId → resellerId → { msgs, unread }
+    const rfqResellerMap = {}; // rfqId → { resellerId: { msgs[], unread } }
+
     (directMsgs || []).forEach(function(m) {
       const resellerId = m.sender_id === _buyerUserId ? m.recipient_id : m.sender_id;
-      const key = m.rfq_id + '|' + resellerId;
-      if (!threadMap[key]) threadMap[key] = { rfqId: m.rfq_id, resellerId: resellerId, msgs: [], unread: 0 };
-      threadMap[key].msgs.push(m);
-      if (!m.read && m.sender_id !== _buyerUserId) threadMap[key].unread++;
+      if (!rfqResellerMap[m.rfq_id]) rfqResellerMap[m.rfq_id] = {};
+      if (!rfqResellerMap[m.rfq_id][resellerId]) rfqResellerMap[m.rfq_id][resellerId] = { msgs: [], unread: 0 };
+      rfqResellerMap[m.rfq_id][resellerId].msgs.push(m);
+      if (!m.read && m.sender_id !== _buyerUserId) rfqResellerMap[m.rfq_id][resellerId].unread++;
     });
 
-    // Add broadcasts under a synthetic "broadcast" thread per RFQ
+    // Add broadcasts as a special 'broadcast' reseller slot per RFQ
     (broadcasts || []).forEach(function(m) {
-      const key = m.rfq_id + '|broadcast';
-      if (!threadMap[key]) threadMap[key] = { rfqId: m.rfq_id, resellerId: 'broadcast', msgs: [], unread: 0 };
-      threadMap[key].msgs.push(m);
+      if (!rfqResellerMap[m.rfq_id]) rfqResellerMap[m.rfq_id] = {};
+      if (!rfqResellerMap[m.rfq_id]['broadcast']) rfqResellerMap[m.rfq_id]['broadcast'] = { msgs: [], unread: 0 };
+      rfqResellerMap[m.rfq_id]['broadcast'].msgs.push(m);
     });
 
-    // Fetch reseller company names
-    const resellerIds = [...new Set(Object.values(threadMap).map(function(t) { return t.resellerId; }).filter(function(id) { return id !== 'broadcast'; }))];
-    if (resellerIds.length > 0) {
-      const { data: rps } = await _supabase.from('reseller_profiles').select('id, company, contact_first, contact_last').in('id', resellerIds);
+    // Fetch reseller names
+    const allResellerIds = [];
+    Object.values(rfqResellerMap).forEach(function(byReseller) {
+      Object.keys(byReseller).forEach(function(rid) { if (rid !== 'broadcast') allResellerIds.push(rid); });
+    });
+    const uniqueResellerIds = [...new Set(allResellerIds)];
+    if (uniqueResellerIds.length > 0) {
+      const { data: rps } = await _supabase.from('reseller_profiles').select('id, company, contact_first, contact_last').in('id', uniqueResellerIds);
       (rps || []).forEach(function(p) {
         _BUYER_RESELLER_MAP[p.id] = p.company || ((p.contact_first || '') + ' ' + (p.contact_last || '')).trim() || 'Reseller';
       });
     }
 
-    _BUYER_MSG_THREADS = Object.keys(threadMap).map(function(key) {
-      const { rfqId, resellerId, msgs, unread } = threadMap[key];
-      const sorted = msgs.slice().sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
-      const last = sorted[0];
+    // Build groups: one group per RFQ, threads array per reseller within it
+    _BUYER_MSG_GROUPS = Object.keys(rfqResellerMap).map(function(rfqId) {
       const rfq = allRFQs.find(function(r) { return r.id === rfqId; });
       const rfqTitle = rfq ? rfq.title : 'RFQ #' + rfqId.slice(0, 8).toUpperCase();
-      const resellerName = resellerId === 'broadcast' ? 'Broadcast' : (_BUYER_RESELLER_MAP[resellerId] || 'Reseller');
-      let preview = '';
-      if (last.is_broadcast) preview = '📢 ' + last.content;
-      else if (last.sender_id === _buyerUserId) preview = 'You: ' + last.content;
-      else preview = resellerName + ': ' + last.content;
-      return { key, rfqId, resellerId, rfqTitle, resellerName, lastMsg: preview, lastMsgTime: last.created_at, unreadCount: unread };
+      const byReseller = rfqResellerMap[rfqId];
+
+      const threads = Object.keys(byReseller).map(function(resellerId) {
+        const { msgs, unread } = byReseller[resellerId];
+        const sorted = msgs.slice().sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+        const last = sorted[0];
+        const resellerName = resellerId === 'broadcast' ? '📢 Broadcast (all bidders)' : (_BUYER_RESELLER_MAP[resellerId] || 'Reseller');
+        let preview = '';
+        if (last.is_broadcast) preview = last.content;
+        else if (last.sender_id === _buyerUserId) preview = 'You: ' + last.content;
+        else preview = last.content;
+        return { resellerId, resellerName, lastMsg: preview, lastMsgTime: last.created_at, unreadCount: unread };
+      }).sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
+
+      const totalUnread = threads.reduce(function(s, t) { return s + t.unreadCount; }, 0);
+      const lastMsgTime = threads[0] ? threads[0].lastMsgTime : null;
+      return { rfqId, rfqTitle, threads, totalUnread, lastMsgTime };
     }).sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
 
     // Update sidebar badge
-    const totalUnread = _BUYER_MSG_THREADS.reduce(function(s, t) { return s + t.unreadCount; }, 0);
+    const totalUnread = _BUYER_MSG_GROUPS.reduce(function(s, g) { return s + g.totalUnread; }, 0);
     const badge = document.getElementById('badge-messages');
     if (badge) { if (totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = ''; } else { badge.style.display = 'none'; } }
 
-    // Build RFQ filter pills
-    buildMsgRfqFilterPills();
     renderBuyerMsgThreadList();
   }
 
-  function buildMsgRfqFilterPills() {
-    const row = document.getElementById('msg-rfq-filter-row');
-    if (!row) return;
-    const rfqIds = [...new Set(_BUYER_MSG_THREADS.map(function(t) { return t.rfqId; }))];
-    const allPill = '<div class="filter-pill' + (_MSG_RFQ_FILTER === null ? ' active' : '') + '" onclick="filterMsgByRfq(null, this)">All RFQs</div>';
-    const pills = rfqIds.map(function(rfqId) {
-      const t = _BUYER_MSG_THREADS.find(function(x) { return x.rfqId === rfqId; });
-      const label = t ? (t.rfqTitle.length > 28 ? t.rfqTitle.slice(0, 25) + '…' : t.rfqTitle) : rfqId.slice(0, 8).toUpperCase();
-      const isActive = _MSG_RFQ_FILTER === rfqId;
-      return '<div class="filter-pill' + (isActive ? ' active' : '') + '" onclick="filterMsgByRfq(\'' + rfqId + '\', this)">' + label.replace(/</g, '&lt;') + '</div>';
-    });
-    row.innerHTML = allPill + pills.join('');
-  }
-
-  function filterMsgByRfq(rfqId, el) {
-    _MSG_RFQ_FILTER = rfqId;
-    document.querySelectorAll('#msg-rfq-filter-row .filter-pill').forEach(function(p) { p.classList.remove('active'); });
-    if (el) el.classList.add('active');
+  function toggleRfqGroup(rfqId) {
+    _EXPANDED_RFQ_ID = _EXPANDED_RFQ_ID === rfqId ? null : rfqId;
     renderBuyerMsgThreadList();
   }
 
   function renderBuyerMsgThreadList() {
     const listEl = document.getElementById('msg-inbox-threads');
     if (!listEl) return;
-    const filtered = _MSG_RFQ_FILTER
-      ? _BUYER_MSG_THREADS.filter(function(t) { return t.rfqId === _MSG_RFQ_FILTER; })
-      : _BUYER_MSG_THREADS;
-    if (filtered.length === 0) {
+    if (_BUYER_MSG_GROUPS.length === 0) {
       listEl.innerHTML = '<div class="msg-thread-empty">No conversations yet.<br><span style="font-size:12px;">Messages from resellers will appear here when they reach out about your RFQs.</span></div>';
       return;
     }
-    listEl.innerHTML = filtered.map(function(t) {
-      const isActive = t.rfqId === _ACTIVE_THREAD_RFQ_ID && t.resellerId === _ACTIVE_THREAD_RESELLER_ID;
-      const hasUnread = t.unreadCount > 0;
-      const timeLabel = formatTimeAgo(t.lastMsgTime);
-      const preview = (t.lastMsg || '').length > 50 ? t.lastMsg.slice(0, 47) + '…' : (t.lastMsg || '');
-      return '<div class="msg-thread-item' + (isActive ? ' active' : '') + (hasUnread ? ' unread' : '') + '" onclick="selectBuyerMsgThread(\'' + t.rfqId + '\', \'' + t.resellerId + '\')">' +
-        '<div class="msg-thread-meta">' +
-          '<div class="msg-thread-rfq">' + t.rfqTitle.replace(/</g, '&lt;') + '</div>' +
-          '<div style="display:flex;align-items:center;gap:5px;">' +
-            (hasUnread ? '<span class="msg-thread-unread-badge">' + t.unreadCount + '</span>' : '') +
-            '<span class="msg-thread-time">' + timeLabel + '</span>' +
+
+    listEl.innerHTML = _BUYER_MSG_GROUPS.map(function(group) {
+      const isExpanded = _EXPANDED_RFQ_ID === group.rfqId;
+      const hasUnread = group.totalUnread > 0;
+      const titleShort = group.rfqTitle.length > 26 ? group.rfqTitle.slice(0, 23) + '…' : group.rfqTitle;
+
+      const headerHtml =
+        '<div class="msg-rfq-group-header' + (isExpanded ? ' expanded' : '') + '" onclick="toggleRfqGroup(\'' + group.rfqId + '\')">' +
+          '<div>' +
+            '<div class="msg-rfq-group-title">' + titleShort.replace(/</g, '&lt;') + '</div>' +
+            '<div style="font-size:11px;color:var(--slate);margin-top:2px;">' + group.threads.length + ' reseller' + (group.threads.length !== 1 ? 's' : '') + '</div>' +
           '</div>' +
-        '</div>' +
-        '<div class="msg-thread-sub">' + t.resellerName.replace(/</g, '&lt;') + '</div>' +
-        '<div class="msg-thread-preview">' + preview.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
-      '</div>';
+          '<div class="msg-rfq-group-meta">' +
+            (hasUnread ? '<span class="msg-rfq-group-unread">' + group.totalUnread + '</span>' : '') +
+            '<span class="msg-rfq-group-chevron">▼</span>' +
+          '</div>' +
+        '</div>';
+
+      const resellerRowsHtml = group.threads.map(function(t) {
+        const isActive = group.rfqId === _ACTIVE_THREAD_RFQ_ID && t.resellerId === _ACTIVE_THREAD_RESELLER_ID;
+        const hasThreadUnread = t.unreadCount > 0;
+        const timeLabel = formatTimeAgo(t.lastMsgTime);
+        const preview = (t.lastMsg || '').length > 42 ? t.lastMsg.slice(0, 39) + '…' : (t.lastMsg || '');
+        return '<div class="msg-thread-item' + (isActive ? ' active' : '') + (hasThreadUnread ? ' unread' : '') + '" onclick="selectBuyerMsgThread(\'' + group.rfqId + '\', \'' + t.resellerId + '\')">' +
+          '<div class="msg-thread-meta">' +
+            '<div class="msg-thread-rfq">' + t.resellerName.replace(/</g, '&lt;') + '</div>' +
+            '<div style="display:flex;align-items:center;gap:5px;">' +
+              (hasThreadUnread ? '<span class="msg-thread-unread-badge">' + t.unreadCount + '</span>' : '') +
+              '<span class="msg-thread-time">' + timeLabel + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="msg-thread-preview">' + preview.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+        '</div>';
+      }).join('');
+
+      const resellerListHtml = '<div class="msg-reseller-list' + (isExpanded ? ' open' : '') + '">' + resellerRowsHtml + '</div>';
+      return headerHtml + resellerListHtml;
     }).join('');
   }
 
   async function selectBuyerMsgThread(rfqId, resellerId) {
     _ACTIVE_THREAD_RFQ_ID = rfqId;
     _ACTIVE_THREAD_RESELLER_ID = resellerId;
+    // Auto-expand the group when a reseller is selected
+    _EXPANDED_RFQ_ID = rfqId;
     renderBuyerMsgThreadList();
 
     const convEl = document.getElementById('msg-inbox-conv');
     if (!convEl) return;
-    const thread = _BUYER_MSG_THREADS.find(function(t) { return t.rfqId === rfqId && t.resellerId === resellerId; });
-    const rfqTitle = thread ? thread.rfqTitle : 'Conversation';
+    const group = _BUYER_MSG_GROUPS.find(function(g) { return g.rfqId === rfqId; });
+    const thread = group ? group.threads.find(function(t) { return t.resellerId === resellerId; }) : null;
+    const rfqTitle = group ? group.rfqTitle : 'Conversation';
     const resellerName = thread ? thread.resellerName : 'Reseller';
     const isBroadcast = resellerId === 'broadcast';
 
@@ -1206,7 +1234,8 @@
         await _supabase.from('messages').update({ read: true })
           .eq('rfq_id', rfqId).eq('sender_id', resellerId).eq('recipient_id', _buyerUserId).eq('read', false);
         if (thread) thread.unreadCount = 0;
-        const totalUnread = _BUYER_MSG_THREADS.reduce(function(s, t) { return s + t.unreadCount; }, 0);
+        if (group) group.totalUnread = group.threads.reduce(function(s, t) { return s + t.unreadCount; }, 0);
+        const totalUnread = _BUYER_MSG_GROUPS.reduce(function(s, g) { return s + g.totalUnread; }, 0);
         const badge = document.getElementById('badge-messages');
         if (badge) { if (totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = ''; } else { badge.style.display = 'none'; } }
         renderBuyerMsgThreadList();
@@ -1250,14 +1279,16 @@
     if (sendBtn) sendBtn.disabled = false;
 
     // Notify reseller
-    const thread = _BUYER_MSG_THREADS.find(function(t) { return t.rfqId === _ACTIVE_THREAD_RFQ_ID && t.resellerId === _ACTIVE_THREAD_RESELLER_ID; });
-    const rfqTitle = thread ? thread.rfqTitle : 'an RFQ';
+    const group = _BUYER_MSG_GROUPS.find(function(g) { return g.rfqId === _ACTIVE_THREAD_RFQ_ID; });
+    const thread = group ? group.threads.find(function(t) { return t.resellerId === _ACTIVE_THREAD_RESELLER_ID; }) : null;
+    const rfqTitle = group ? group.rfqTitle : 'an RFQ';
     const snippet = text.length > 60 ? text.slice(0, 57) + '…' : text;
     await _supabase.from('notifications').insert({ user_id: _ACTIVE_THREAD_RESELLER_ID, type: 'new_message', message: '💬 New message from the buyer on "' + rfqTitle + '": "' + snippet + '"', rfq_id: _ACTIVE_THREAD_RFQ_ID, read: false });
 
-    // Update thread preview
+    // Update thread preview and re-sort groups
     if (thread) { thread.lastMsg = 'You: ' + text; thread.lastMsgTime = new Date().toISOString(); }
-    _BUYER_MSG_THREADS.sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
+    if (group) { group.lastMsgTime = new Date().toISOString(); }
+    _BUYER_MSG_GROUPS.sort(function(a, b) { return new Date(b.lastMsgTime) - new Date(a.lastMsgTime); });
 
     selectBuyerMsgThread(_ACTIVE_THREAD_RFQ_ID, _ACTIVE_THREAD_RESELLER_ID);
   }

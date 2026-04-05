@@ -553,6 +553,67 @@
   .msg-bubble.broadcast { align-self: center; background: rgba(245,200,66,0.07); border: 1px solid rgba(245,200,66,0.15); color: var(--gold); font-size: 12px; max-width: 95%; text-align: center; border-radius: 8px; padding: 8px 16px; }
   .msg-sender { font-size: 11px; color: var(--slate); margin-bottom: 3px; }
   .msg-time { font-size: 11px; color: var(--slate); margin-top: 3px; }
+
+  /* ─── ACTION NEEDED SECTION ─── */
+  .action-section { margin-bottom: 28px; }
+  .action-section-title { font-family: var(--font-head); font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 12px; }
+  .action-cards { display: flex; flex-direction: column; gap: 10px; }
+  .action-card {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 14px 18px;
+    transition: border-color .2s, background .2s;
+  }
+  .action-card:hover { border-color: rgba(255,255,255,0.15); }
+  .action-card.ac-review { border-color: rgba(245,200,66,0.3); background: rgba(245,200,66,0.03); }
+  .action-card.ac-bids { border-color: rgba(0,200,150,0.25); background: rgba(0,200,150,0.03); }
+  .action-card.ac-deadline { border-color: rgba(255,107,107,0.25); background: rgba(255,107,107,0.03); }
+  .action-card.ac-msg { border-color: rgba(255,255,255,0.12); }
+  .action-card-icon { font-size: 22px; width: 36px; text-align: center; flex-shrink: 0; }
+  .action-card-body { flex: 1; min-width: 0; }
+  .action-card-title { font-size: 14px; font-weight: 600; color: var(--white); }
+  .action-card-sub { font-size: 12px; color: var(--slate); margin-top: 2px; }
+  .action-cta {
+    background: var(--accent); color: var(--navy);
+    border: none; border-radius: 8px;
+    padding: 8px 16px; font-size: 13px; font-weight: 700;
+    cursor: pointer; text-decoration: none; white-space: nowrap;
+    display: inline-block; flex-shrink: 0;
+    transition: opacity .15s;
+  }
+  .action-cta:hover { opacity: 0.88; }
+  .action-cta.cta-ghost {
+    background: transparent; color: var(--accent);
+    border: 1px solid rgba(0,200,150,0.35);
+  }
+  .action-cta.cta-gold { background: var(--gold); }
+  .action-catchup {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(0,200,150,0.05); border: 1px solid rgba(0,200,150,0.15);
+    border-radius: 12px; padding: 18px 20px;
+    font-size: 14px; color: var(--accent); font-weight: 500;
+  }
+
+  /* ─── DASHBOARD LAYOUT ─── */
+  .dash-two-col { display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
+  @media (max-width: 1100px) { .dash-two-col { grid-template-columns: 1fr; } }
+  .dash-right-col { display: flex; flex-direction: column; gap: 20px; }
+  .quick-links-card {
+    background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px 20px;
+  }
+  .quick-links-title { font-size: 13px; font-weight: 700; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+  .quick-link-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    text-decoration: none; color: var(--white); font-size: 14px;
+    transition: color .15s;
+  }
+  .quick-link-row:last-child { border-bottom: none; }
+  .quick-link-row:hover { color: var(--accent); }
+  .quick-link-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .quick-link-label { flex: 1; }
+  .quick-link-arrow { color: var(--slate); font-size: 12px; }
 </style>
 </head>
 <body>
@@ -612,15 +673,9 @@
     <!-- TOP BAR -->
     <div class="topbar">
       <div class="topbar-left">
-        <h1>Buyer Dashboard</h1>
-        <p id="topbar-greeting">Welcome back</p>
+        <h1 id="topbar-greeting">Welcome back</h1>
+        <p id="topbar-date" style="font-size:13px;color:var(--slate);margin-top:2px;"></p>
       </div>
-
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="search-input" placeholder="Search RFQs by name, vendor, or status..." oninput="filterRFQs()">
-      </div>
-
       <a href="bidbridge-submit-rfq_2.html" class="btn-new-rfq">
         <span>＋</span> New RFQ
       </a>
@@ -631,137 +686,105 @@
 
       <!-- STAT CARDS -->
       <div class="stats-grid">
-        <div class="stat-card selected" id="stat-card-rfqs" style="cursor:pointer;" onclick="showPanel('rfqs', this)">
+        <a class="stat-card" href="bidbridge-my-rfqs.html" style="text-decoration:none;cursor:pointer;">
           <div class="stat-label">Active RFQs</div>
           <div class="stat-value accent" id="stat-active">—</div>
           <div class="stat-sub up" id="stat-active-sub"></div>
-        </div>
-        <div class="stat-card" id="stat-bids-card" style="cursor:pointer;position:relative;" onclick="showPanel('bids', this)">
+        </a>
+        <a class="stat-card" id="stat-bids-card" href="bidbridge-compare-bids_1.html" style="text-decoration:none;cursor:pointer;position:relative;">
           <div class="stat-label">Total bids received</div>
           <div class="stat-value" id="stat-bids">—</div>
           <div class="stat-sub" id="stat-bids-sub">Across all open RFQs</div>
-        </div>
-        <div class="stat-card" id="stat-card-review" style="cursor:pointer;" onclick="showPanel('rfqs', document.getElementById('stat-card-rfqs')); setFilter(document.querySelector('#filter-pill-review'), 'review');">
-          <div class="stat-label">Awaiting your review</div>
+        </a>
+        <a class="stat-card" href="bidbridge-compare-bids_1.html" style="text-decoration:none;cursor:pointer;">
+          <div class="stat-label">Ready to review</div>
           <div class="stat-value gold" id="stat-review">—</div>
           <div class="stat-sub">Bids ready to compare</div>
-        </div>
-        <div class="stat-card" id="stat-card-awarded" style="cursor:pointer;" onclick="showPanel('awarded', this)">
+        </a>
+        <a class="stat-card" href="bidbridge-my-rfqs.html" style="text-decoration:none;cursor:pointer;">
           <div class="stat-label">Deals awarded</div>
           <div class="stat-value" id="stat-awarded">—</div>
-          <div class="stat-sub">This quarter</div>
+          <div class="stat-sub">Total to date</div>
+        </a>
+      </div>
+
+      <!-- ══ ACTION NEEDED ══ -->
+      <div class="action-section">
+        <div class="action-section-title">Action needed</div>
+        <div class="action-cards" id="action-cards">
+          <div class="action-catchup"><span>⏳</span> Loading…</div>
         </div>
       </div>
 
-      <!-- Recent activity always visible -->
-      <div class="notif-section">
-        <div class="notif-header">
-          <div class="notif-title">Recent activity</div>
-          <a class="notif-see-all" href="bidbridge-notifications_1.html">See all</a>
+      <!-- ══ TWO-COLUMN: Activity + Quick links ══ -->
+      <div class="dash-two-col">
+        <!-- Left: Recent bid activity -->
+        <div class="notif-section">
+          <div class="notif-header">
+            <div class="notif-title">Bid activity</div>
+            <a class="notif-see-all" href="bidbridge-notifications_1.html">See all</a>
+          </div>
+          <div class="notif-list" id="notif-list">
+            <div style="padding:20px;font-size:13px;color:var(--slate);">No recent activity yet. Activity will appear here as resellers bid on your RFQs.</div>
+          </div>
         </div>
-        <div class="notif-list" id="notif-list">
-          <div style="padding:20px;font-size:13px;color:var(--slate);">No recent activity yet. Activity will appear here as resellers bid on your RFQs.</div>
+
+        <!-- Right: Quick links -->
+        <div class="dash-right-col">
+          <div class="quick-links-card">
+            <div class="quick-links-title">Quick links</div>
+            <a class="quick-link-row" href="bidbridge-submit-rfq_2.html">
+              <div class="quick-link-icon">＋</div>
+              <span class="quick-link-label">Post a new RFQ</span>
+              <span class="quick-link-arrow">›</span>
+            </a>
+            <a class="quick-link-row" href="bidbridge-my-rfqs.html">
+              <div class="quick-link-icon">📋</div>
+              <span class="quick-link-label">My RFQs</span>
+              <span class="quick-link-arrow">›</span>
+            </a>
+            <a class="quick-link-row" href="bidbridge-compare-bids_1.html">
+              <div class="quick-link-icon">⚖️</div>
+              <span class="quick-link-label">Compare bids</span>
+              <span class="quick-link-arrow">›</span>
+            </a>
+            <a class="quick-link-row" href="#" onclick="showPanel('messages', document.getElementById('nav-messages')); return false;">
+              <div class="quick-link-icon">💬</div>
+              <span class="quick-link-label">Messages</span>
+              <span class="quick-link-arrow">›</span>
+            </a>
+            <a class="quick-link-row" href="bidbridge-notifications_1.html">
+              <div class="quick-link-icon">🔔</div>
+              <span class="quick-link-label">Notifications</span>
+              <span class="quick-link-arrow">›</span>
+            </a>
+          </div>
+
+          <!-- Upcoming deadlines mini-card -->
+          <div class="quick-links-card" id="upcoming-deadlines-card" style="display:none;">
+            <div class="quick-links-title">Closing soon</div>
+            <div id="upcoming-deadlines-list"></div>
+          </div>
         </div>
-      </div>
+      </div><!-- /dash-two-col -->
 
       <!-- Activity modal -->
       <div id="activity-modal-backdrop" onclick="closeActivityDropdown()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;"></div>
       <div id="activity-dropdown" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:901;width:520px;max-width:92vw;background:var(--navy-mid);border:1px solid rgba(255,255,255,0.1);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.5);">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.07);">
-          <span style="font-size:15px;font-weight:600;color:var(--white);">Recent activity</span>
+          <span style="font-size:15px;font-weight:600;color:var(--white);">Bid activity</span>
           <button onclick="closeActivityDropdown()" style="background:none;border:none;color:var(--slate);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;">&times;</button>
         </div>
         <div id="activity-dropdown-list" style="max-height:calc(80vh - 60px);overflow-y:auto;display:flex;flex-direction:column;"></div>
       </div>
 
-      <!-- ══ PANEL: RFQs ══ -->
-      <div class="dash-panel active" id="panel-rfqs">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">My RFQs</div>
-        </div>
-
-        <div class="filters-row" id="filters-row">
-          <div class="filter-pill active" id="filter-pill-all" onclick="setFilter(this, 'all')">All RFQs</div>
-          <div class="filter-pill" id="filter-pill-active" onclick="setFilter(this, 'active')">Active</div>
-          <div class="filter-pill" id="filter-pill-review" onclick="setFilter(this, 'review')">Ready to review</div>
-          <div class="filter-pill" id="filter-pill-draft" onclick="setFilter(this, 'draft')">Drafts</div>
-          <div class="filter-pill" id="filter-pill-closed" onclick="setFilter(this, 'closed')">Closed</div>
-          <div class="filter-pill" id="filter-pill-awarded" onclick="setFilter(this, 'awarded')">Awarded</div>
-          <div class="filter-pill" id="filter-pill-cancelled" onclick="setFilter(this, 'cancelled')">Cancelled</div>
-          <div class="filters-right">
-            <div class="sort-wrap">
-              <select class="sort-select" onchange="sortRFQs(this.value)">
-                <option value="newest">Newest first</option>
-                <option value="deadline">Deadline soonest</option>
-                <option value="bids-desc">Most bids</option>
-                <option value="bids-asc">Fewest bids</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="rfq-table-wrap">
-          <table class="rfq-table" id="rfq-table">
-            <thead>
-              <tr>
-                <th>Project</th>
-                <th>Status</th>
-                <th>Strategy</th>
-                <th>Bids</th>
-                <th>Savings</th>
-                <th>Deadline</th>
-                <th>Posted</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="rfq-tbody"></tbody>
-          </table>
-          <div class="empty-state" id="empty-state">
-            <span class="empty-icon">📋</span>
-            <h3>No RFQs found</h3>
-            <p>Try adjusting your search or filter, or post your first RFQ to get competitive bids.</p>
-            <a href="bidbridge-submit-rfq_2.html" class="btn-new-rfq" style="display:inline-flex;">＋ Post your first RFQ</a>
-          </div>
-          <div class="pagination" id="pagination">
-            <span id="pagination-label">Showing 1–6 of 6 RFQs</span>
-            <div class="page-btns">
-              <button class="page-btn">‹</button>
-              <button class="page-btn active">1</button>
-              <button class="page-btn">›</button>
-            </div>
-          </div>
-        </div>
-      </div><!-- /panel-rfqs -->
-
-      <!-- ══ PANEL: Bids received ══ -->
-      <div class="dash-panel" id="panel-bids">
+      <!-- ══ PANEL: Messages (hidden until sidebar click) ══ -->
+      <div class="dash-panel" id="panel-messages" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-          <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">Bids received</div>
-          <div style="font-size:13px;color:var(--slate);">Click an RFQ to expand its bids</div>
-        </div>
-        <!-- Filter pills for bids panel -->
-        <div class="filters-row" style="margin-bottom:20px;" id="bids-filter-row">
-          <div class="filter-pill active" id="bids-pill-all" onclick="setBidsFilter('all', this)">All RFQs</div>
-          <div class="filter-pill" id="bids-pill-active" onclick="setBidsFilter('active', this)">Active</div>
-          <div class="filter-pill" id="bids-pill-review" onclick="setBidsFilter('review', this)">Ready to review</div>
-        </div>
-        <div id="bids-panel-body">
-          <div style="padding:40px;text-align:center;color:var(--slate);font-size:13px;">Loading bids…</div>
-        </div>
-      </div><!-- /panel-bids -->
-
-      <!-- ══ PANEL: Awarded ══ -->
-      <div class="dash-panel" id="panel-awarded">
-        <div style="font-family:var(--font-head);font-size:16px;font-weight:600;margin-bottom:16px;">Deals awarded</div>
-        <div id="awarded-panel-body">
-          <div style="padding:40px;text-align:center;color:var(--slate);font-size:13px;">Loading awarded deals…</div>
-        </div>
-      </div><!-- /panel-awarded -->
-
-      <!-- ══ PANEL: Messages ══ -->
-      <div class="dash-panel" id="panel-messages">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-          <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">Messages</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button onclick="showOverview()" style="background:none;border:none;color:var(--slate);cursor:pointer;font-size:20px;padding:0;line-height:1;" title="Back to dashboard">←</button>
+            <div style="font-family:var(--font-head);font-size:16px;font-weight:600;">Messages</div>
+          </div>
           <div style="font-size:13px;color:var(--slate);">Click an RFQ to see conversations by reseller</div>
         </div>
         <div class="msg-inbox">
@@ -861,12 +884,18 @@
       .eq('id', session.user.id)
       .single();
 
+    // Set date in topbar
+    const dateEl = document.getElementById('topbar-date');
+    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
     if (profile) {
       const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase();
       document.getElementById('user-avatar').textContent = initials || '?';
       document.getElementById('user-name').textContent = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
       document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
-      document.getElementById('topbar-greeting').textContent = `Welcome back, ${profile.first_name || 'there'}`;
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('topbar-greeting').textContent = `${greeting}, ${profile.first_name || 'there'}`;
     }
 
     /* Load RFQs with items and bid counts */
@@ -915,7 +944,7 @@
     if (active > 0) { rfqBadge.textContent = active; rfqBadge.style.display = ''; }
     if (review > 0) { reviewBadge.textContent = review; reviewBadge.style.display = ''; }
 
-    applyFilters();
+    renderOverviewPanel();
 
     // ── Bid activity notifications ──
     // Only track bids on open/active/review RFQs — awarded and closed don't count as "new"
@@ -940,7 +969,6 @@
           ...rfq,
           highestEverBid: highestEverByRfq[rfq.id] || null,
         }));
-        applyFilters(); // re-render now that savings data is available
 
         // Find new entries — bids whose bid_id hasn't been seen yet
         const seen = getSeenBids();
@@ -1034,11 +1062,13 @@
         }
 
         renderActivity();
+        renderOverviewPanel(); // re-render with unread bid counts
       }
     }
 
     // Load message threads after RFQs are ready
     await loadBuyerMsgThreads();
+    renderOverviewPanel(); // re-render with unread message counts
 
     // If navigated here via #messages hash (e.g. from Messages link on other pages), open panel
     if (window.location.hash === '#messages') {
@@ -1327,21 +1357,133 @@
   }
 
   /* ─── PANEL SWITCHING ─── */
-  let _activeBidsFilter = 'all';
+  const _overviewEls = ['action-section', 'dash-two-col'].map(id => null); // lazily resolved
 
-  function showPanel(name, cardEl) {
-    // Deselect all stat cards and sidebar nav-items that act as panel triggers
-    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('selected'));
+  function _getOverviewSections() {
+    return document.querySelectorAll('.action-section, .dash-two-col');
+  }
+
+  function showPanel(name, navEl) {
+    // Update sidebar active state
     document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
-    if (cardEl && cardEl.classList.contains('stat-card')) cardEl.classList.add('selected');
-    if (cardEl && cardEl.classList.contains('nav-item')) cardEl.classList.add('active');
-    // Hide all panels, show the target
-    document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + name).classList.add('active');
-    // Render panel content if needed
-    if (name === 'bids') renderBidsPanel(_activeBidsFilter);
-    if (name === 'awarded') renderAwardedPanel();
-    if (name === 'messages') renderBuyerMsgThreadList();
+    if (navEl && navEl.classList && navEl.classList.contains('nav-item')) navEl.classList.add('active');
+
+    if (name === 'messages') {
+      _getOverviewSections().forEach(el => { el.style.display = 'none'; });
+      document.getElementById('panel-messages').style.display = 'block';
+      renderBuyerMsgThreadList();
+    } else {
+      showOverview();
+    }
+  }
+
+  function showOverview() {
+    document.getElementById('panel-messages').style.display = 'none';
+    _getOverviewSections().forEach(el => { el.style.display = ''; });
+    // Restore Dashboard as active nav
+    document.querySelectorAll('.sidebar .nav-item').forEach(n => n.classList.remove('active'));
+    const dashLink = document.querySelector('.sidebar a[href="bidbridge-buyer-dashboard_2.html"]');
+    if (dashLink) dashLink.classList.add('active');
+  }
+
+  function renderOverviewPanel() {
+    const container = document.getElementById('action-cards');
+    if (!container) return;
+
+    const actions = [];
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    // 1. RFQs ready to review (status = 'review')
+    const reviewRFQs = allRFQs.filter(r => r.status === 'review');
+    if (reviewRFQs.length > 0) {
+      reviewRFQs.forEach(rfq => {
+        actions.push(`
+          <div class="action-card ac-review">
+            <div class="action-card-icon">⚖️</div>
+            <div class="action-card-body">
+              <div class="action-card-title">${rfq.bidCount} bid${rfq.bidCount !== 1 ? 's' : ''} ready to compare</div>
+              <div class="action-card-sub">${rfq.title}</div>
+            </div>
+            <a class="action-cta cta-gold" href="bidbridge-compare-bids_1.html?rfq=${rfq.id}">Compare bids →</a>
+          </div>`);
+      });
+    }
+
+    // 2. New/unread bids
+    const seen = getSeenBids();
+    const newByRFQ = {};
+    (window._dashHistoryRows || []).forEach(h => {
+      if (!seen.has(h.bid_id)) {
+        newByRFQ[h.rfq_id] = (newByRFQ[h.rfq_id] || 0) + 1;
+      }
+    });
+    Object.entries(newByRFQ).forEach(([rfqId, count]) => {
+      const rfq = allRFQs.find(r => r.id === rfqId);
+      if (!rfq || rfq.status === 'review') return; // review already shown above
+      actions.push(`
+        <div class="action-card ac-bids">
+          <div class="action-card-icon">📬</div>
+          <div class="action-card-body">
+            <div class="action-card-title">${count} new bid${count !== 1 ? 's' : ''} received</div>
+            <div class="action-card-sub">${rfq ? rfq.title : 'RFQ #' + rfqId.slice(0,8).toUpperCase()}</div>
+          </div>
+          <a class="action-cta" href="bidbridge-compare-bids_1.html?rfq=${rfqId}">View bids →</a>
+        </div>`);
+    });
+
+    // 3. Deadlines within 7 days (active RFQs only)
+    const soon = allRFQs.filter(r => r.status === 'active' && r.deadline && (() => {
+      const d = new Date(r.deadline + 'T00:00:00'); return (d - today) / 86400000 <= 7 && (d - today) / 86400000 >= 0;
+    })());
+    soon.forEach(rfq => {
+      const days = Math.ceil((new Date(rfq.deadline + 'T00:00:00') - today) / 86400000);
+      const urgency = days === 0 ? 'Closes today — last chance for bids' : days === 1 ? 'Closes tomorrow — resellers can still bid' : `Closes in ${days} days on ${new Date(rfq.deadline + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'})}`;
+      actions.push(`
+        <div class="action-card ac-deadline">
+          <div class="action-card-icon">⏰</div>
+          <div class="action-card-body">
+            <div class="action-card-title">${rfq.title}</div>
+            <div class="action-card-sub">${urgency} · ${rfq.bidCount} bid${rfq.bidCount !== 1 ? 's' : ''} so far</div>
+          </div>
+          <a class="action-cta cta-ghost" href="bidbridge-compare-bids_1.html?rfq=${rfq.id}">View bids →</a>
+        </div>`);
+    });
+
+    // 4. Unread messages
+    const totalUnreadMsg = _BUYER_MSG_GROUPS.reduce((s, g) => s + g.totalUnread, 0);
+    if (totalUnreadMsg > 0) {
+      actions.push(`
+        <div class="action-card ac-msg">
+          <div class="action-card-icon">💬</div>
+          <div class="action-card-body">
+            <div class="action-card-title">${totalUnreadMsg} unread message${totalUnreadMsg !== 1 ? 's' : ''}</div>
+            <div class="action-card-sub">Resellers have sent you messages</div>
+          </div>
+          <a class="action-cta cta-ghost" href="#" onclick="showPanel('messages', document.getElementById('nav-messages')); return false;">Open Messages →</a>
+        </div>`);
+    }
+
+    if (actions.length === 0) {
+      container.innerHTML = '<div class="action-catchup"><span>✓</span> You\'re all caught up — no action needed right now.</div>';
+    } else {
+      container.innerHTML = actions.join('');
+    }
+
+    // Populate upcoming deadlines right-col card
+    if (soon.length > 0) {
+      const card = document.getElementById('upcoming-deadlines-card');
+      const list = document.getElementById('upcoming-deadlines-list');
+      if (card && list) {
+        card.style.display = '';
+        list.innerHTML = soon.map(rfq => {
+          const days = Math.ceil((new Date(rfq.deadline + 'T00:00:00') - today) / 86400000);
+          return `<a class="quick-link-row" href="bidbridge-compare-bids_1.html?rfq=${rfq.id}" style="flex-direction:column;align-items:flex-start;gap:2px;">
+            <div style="font-size:13px;font-weight:600;color:var(--white);">${rfq.title}</div>
+            <div style="font-size:12px;color:${days <= 2 ? 'var(--error)' : 'var(--gold)'};">${days === 0 ? 'Closes today' : days === 1 ? 'Tomorrow' : days + ' days left'} · ${rfq.bidCount} bid${rfq.bidCount !== 1 ? 's' : ''}</div>
+          </a>`;
+        }).join('');
+      }
+    }
   }
 
   function setBidsFilter(filter, el) {

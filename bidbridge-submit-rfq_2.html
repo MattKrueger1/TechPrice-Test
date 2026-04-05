@@ -6,6 +6,7 @@
 <title>IT Pricing Network — Submit RFQ</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -553,6 +554,70 @@
   }
   .btn-another:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
 
+  /* ─── IMPORT BAR ─── */
+  .import-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: rgba(0,200,150,0.05);
+    border: 1px solid rgba(0,200,150,0.18);
+    border-radius: 12px; padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+  .import-bar-text { flex: 1; min-width: 0; }
+  .import-bar-title { font-size: 14px; font-weight: 600; color: var(--white); }
+  .import-bar-sub { font-size: 12px; color: var(--slate); margin-top: 3px; }
+  .import-bar-actions { display: flex; gap: 10px; flex-shrink: 0; }
+  .btn-import {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: var(--font-body); transition: all .18s;
+    white-space: nowrap;
+  }
+  .btn-import-download {
+    background: transparent; color: var(--accent);
+    border: 1px solid rgba(0,200,150,0.35);
+  }
+  .btn-import-download:hover { background: rgba(0,200,150,0.08); border-color: var(--accent); }
+  .btn-import-upload {
+    background: var(--accent); color: var(--navy);
+    border: 1px solid var(--accent);
+  }
+  .btn-import-upload:hover { opacity: 0.88; }
+  .import-success {
+    display: none;
+    background: rgba(0,200,150,0.08); border: 1px solid rgba(0,200,150,0.25);
+    border-radius: 10px; padding: 12px 16px;
+    font-size: 13px; color: var(--accent); margin-bottom: 20px;
+  }
+  .import-error {
+    display: none;
+    background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.25);
+    border-radius: 10px; padding: 12px 16px;
+    font-size: 13px; color: var(--error); margin-bottom: 20px;
+  }
+  .import-suggestions {
+    display: none;
+    flex-direction: column; gap: 10px;
+    background: rgba(255,190,50,0.06); border: 1px solid rgba(255,190,50,0.28);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+  }
+  .suggestion-chip {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .suggestion-text { font-size: 13px; color: var(--white); flex: 1; }
+  .suggestion-text strong { color: #ffd060; }
+  .suggestion-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .btn-suggestion-accept {
+    padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+    background: var(--accent); color: var(--bg); border: none; cursor: pointer;
+  }
+  .btn-suggestion-dismiss {
+    padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+    background: transparent; color: var(--slate);
+    border: 1px solid rgba(255,255,255,0.12); cursor: pointer;
+  }
+  .btn-suggestion-dismiss:hover { color: var(--white); }
+
   @media (max-width: 1024px) {
     .app-shell { grid-template-columns: 1fr; }
     .sidebar { display: none; }
@@ -692,12 +757,28 @@
   <!-- ── STEP 2: VENDORS & PRODUCTS ── -->
   <div class="form-section" id="section-2">
     <div class="section-title">Vendors &amp; products</div>
-    <p class="section-sub">Add each technology vendor and the specific products you need. You can add multiple vendors to a single RFQ.</p>
+    <p class="section-sub">Add each technology vendor and the specific products you need. You can enter them manually below, or have your IT team fill out a spreadsheet template and upload it.</p>
+
+    <!-- Import bar -->
+    <div class="import-bar">
+      <div class="import-bar-text">
+        <div class="import-bar-title">Have IT fill out a spreadsheet?</div>
+        <div class="import-bar-sub">Download the template, send it to your IT team to fill in vendors, SKUs and quantities, then upload it here — the form populates automatically.</div>
+      </div>
+      <div class="import-bar-actions">
+        <button type="button" class="btn-import btn-import-download" onclick="downloadTemplate()">⬇ Download template</button>
+        <button type="button" class="btn-import btn-import-upload" onclick="document.getElementById('import-file').click()">⬆ Upload spreadsheet</button>
+        <input type="file" id="import-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="importSpreadsheet(this)">
+      </div>
+    </div>
+    <div class="import-success" id="import-success"></div>
+    <div class="import-error" id="import-error"></div>
+    <div class="import-suggestions" id="import-suggestions"></div>
 
     <div class="vendor-list" id="vendor-list"></div>
 
     <button class="btn-add-vendor" onclick="addVendorItem()">
-      <span style="font-size:18px;">+</span> Add a vendor
+      <span style="font-size:18px;">+</span> Add a vendor manually
     </button>
 
     <div class="form-nav">
@@ -706,46 +787,49 @@
     </div>
   </div>
 
-  <!-- ── STEP 3: SOURCING STRATEGY ── -->
+  <!-- ── STEP 3: BIDDING PREFERENCES ── -->
   <div class="form-section" id="section-3">
-    <div class="section-title">Sourcing strategy</div>
-    <p class="section-sub">Choose how you want resellers to bid on this project.</p>
+    <div class="section-title">Bidding preferences</div>
+    <p class="section-sub" id="step3-sub">Choose how resellers compete for your project. The defaults work well for most RFQs — only change them if you have a specific reason.</p>
 
-    <!-- Only show strategy choice if multiple vendors -->
+    <!-- ─ DECISION 1: How should resellers bid? ─ -->
     <div id="strategy-section">
+      <div style="font-size:13px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:14px;">How should resellers bid?</div>
       <div class="strategy-cards">
-        <label class="strategy-card selected" id="card-sole">
+        <label class="strategy-card selected" id="card-sole" style="position:relative;">
           <input type="radio" name="strategy" value="sole" checked onchange="selectStrategy('sole')">
           <div class="strategy-check"></div>
+          <div style="position:absolute;top:14px;right:14px;background:var(--accent);color:var(--navy);font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:0.05em;">RECOMMENDED</div>
           <span class="strategy-icon">🤝</span>
-          <div class="strategy-title">Sole source</div>
-          <div class="strategy-desc">One reseller bids the entire project — all vendors included in a single all-in price. Simpler to manage, one relationship, one purchase order.</div>
+          <div class="strategy-title">One reseller bids everything</div>
+          <div class="strategy-desc">A single reseller prices all your vendors in one quote. You get one invoice, one point of contact, and one purchase order. Easiest to manage.</div>
         </label>
         <label class="strategy-card" id="card-split">
           <input type="radio" name="strategy" value="split" onchange="selectStrategy('split')">
           <div class="strategy-check"></div>
           <span class="strategy-icon">⚖️</span>
-          <div class="strategy-title">Split bid</div>
-          <div class="strategy-desc">Each vendor is bid separately. The best authorized reseller per vendor competes independently. Maximum price competition on every line item.</div>
+          <div class="strategy-title">Each vendor is bid separately</div>
+          <div class="strategy-desc">The best-priced reseller for each vendor wins that portion. More competition per line item, but you may end up with multiple invoices and contacts.</div>
         </label>
       </div>
-
       <div class="strategy-note visible" id="strategy-note-sole">
-        Resellers who bid must be authorized to sell <strong>all</strong> vendors in your project. Only multi-vendor authorized partners will be notified.
+        Only resellers authorized to sell <strong>all</strong> vendors in your project will be invited to bid.
       </div>
       <div class="strategy-note" id="strategy-note-split">
-        Your RFQ will be split into separate lots — one per vendor. The top authorized resellers for each vendor will be notified independently. You can select a different winner for each vendor.
+        Your RFQ is split into separate lots — one per vendor. You can pick a different winner for each. Best for price-sensitive multi-vendor projects.
       </div>
     </div>
 
-    <div style="margin-top:36px;">
-      <div class="section-title" style="font-size:17px;margin-bottom:6px;">Partner tier filter</div>
-      <p class="section-sub" style="margin-bottom:16px;">Optionally restrict bids to resellers who hold a minimum partner tier status with the vendors in your project.</p>
+    <!-- ─ DECISION 2: Who can bid? ─ -->
+    <div style="margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.07);">
+      <div style="font-size:13px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Who can bid?</div>
+      <p style="font-size:13px;color:var(--slate-light);margin-bottom:16px;">By default, all verified resellers on the platform can see and bid on your RFQ. You can optionally require a minimum vendor certification level.</p>
 
       <div class="tier-filter-wrap">
         <div class="tier-filter-header">
-          <div class="tier-filter-title">
-            ⭐ Require minimum partner tier
+          <div>
+            <div class="tier-filter-title">Require a minimum partner tier</div>
+            <div style="font-size:12px;color:var(--slate);margin-top:2px;">Leave off to get the most bids (recommended for most projects)</div>
           </div>
           <label class="toggle-switch">
             <input type="checkbox" id="tier-toggle" onchange="toggleTierFilter(this)">
@@ -754,36 +838,20 @@
           </label>
         </div>
 
-        <div id="tier-options" style="display:none;">
-          <p style="font-size:13px;color:var(--slate-light);margin-bottom:14px;">Select the minimum tier level resellers must hold with each vendor to be eligible to bid:</p>
+        <div id="tier-options" style="display:none;margin-top:16px;">
+          <p style="font-size:13px;color:var(--slate-light);margin-bottom:14px;">Select the minimum certification level a reseller must hold with each vendor:</p>
           <div class="tier-options" id="tier-pills">
-            <div class="tier-pill" onclick="selectTier(this, 'authorized')">Authorized</div>
-            <div class="tier-pill" onclick="selectTier(this, 'silver')">Silver / Select</div>
-            <div class="tier-pill selected" onclick="selectTier(this, 'gold')">Gold</div>
-            <div class="tier-pill" onclick="selectTier(this, 'platinum')">Platinum</div>
-            <div class="tier-pill" onclick="selectTier(this, 'top')">Top tier only</div>
+            <div class="tier-pill" onclick="selectTier(this, 'authorized')">Authorized <span style="font-size:11px;opacity:0.7;display:block;margin-top:2px;">Most resellers</span></div>
+            <div class="tier-pill" onclick="selectTier(this, 'silver')">Silver / Select <span style="font-size:11px;opacity:0.7;display:block;margin-top:2px;">Mid-tier</span></div>
+            <div class="tier-pill" onclick="selectTier(this, 'gold')">Gold <span style="font-size:11px;opacity:0.7;display:block;margin-top:2px;">Strong discount access</span></div>
+            <div class="tier-pill" onclick="selectTier(this, 'platinum')">Platinum <span style="font-size:11px;opacity:0.7;display:block;margin-top:2px;">Fewer, elite resellers</span></div>
           </div>
-          <p class="field-hint" style="margin-top:12px;">Selecting a higher tier reduces the number of eligible resellers but typically means access to better pricing discounts from the vendor.</p>
+          <p class="field-hint" style="margin-top:12px;">Higher tiers mean fewer eligible resellers but typically deeper vendor discounts. If unsure, start with Gold.</p>
         </div>
       </div>
     </div>
 
-    <div style="margin-top:36px;">
-      <div class="section-title" style="font-size:17px;margin-bottom:6px;">RFQ visibility</div>
-      <p class="section-sub" style="margin-bottom:16px;">Control who can see and bid on this RFQ.</p>
-      <div class="form-group">
-        <div class="select-wrap">
-          <select id="rfq-visibility">
-            <option value="all">Open to all verified resellers (recommended)</option>
-            <option value="tier-filtered">Filtered by partner tier only</option>
-            <option value="invited">Invited resellers only (coming soon)</option>
-          </select>
-        </div>
-        <div class="field-hint">Most customers get the best pricing by opening bids to all verified resellers.</div>
-      </div>
-    </div>
-
-    <div class="form-nav">
+    <div class="form-nav" style="margin-top:36px;">
       <button class="btn-back" onclick="goToStep(2)">← Back</button>
       <button class="btn-next" onclick="goToStep(4)">Next: Review &amp; submit →</button>
     </div>
@@ -1026,6 +1094,252 @@
     }
   }
 
+  /* ═══════════════════════════════════════════════
+     SPREADSHEET IMPORT / EXPORT
+  ═══════════════════════════════════════════════ */
+
+  function downloadTemplate() {
+    if (typeof XLSX === 'undefined') {
+      alert('Spreadsheet library not loaded yet — please wait a moment and try again.');
+      return;
+    }
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Items template with example rows
+    const templateRows = [
+      ['Vendor', 'SKU / Part Number', 'Quantity', 'Notes (optional)'],
+      ['Cisco', 'C9300-48P-A', 5, 'Core switch — PoE+'],
+      ['Cisco', 'C9300-24T-A', 2, 'Distribution switch'],
+      ['Dell Technologies', 'PowerEdge R750', 3, '2U rack server'],
+      ['', '', '', ''],
+      ['', '', '', ''],
+      ['', '', '', ''],
+      ['', '', '', ''],
+      ['', '', '', ''],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(templateRows);
+    ws['!cols'] = [{ wch: 28 }, { wch: 28 }, { wch: 12 }, { wch: 40 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'Items');
+
+    // Sheet 2: Supported vendor list so IT knows exactly what to type
+    const vendorRows = [
+      ['Supported Vendor Names'],
+      ['(Copy the exact spelling into the Vendor column on the Items sheet)'],
+      [''],
+      ...VENDORS.filter(v => v !== 'Other').map(v => [v]),
+      [''],
+      ['Other  ← use this if your vendor is not listed above'],
+    ];
+    const vs = XLSX.utils.aoa_to_sheet(vendorRows);
+    vs['!cols'] = [{ wch: 55 }];
+    XLSX.utils.book_append_sheet(wb, vs, 'Supported Vendors');
+
+    XLSX.writeFile(wb, 'rfq-sku-template.xlsx');
+  }
+
+  function importSpreadsheet(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const successEl = document.getElementById('import-success');
+    const errorEl = document.getElementById('import-error');
+    successEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+
+        // Use the first sheet
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+        if (rows.length < 2) {
+          showImportError('The spreadsheet appears to be empty. Fill in the template rows and try again.');
+          return;
+        }
+
+        // Detect columns from header row
+        const headers = rows[0].map(h => String(h).toLowerCase().trim());
+        const vendorCol = headers.findIndex(h => h.includes('vendor'));
+        const skuCol    = headers.findIndex(h => h.includes('sku') || h.includes('part'));
+        const qtyCol    = headers.findIndex(h => h.includes('qty') || h.includes('quantity'));
+        const notesCol  = headers.findIndex(h => h.includes('note'));
+
+        if (vendorCol === -1) {
+          showImportError('Could not find a "Vendor" column. Make sure you\'re using the downloaded template.');
+          return;
+        }
+        if (qtyCol === -1) {
+          showImportError('Could not find a "Quantity" column. Make sure you\'re using the downloaded template.');
+          return;
+        }
+
+        // Parse data rows — skip header and blank rows
+        const items = [];
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          const vendor = String(row[vendorCol] || '').trim();
+          if (!vendor) continue;
+          const sku   = skuCol >= 0  ? String(row[skuCol]   || '').trim() : '';
+          const qty   = Math.max(1, parseInt(row[qtyCol]) || 1);
+          const notes = notesCol >= 0 ? String(row[notesCol] || '').trim() : '';
+          items.push({ vendor, sku, qty, notes });
+        }
+
+        if (items.length === 0) {
+          showImportError('No items found. Fill in the vendor and quantity rows in the template and re-upload.');
+          return;
+        }
+
+        // Group rows by vendor (preserving order of first appearance)
+        const vendorOrder = [];
+        const byVendor = {};
+        items.forEach(item => {
+          if (!byVendor[item.vendor]) {
+            vendorOrder.push(item.vendor);
+            byVendor[item.vendor] = { skus: [], notes: item.notes };
+          }
+          byVendor[item.vendor].skus.push({ sku: item.sku, qty: item.qty });
+        });
+
+        // Clear existing vendor blocks
+        document.getElementById('vendor-list').innerHTML = '';
+        vendorCount = 0;
+        Object.keys(skuCounts).forEach(k => delete skuCounts[k]);
+        document.getElementById('import-suggestions').style.display = 'none';
+        document.getElementById('import-suggestions').innerHTML = '';
+
+        const suggestions = [];
+
+        // Rebuild vendor blocks from imported data
+        vendorOrder.forEach(vendorName => {
+          const group = byVendor[vendorName];
+          addVendorItem();
+          const id = vendorCount;
+
+          // Match to known vendor list (case-insensitive)
+          const sel = document.getElementById('vendor-name-' + id);
+          const exactMatch = VENDORS.find(v => v.toLowerCase() === vendorName.toLowerCase());
+          if (exactMatch) {
+            sel.value = exactMatch;
+          } else {
+            sel.value = 'Other';
+            handleVendorSelect(sel, id);
+            const otherInput = document.getElementById('vendor-name-other-' + id);
+            if (otherInput) otherInput.value = vendorName;
+            // Check for a fuzzy match suggestion
+            const closest = findClosestVendor(vendorName);
+            if (closest) suggestions.push({ vendorName, match: closest.match, blockId: id });
+          }
+
+          // Notes (use first row's notes for the vendor block)
+          if (group.notes) {
+            const notesInput = document.getElementById('vendor-notes-' + id);
+            if (notesInput) notesInput.value = group.notes;
+          }
+
+          // First SKU row already exists from addVendorItem()
+          if (group.skus.length > 0) {
+            document.getElementById('sku-part-' + id + '-1').value = group.skus[0].sku;
+            document.getElementById('sku-qty-' + id + '-1').value  = group.skus[0].qty;
+          }
+
+          // Additional SKU rows
+          for (let i = 1; i < group.skus.length; i++) {
+            addSkuRow(id);
+            const rowIdx = skuCounts[id];
+            document.getElementById('sku-part-' + id + '-' + rowIdx).value = group.skus[i].sku;
+            document.getElementById('sku-qty-' + id + '-' + rowIdx).value  = group.skus[i].qty;
+          }
+        });
+
+        updateStrategyVisibility();
+        renderVendorSuggestions(suggestions);
+
+        const vCount = vendorOrder.length;
+        successEl.innerHTML = `✓ Imported <strong>${items.length} SKU${items.length !== 1 ? 's' : ''}</strong> across <strong>${vCount} vendor${vCount !== 1 ? 's' : ''}</strong>. Review the fields below and make any adjustments before continuing.`;
+        successEl.style.display = 'block';
+
+      } catch (err) {
+        showImportError('Could not read the file: ' + err.message + '. Try saving as .xlsx and re-uploading.');
+      }
+
+      // Reset so the same file can be re-uploaded if needed
+      input.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function showImportError(msg) {
+    const el = document.getElementById('import-error');
+    el.textContent = '⚠ ' + msg;
+    el.style.display = 'block';
+  }
+
+  function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, (_, i) =>
+      Array.from({ length: n + 1 }, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+    );
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = a[i-1] === b[j-1]
+          ? dp[i-1][j-1]
+          : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+      }
+    }
+    return dp[m][n];
+  }
+
+  function findClosestVendor(name) {
+    const lname = name.toLowerCase();
+    let best = null, bestScore = 0;
+    for (const v of VENDORS) {
+      if (v === 'Other') continue;
+      const lv = v.toLowerCase();
+      const dist = levenshtein(lname, lv);
+      const score = 1 - dist / Math.max(lname.length, lv.length);
+      if (score > bestScore) { bestScore = score; best = v; }
+    }
+    return bestScore >= 0.6 ? { match: best, score: bestScore } : null;
+  }
+
+  function renderVendorSuggestions(suggestions) {
+    const el = document.getElementById('import-suggestions');
+    if (!suggestions.length) { el.style.display = 'none'; return; }
+    el.innerHTML = suggestions.map(s => `
+      <div class="suggestion-chip" id="suggestion-${s.blockId}">
+        <span class="suggestion-text">⚠ <strong>"${s.vendorName}"</strong> wasn't recognized. Did you mean <strong>${s.match}</strong>?</span>
+        <div class="suggestion-actions">
+          <button type="button" class="btn-suggestion-accept" onclick="acceptVendorSuggestion(${s.blockId}, '${s.match.replace(/'/g, "\\'")}')">Use "${s.match}"</button>
+          <button type="button" class="btn-suggestion-dismiss" onclick="dismissVendorSuggestion(${s.blockId})">Keep as entered</button>
+        </div>
+      </div>
+    `).join('');
+    el.style.display = 'flex';
+  }
+
+  function acceptVendorSuggestion(blockId, match) {
+    const sel = document.getElementById('vendor-name-' + blockId);
+    if (sel) {
+      sel.value = match;
+      // Hide the "Other" free-text input if it was shown
+      const otherInput = document.getElementById('vendor-name-other-' + blockId);
+      if (otherInput) otherInput.style.display = 'none';
+    }
+    dismissVendorSuggestion(blockId);
+  }
+
+  function dismissVendorSuggestion(blockId) {
+    const chip = document.getElementById('suggestion-' + blockId);
+    if (chip) chip.remove();
+    const el = document.getElementById('import-suggestions');
+    if (el && !el.querySelector('.suggestion-chip')) el.style.display = 'none';
+  }
+
   function getVendorCount() {
     return document.querySelectorAll('.vendor-item').length;
   }
@@ -1061,6 +1375,11 @@
   function toggleTierFilter(checkbox) {
     tierFilterEnabled = checkbox.checked;
     document.getElementById('tier-options').style.display = tierFilterEnabled ? 'block' : 'none';
+    if (!tierFilterEnabled) {
+      // Clear selection when toggled off so there's no stale pre-selection
+      document.querySelectorAll('.tier-pill').forEach(p => p.classList.remove('selected'));
+      selectedTier = null;
+    }
   }
 
   function selectTier(el, tier) {
@@ -1109,9 +1428,9 @@
       `;
     });
 
-    const tierLabel = tierFilterEnabled
+    const tierLabel = tierFilterEnabled && selectedTier
       ? `Minimum: ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`
-      : 'No minimum tier required';
+      : 'Open to all verified resellers';
 
     document.getElementById('review-content').innerHTML = `
       <div class="review-row"><span class="review-label">Project name</span><span class="review-value">${title}</span></div>
@@ -1120,9 +1439,8 @@
       <div class="review-row"><span class="review-label">Delivery date</span><span class="review-value">${delivery ? formatDate(delivery) : 'Not specified'}</span></div>
       <div class="review-row"><span class="review-label">Budget</span><span class="review-value">${budget ? '$' + Number(budget).toLocaleString() : 'Not disclosed'}</span></div>
       <div class="review-row"><span class="review-label">HQ location</span><span class="review-value">${location}</span></div>
-      <div class="review-row"><span class="review-label">Sourcing strategy</span><span class="review-value">${selectedStrategy === 'sole' ? '🤝 Sole source' : '⚖️ Split bid per vendor'}</span></div>
-      <div class="review-row"><span class="review-label">Partner tier filter</span><span class="review-value">${tierLabel}</span></div>
-      <div class="review-row"><span class="review-label">Visibility</span><span class="review-value">${visibilityText}</span></div>
+      <div class="review-row"><span class="review-label">Bidding</span><span class="review-value">${selectedStrategy === 'sole' ? '🤝 One reseller bids everything' : '⚖️ Each vendor bid separately'}</span></div>
+      <div class="review-row"><span class="review-label">Who can bid</span><span class="review-value">${tierLabel}</span></div>
       <div class="review-row"><span class="review-label">Documents attached</span><span class="review-value">${uploadedFiles.length > 0 ? uploadedFiles.length + ' file(s)' : 'None'}</span></div>
       <div style="margin-top:8px;">
         <div style="font-size:13px;color:var(--slate);margin-bottom:12px;font-weight:500;">VENDORS (${vendorItems.length})</div>

@@ -143,6 +143,25 @@
   .pwd-fields { display: none; margin-top: 16px; }
   .pwd-fields.visible { display: block; }
 
+  /* SMS NOTIFICATIONS */
+  .sms-main-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .sms-label-title { font-size: 14px; font-weight: 500; color: var(--white); }
+  .sms-label-sub { font-size: 12px; color: var(--slate); margin-top: 3px; line-height: 1.5; }
+  .toggle-switch { position: relative; display: inline-flex; align-items: center; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 99px; transition: background .2s; }
+  .toggle-switch input:checked + .toggle-track { background: var(--accent); }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform .2s; pointer-events: none; }
+  .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(20px); }
+  .sms-sub-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); display: none; }
+  .sms-sub-section.visible { display: block; }
+  .sms-event-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .sms-event-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; cursor: pointer; transition: border-color .2s; }
+  .sms-event-row:hover { border-color: rgba(0,200,150,0.25); }
+  .sms-event-check { width: 16px; height: 16px; accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; cursor: pointer; }
+  .sms-event-title { font-size: 14px; font-weight: 500; color: var(--white); }
+  .sms-event-sub { font-size: 12px; color: var(--slate); margin-top: 3px; line-height: 1.5; }
+
   /* DANGER ZONE */
   .danger-zone { background: rgba(255,107,107,0.04); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; padding: 26px 30px; }
   .danger-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--error); margin-bottom: 6px; }
@@ -365,6 +384,55 @@
           </div>
         </div>
 
+        <!-- SMS NOTIFICATIONS -->
+        <div class="section-card" id="section-sms">
+          <div class="section-header">
+            <div>
+              <div class="section-title">SMS notifications</div>
+              <div class="section-sub">Get a text with a direct link when a new RFQ matches your authorizations</div>
+            </div>
+            <button class="btn-save" id="save-sms" onclick="saveSmsPrefs()" style="display:inline-block;">Save</button>
+          </div>
+
+          <div class="sms-main-row">
+            <div>
+              <div class="sms-label-title">Enable SMS notifications</div>
+              <div class="sms-label-sub">We'll text you from a BidBridge number. Standard messaging rates apply.</div>
+            </div>
+            <label class="toggle-switch" title="Toggle SMS notifications">
+              <input type="checkbox" id="sms-enabled" onchange="toggleSmsSection()">
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
+
+          <div class="sms-sub-section" id="sms-sub">
+            <div class="form-group" style="margin-bottom:18px;">
+              <label>Mobile number to text</label>
+              <input type="tel" id="sms-phone" class="editing" placeholder="e.g. (214) 555-0182" style="display:block;">
+              <div class="field-hint">Can be different from your profile phone. Must be a US mobile number.</div>
+            </div>
+
+            <div style="font-size:13px;font-weight:500;color:var(--slate-light);margin-bottom:10px;">Notify me when:</div>
+            <div class="sms-event-list">
+              <label class="sms-event-row">
+                <input type="checkbox" id="sms-notify-rfq" class="sms-event-check">
+                <div>
+                  <div class="sms-event-title">A new RFQ is posted that matches my vendor authorizations</div>
+                  <div class="sms-event-sub">Text includes the RFQ title, buyer location, deadline, and a direct link to submit a bid</div>
+                </div>
+              </label>
+              <label class="sms-event-row">
+                <input type="checkbox" id="sms-notify-deadline" class="sms-event-check">
+                <div>
+                  <div class="sms-event-title">A bid deadline is approaching (48 hrs out)</div>
+                  <div class="sms-event-sub">Text includes the RFQ name and a link to submit or update your bid before it closes</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <!-- DANGER ZONE -->
         <div class="danger-zone">
           <div class="danger-title">⚠️ Danger zone</div>
@@ -477,6 +545,7 @@
     if (profile) {
       _profile = profile;
       populateProfile(profile, session.user.email);
+      loadSmsPrefs(profile);
     }
 
     // Load vendors
@@ -846,6 +915,60 @@
   function showError(id, msg) {
     const el = document.getElementById(id);
     if (el) { el.textContent = msg; el.style.display = 'block'; }
+  }
+
+  /* ─── SMS NOTIFICATIONS ─── */
+  function toggleSmsSection() {
+    const enabled = document.getElementById('sms-enabled').checked;
+    document.getElementById('sms-sub').classList.toggle('visible', enabled);
+  }
+
+  function loadSmsPrefs(profile) {
+    if (!profile) return;
+    const enabled = !!profile.sms_enabled;
+    document.getElementById('sms-enabled').checked = enabled;
+    if (profile.sms_phone) document.getElementById('sms-phone').value = profile.sms_phone;
+    if (profile.sms_notify_new_rfq != null) document.getElementById('sms-notify-rfq').checked = !!profile.sms_notify_new_rfq;
+    if (profile.sms_notify_deadline != null) document.getElementById('sms-notify-deadline').checked = !!profile.sms_notify_deadline;
+    if (enabled) document.getElementById('sms-sub').classList.add('visible');
+  }
+
+  function normalizeSmsPhone(raw) {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length === 10) return '+1' + digits;
+    if (digits.length === 11 && digits[0] === '1') return '+' + digits;
+    return '+' + digits;
+  }
+
+  async function saveSmsPrefs() {
+    const enabled = document.getElementById('sms-enabled').checked;
+    const raw = document.getElementById('sms-phone').value.trim();
+    const phone = raw ? normalizeSmsPhone(raw) : '';
+    const notifyRfq = document.getElementById('sms-notify-rfq').checked;
+    const notifyDeadline = document.getElementById('sms-notify-deadline').checked;
+
+    if (enabled && !phone) {
+      showToast('Please enter a mobile number to enable SMS notifications.');
+      document.getElementById('sms-phone').focus();
+      return;
+    }
+
+    const btn = document.getElementById('save-sms');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    const { error } = await _supabase.from('reseller_profiles').update({
+      sms_enabled: enabled,
+      sms_phone: phone || null,
+      sms_notify_new_rfq: notifyRfq,
+      sms_notify_deadline: notifyDeadline,
+    }).eq('id', _userId);
+
+    btn.textContent = 'Save';
+    btn.disabled = false;
+
+    if (error) { showToast('Could not save: ' + error.message); return; }
+    showToast('SMS preferences saved');
   }
 
   function showToast(msg) {

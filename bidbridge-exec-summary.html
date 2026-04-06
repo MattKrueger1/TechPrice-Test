@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Pricing Network — Executive Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0B1B33; --navy-mid: #112240; --navy-light: #1A3356;
+    --accent: #00C896; --accent-dim: #00a87b;
+    --gold: #F5C842; --slate: #8896A9; --slate-light: #A8B8CC;
+    --white: #F0F4FA; --error: #FF6B6B;
+    --card-border: rgba(255,255,255,0.08);
+    --font-head: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  /* ── SCREEN TOOLBAR ── */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 40px; background: var(--navy-mid); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 10; }
+  .toolbar-left { display: flex; align-items: center; gap: 16px; }
+  .toolbar-logo { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; }
+  .toolbar-logo span { color: var(--accent); }
+  .btn-back { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; text-decoration: none; transition: all .2s; }
+  .btn-back:hover { border-color: rgba(255,255,255,0.25); color: var(--white); }
+  .toolbar-actions { display: flex; gap: 10px; }
+  .btn-print { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: var(--accent); border: none; border-radius: 9px; color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
+  .btn-print:hover { background: var(--accent-dim); }
+
+  /* ── DOCUMENT WRAPPER ── */
+  .doc-wrap { max-width: 860px; margin: 40px auto; padding: 0 40px 80px; }
+
+  /* ── HEADER ── */
+  .doc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 40px; padding-bottom: 28px; border-bottom: 2px solid rgba(0,200,150,0.25); }
+  .doc-logo-block { display: flex; flex-direction: column; gap: 4px; }
+  .doc-logo { font-family: var(--font-head); font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .doc-logo span { color: var(--accent); }
+  .doc-logo-sub { font-size: 12px; color: var(--slate); letter-spacing: 0.05em; text-transform: uppercase; }
+  .doc-meta { text-align: right; }
+  .doc-meta-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+  .doc-meta-value { font-size: 13px; color: var(--slate-light); }
+
+  /* ── TITLE BLOCK ── */
+  .doc-title-block { margin-bottom: 36px; }
+  .doc-eyebrow { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; }
+  .doc-title { font-family: var(--font-head); font-size: 32px; font-weight: 800; letter-spacing: -0.8px; color: var(--white); margin-bottom: 8px; line-height: 1.2; }
+  .doc-subtitle { font-size: 15px; color: var(--slate-light); }
+
+  /* ── THANK YOU ── */
+  .thank-you-card { background: rgba(0,200,150,0.05); border: 1px solid rgba(0,200,150,0.18); border-radius: 14px; padding: 28px 30px; margin-bottom: 32px; }
+  .thank-you-card p { font-size: 15px; color: var(--slate-light); line-height: 1.8; }
+  .thank-you-card p + p { margin-top: 12px; }
+
+  /* ── SECTION HEADERS ── */
+  .section-label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,200,150,0.18); }
+
+  /* ── STAT GRID ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-box { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px 22px; }
+  .stat-box.accent { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.06); }
+  .stat-box.gold { border-color: rgba(245,200,66,0.3); background: rgba(245,200,66,0.04); }
+  .stat-box-label { font-size: 12px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .stat-box-value { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--white); letter-spacing: -0.5px; }
+  .stat-box.accent .stat-box-value { color: var(--accent); }
+  .stat-box.gold .stat-box-value { color: var(--gold); }
+  .stat-box-sub { font-size: 12px; color: var(--slate); margin-top: 4px; }
+
+  /* ── BID BREAKDOWN TABLE ── */
+  .bid-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+  .bid-table th { font-size: 11px; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .bid-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .bid-table tr:last-child td { border-bottom: none; }
+  .bid-table tr.winner-row td { background: rgba(0,200,150,0.05); color: var(--accent); font-weight: 600; }
+  .winner-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(0,200,150,0.12); border: 1px solid rgba(0,200,150,0.25); border-radius: 999px; padding: 2px 10px; font-size: 11px; font-weight: 700; color: var(--accent); margin-left: 8px; }
+
+  /* ── SAVINGS SECTION ── */
+  .savings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+  .savings-box { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 12px; padding: 22px; text-align: center; }
+  .savings-box-value { font-family: var(--font-head); font-size: 36px; font-weight: 800; color: var(--gold); letter-spacing: -1px; }
+  .savings-box-label { font-size: 12px; color: var(--slate); margin-top: 6px; line-height: 1.5; }
+
+  /* ── FOOTER ── */
+  .doc-footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; }
+  .doc-footer-left { font-size: 12px; color: var(--slate); line-height: 1.6; }
+  .doc-footer-right { font-size: 12px; color: var(--slate); text-align: right; }
+
+  /* ── LOADING / ERROR ── */
+  .loading-state { text-align: center; padding: 80px 40px; color: var(--slate); }
+  .loading-spinner { font-size: 32px; margin-bottom: 16px; animation: spin 1.5s linear infinite; display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    @page { margin: 20mm 18mm; }
+    html, body { background: #fff !important; color: #111 !important; font-size: 13px; }
+    .toolbar { display: none !important; }
+    .doc-wrap { max-width: 100%; margin: 0; padding: 0; }
+    :root {
+      --navy: #fff; --navy-mid: #f7f9fc; --white: #111;
+      --accent: #007a5e; --gold: #8a6e00; --slate: #555; --slate-light: #333;
+      --card-border: #dde3ec;
+    }
+    .doc-logo span { color: #007a5e !important; }
+    .stat-box-value, .savings-box-value { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .thank-you-card, .stat-box, .savings-box { border: 1px solid #dde3ec !important; background: #f7f9fc !important; }
+    .stat-box.accent { background: #edfaf5 !important; }
+    .stat-box.gold { background: #fdfaed !important; }
+    .bid-table tr.winner-row td { background: #edfaf5 !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SCREEN TOOLBAR (hidden on print) -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <a href="bidbridge-my-rfqs.html" class="btn-back">← Back to My RFQs</a>
+    <a href="bidbridge-buyer-dashboard_2.html" class="toolbar-logo">Bid<span>Bridge</span></a>
+  </div>
+  <div class="toolbar-actions">
+    <button class="btn-print" onclick="window.print()">⬇ Save as PDF / Print</button>
+  </div>
+</div>
+
+<!-- DOCUMENT -->
+<div class="doc-wrap" id="doc-wrap">
+  <div class="loading-state" id="loading-state">
+    <span class="loading-spinner">⟳</span>
+    <div>Building your executive summary…</div>
+  </div>
+</div>
+
+<script>
+  const _supabase = supabase.createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  const fmt = (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const pct = (n) => (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+
+    const rfqId = new URLSearchParams(window.location.search).get('rfq');
+    if (!rfqId) { showError('No RFQ specified.'); return; }
+
+    // Load RFQ
+    const { data: rfq } = await _supabase.from('rfqs')
+      .select('id, title, status, created_at, deadline, delivery_location, winner_reseller_id, winner_price, buyer_id')
+      .eq('id', rfqId).single();
+
+    if (!rfq) { showError('RFQ not found.'); return; }
+    if (rfq.buyer_id !== session.user.id) { showError('You do not have access to this RFQ.'); return; }
+
+    // Load buyer profile
+    const { data: buyer } = await _supabase.from('profiles')
+      .select('first_name, last_name, company')
+      .eq('id', session.user.id).single();
+
+    // Load all bids
+    const { data: allBids } = await _supabase.from('bids')
+      .select('id, reseller_id, total_price, status, created_at')
+      .eq('rfq_id', rfqId)
+      .order('total_price', { ascending: true });
+
+    if (!allBids || allBids.length === 0) { showError('No bids found for this RFQ.'); return; }
+
+    // Load reseller profiles for bid table
+    const resellerIds = [...new Set(allBids.map(b => b.reseller_id))];
+    const { data: resellers } = await _supabase.from('reseller_profiles')
+      .select('id, company, contact_first, contact_last')
+      .in('id', resellerIds);
+    const rpMap = {};
+    (resellers || []).forEach(r => rpMap[r.id] = r);
+
+    // Compute stats
+    const prices = allBids.map(b => Number(b.total_price || 0)).filter(p => p > 0);
+    const highestBid  = Math.max(...prices);
+    const lowestBid   = Math.min(...prices);
+    const averageBid  = prices.reduce((a, b) => a + b, 0) / prices.length;
+    const awardedBid  = Number(rfq.winner_price || lowestBid);
+    const bidCount    = allBids.length;
+
+    // Days on market
+    const createdAt  = new Date(rfq.created_at);
+    const closedAt   = rfq.deadline ? new Date(rfq.deadline) : new Date();
+    const daysOnMarket = Math.max(1, Math.round((closedAt - createdAt) / (1000 * 60 * 60 * 24)));
+
+    // Savings
+    const savedVsHighest = highestBid - awardedBid;
+    const pctVsHighest   = ((savedVsHighest / highestBid) * 100);
+    const pctVsAverage   = (((averageBid - awardedBid) / averageBid) * 100);
+
+    const buyerName    = buyer ? `${buyer.first_name || ''} ${buyer.last_name || ''}`.trim() : 'Valued Customer';
+    const buyerCompany = buyer?.company || 'your organization';
+    const rfqTitle     = rfq.title || 'Technology Procurement';
+    const generatedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const createdDate   = createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Winner reseller name
+    const winnerRp = rfq.winner_reseller_id ? rpMap[rfq.winner_reseller_id] : null;
+    const winnerName = winnerRp ? (winnerRp.company || `${winnerRp.contact_first || ''} ${winnerRp.contact_last || ''}`.trim()) : 'Awarded Reseller';
+
+    document.getElementById('loading-state').remove();
+
+    const wrap = document.getElementById('doc-wrap');
+    wrap.innerHTML = `
+
+      <!-- HEADER -->
+      <div class="doc-header">
+        <div class="doc-logo-block">
+          <div class="doc-logo">Bid<span>Bridge</span></div>
+          <div class="doc-logo-sub">IT Pricing Network</div>
+        </div>
+        <div class="doc-meta">
+          <div class="doc-meta-label">Report generated</div>
+          <div class="doc-meta-value">${generatedDate}</div>
+          <div class="doc-meta-label" style="margin-top:8px;">Prepared for</div>
+          <div class="doc-meta-value">${buyerName} · ${buyerCompany}</div>
+        </div>
+      </div>
+
+      <!-- TITLE -->
+      <div class="doc-title-block">
+        <div class="doc-eyebrow">Executive Summary — Procurement Report</div>
+        <div class="doc-title">${rfqTitle}</div>
+        <div class="doc-subtitle">RFQ opened ${createdDate} · ${bidCount} bid${bidCount !== 1 ? 's' : ''} received · ${daysOnMarket} days on market</div>
+      </div>
+
+      <!-- THANK YOU -->
+      <div class="thank-you-card">
+        <p>Dear ${buyerName},</p>
+        <p>Thank you for trusting IT Pricing Network to help ${buyerCompany} secure the best possible pricing on your technology investment. By opening your requirements to our vetted reseller network and letting the market compete for your business, you unlocked real price discovery that a traditional single-vendor quote simply cannot provide.</p>
+        <p>This report summarizes the market activity for your <strong>"${rfqTitle}"</strong> RFQ and documents the financial outcome of your procurement. We hope it serves as a useful record for your internal approval and budgeting process.</p>
+      </div>
+
+      <!-- MARKET ACTIVITY -->
+      <div class="section-label">Market activity</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">Days on market</div>
+          <div class="stat-box-value">${daysOnMarket}</div>
+          <div class="stat-box-sub">From open to close</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Bids received</div>
+          <div class="stat-box-value">${bidCount}</div>
+          <div class="stat-box-sub">Competing resellers</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Highest bid</div>
+          <div class="stat-box-value">${fmt(highestBid)}</div>
+          <div class="stat-box-sub">Market ceiling</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Average bid</div>
+          <div class="stat-box-value">${fmt(averageBid)}</div>
+          <div class="stat-box-sub">Market average</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Lowest bid</div>
+          <div class="stat-box-value">${fmt(lowestBid)}</div>
+          <div class="stat-box-sub">Market floor</div>
+        </div>
+        <div class="stat-box accent">
+          <div class="stat-box-label">Awarded price</div>
+          <div class="stat-box-value">${fmt(awardedBid)}</div>
+          <div class="stat-box-sub">Awarded to ${winnerName}</div>
+        </div>
+      </div>
+
+      <!-- BID BREAKDOWN -->
+      <div class="section-label">Bid breakdown</div>
+      <table class="bid-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Reseller</th>
+            <th>Bid amount</th>
+            <th>vs. Market avg</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${allBids.sort((a, b) => a.total_price - b.total_price).map((bid, i) => {
+            const rp = rpMap[bid.reseller_id];
+            const name = rp ? (rp.company || `${rp.contact_first || ''} ${rp.contact_last || ''}`.trim()) : 'Reseller';
+            const isWinner = bid.reseller_id === rfq.winner_reseller_id || bid.status === 'accepted';
+            const diff = ((bid.total_price - averageBid) / averageBid * 100);
+            const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+            return `<tr class="${isWinner ? 'winner-row' : ''}">
+              <td>${i + 1}</td>
+              <td>${name}${isWinner ? '<span class="winner-badge">✓ Awarded</span>' : ''}</td>
+              <td>${fmt(bid.total_price)}</td>
+              <td>${diffStr}</td>
+              <td>${isWinner ? 'Awarded' : bid.status === 'rejected' ? 'Not selected' : 'Submitted'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+
+      <!-- SAVINGS SUMMARY -->
+      <div class="section-label">Your savings</div>
+      <div class="savings-grid">
+        <div class="savings-box">
+          <div class="savings-box-value">${fmt(savedVsHighest)}</div>
+          <div class="savings-box-label">Saved vs. highest bid received</div>
+        </div>
+        <div class="savings-box">
+          <div class="savings-box-value">${pctVsHighest.toFixed(1)}%</div>
+          <div class="savings-box-label">Below the highest price quoted in the market</div>
+        </div>
+        <div class="savings-box">
+          <div class="savings-box-value">${Math.max(0, pctVsAverage).toFixed(1)}%</div>
+          <div class="savings-box-label">Below the average bid price across all resellers</div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="doc-footer">
+        <div class="doc-footer-left">
+          <strong style="color:var(--white);">IT Pricing Network — BidBridge</strong><br>
+          Connecting buyers with vetted technology resellers.<br>
+          This report is confidential and intended solely for ${buyerCompany}.
+        </div>
+        <div class="doc-footer-right">
+          Generated ${generatedDate}<br>
+          RFQ ID: ${rfqId.slice(0, 8).toUpperCase()}
+        </div>
+      </div>
+    `;
+  })();
+
+  function showError(msg) {
+    document.getElementById('doc-wrap').innerHTML = `
+      <div class="loading-state">
+        <div style="font-size:32px;margin-bottom:16px;">⚠</div>
+        <div style="color:var(--error);">${msg}</div>
+        <a href="bidbridge-my-rfqs.html" style="color:var(--accent);margin-top:16px;display:inline-block;">← Back to My RFQs</a>
+      </div>`;
+  }
+</script>
+</body>
+</html>

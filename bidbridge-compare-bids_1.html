@@ -1646,8 +1646,9 @@ if (!rawBids || rawBids.length === 0) {
         Your contact info (${buyer.email || 'your email'}${buyer.name ? ' — ' + buyer.name.replace(/</g,'&lt;') : ''}) has been shared with ${contactName.replace(/</g,'&lt;')} in their Messages inbox.
         All other resellers have been notified they were not selected.
       </p>
-      <div class="intro-actions">
+      <div class="intro-actions" style="flex-wrap:wrap;gap:10px;">
         <a class="btn-intro-msg" href="bidbridge-buyer-dashboard_2.html#messages">Open Messages →</a>
+        <a class="btn-intro-msg" href="bidbridge-exec-summary.html?rfq=${currentRFQ.id}" target="_blank" style="border-color:rgba(245,200,66,0.4);color:var(--gold);">📄 Executive Summary</a>
         <button class="btn-intro-done" onclick="closeIntro()">Done</button>
       </div>
     `;

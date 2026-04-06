@@ -761,7 +761,6 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
                 <span class="status-badge ${statusCls}">${statusLabel}</span>
               </div>
               <div class="rfq-meta" style="margin-top:12px;">
-                <div class="rfq-meta-item">💰 <strong>${rfq.budget ? '$' + rfq.budget.toLocaleString() : 'Budget not disclosed'}</strong></div>
                 <div class="rfq-meta-item">📅 <strong class="${dlClass}">${dlText}</strong></div>
                 ${rfq.lowestBid !== null && rfq.highestBid !== null && rfq.bids > 0 ? `
                   <div class="rfq-meta-item" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.05);width:100%;">
@@ -969,16 +968,6 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
           <input class="edit-input" id="edit-deadline" type="date" value="${data.deadline || ''}">
         </div>
         <div class="edit-field">
-          <div class="edit-label">Expected delivery date</div>
-          <input class="edit-input" id="edit-delivery" type="date" value="${data.delivery_date || ''}">
-        </div>
-      </div>
-      <div class="edit-row">
-        <div class="edit-field">
-          <div class="edit-label">Budget (optional)</div>
-          <input class="edit-input" id="edit-budget" type="number" placeholder="e.g. 150000" value="${data.budget || ''}">
-        </div>
-        <div class="edit-field">
           <div class="edit-label">HQ location</div>
           <input class="edit-input" id="edit-location" type="text" value="${(data.hq_location || '').replace(/"/g, '&quot;')}">
         </div>
@@ -1076,8 +1065,6 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
     const title = document.getElementById('edit-title').value.trim();
     const notes = document.getElementById('edit-notes').value.trim();
     const deadline = document.getElementById('edit-deadline').value || null;
-    const delivery_date = document.getElementById('edit-delivery').value || null;
-    const budget = document.getElementById('edit-budget').value ? parseFloat(document.getElementById('edit-budget').value) : null;
     const hq_location = document.getElementById('edit-location').value.trim();
 
     if (!title) { showToast('Project name is required.'); btn.disabled = false; btn.textContent = 'Save changes'; return; }
@@ -1106,7 +1093,7 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
     const priceImpacting = addedSkusCheck.length > 0 || removedSkusCheck.length > 0;
 
     // 1. Update RFQ fields — stamp sku_updated_at if SKUs changed
-    const rfqUpdate = { title, notes, deadline, delivery_date, budget, hq_location };
+    const rfqUpdate = { title, notes, deadline, hq_location };
     if (priceImpacting) rfqUpdate.sku_updated_at = new Date().toISOString();
 
     const { error: rfqErr } = await _supabase.from('rfqs').update(rfqUpdate).eq('id', _editRfqId);
@@ -1122,8 +1109,6 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
     const changes = [];
     if (orig.title !== title) changes.push(`Title changed to "${title}"`);
     if (orig.deadline !== deadline) changes.push(`Bid deadline updated to ${deadline || 'not set'}`);
-    if ((orig.delivery_date || '') !== (delivery_date || '')) changes.push(`Expected delivery updated to ${delivery_date || 'not set'}`);
-    if ((orig.budget || '') !== (budget || '')) changes.push(`Budget updated to ${budget ? '$' + Number(budget).toLocaleString() : 'not disclosed'}`);
     if ((orig.hq_location || '') !== (hq_location || '')) changes.push(`HQ location updated to ${hq_location}`);
     if ((orig.notes || '') !== notes) changes.push('Project description updated');
 
@@ -1424,18 +1409,8 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
         </div>
         <div class="drawer-row">
           <div class="drawer-field">
-            <div class="drawer-field-label">Budget</div>
-            <div class="drawer-field-value">${data.budget ? '$' + Number(data.budget).toLocaleString('en-US', {minimumFractionDigits:2}) : 'Not disclosed'}</div>
-          </div>
-          <div class="drawer-field">
             <div class="drawer-field-label">HQ location</div>
             <div class="drawer-field-value">${data.hq_location || 'Not specified'}</div>
-          </div>
-        </div>
-        <div class="drawer-row">
-          <div class="drawer-field">
-            <div class="drawer-field-label">Expected delivery</div>
-            <div class="drawer-field-value">${data.delivery_date ? formatDate(data.delivery_date) : 'Not specified'}</div>
           </div>
           <div class="drawer-field">
             <div class="drawer-field-label">Sourcing strategy</div>

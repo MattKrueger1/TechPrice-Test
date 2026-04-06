@@ -717,23 +717,31 @@
         <div class="field-hint">How long resellers have to submit bids</div>
         <div class="field-error" id="project-deadline-error">Please set a bid deadline</div>
       </div>
-      <div class="form-group">
-        <label for="project-delivery">Expected delivery date <span class="optional">(optional)</span></label>
-        <input type="date" id="project-delivery">
-        <div class="field-hint">When you need the technology delivered</div>
-      </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label for="project-budget">Budget <span class="optional">(optional)</span></label>
-        <input type="number" id="project-budget" placeholder="e.g. 150000" min="0">
-        <div class="field-hint">Sharing a budget can attract more targeted bids</div>
+        <label for="project-city">HQ city <span class="required">*</span></label>
+        <input type="text" id="project-city" placeholder="e.g. Austin" autocomplete="off">
+        <div class="field-error" id="project-city-error">City is required</div>
       </div>
       <div class="form-group">
-        <label for="project-location">HQ location <span class="required">*</span></label>
-        <input type="text" id="project-location" placeholder="e.g. Austin, TX 78701">
-        <div class="field-error" id="project-location-error">HQ location is required</div>
+        <label for="project-state">HQ state <span class="required">*</span></label>
+        <select id="project-state">
+          <option value="">Select state…</option>
+          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+          <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+          <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+          <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+          <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+          <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+          <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+          <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+          <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+          <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+          <option>DC</option>
+        </select>
+        <div class="field-error" id="project-state-error">State is required</div>
       </div>
     </div>
 
@@ -757,13 +765,13 @@
   <!-- ── STEP 2: VENDORS & PRODUCTS ── -->
   <div class="form-section" id="section-2">
     <div class="section-title">Vendors &amp; products</div>
-    <p class="section-sub">Add each technology vendor and the specific products you need. You can enter them manually below, or have your IT team fill out a spreadsheet template and upload it.</p>
+    <p class="section-sub">Add each technology vendor and the specific products you need. You can enter them manually below, or have your IT team or vendor account manager fill out a spreadsheet template and upload it.</p>
 
     <!-- Import bar -->
     <div class="import-bar">
       <div class="import-bar-text">
-        <div class="import-bar-title">Have IT fill out a spreadsheet?</div>
-        <div class="import-bar-sub">Download the template, send it to your IT team to fill in vendors, SKUs and quantities, then upload it here — the form populates automatically.</div>
+        <div class="import-bar-title">Have IT or your vendor account manager fill out a spreadsheet?</div>
+        <div class="import-bar-sub">Download the template, send it to your IT team or vendor account manager to fill in vendors, SKUs and quantities, then upload it here — the form populates automatically.</div>
       </div>
       <div class="import-bar-actions">
         <button type="button" class="btn-import btn-import-download" onclick="downloadTemplate()">⬇ Download template</button>
@@ -945,7 +953,8 @@
         ['project-title', 'project-title-error', v => v.trim().length > 0],
         ['project-desc', 'project-desc-error', v => v.trim().length > 10],
         ['project-deadline', 'project-deadline-error', v => v.trim().length > 0],
-        ['project-location', 'project-location-error', v => v.trim().length > 0],
+        ['project-city', 'project-city-error', v => v.trim().length > 0],
+        ['project-state', 'project-state-error', v => v.trim().length > 0],
       ];
       checks.forEach(([id, errId, fn]) => {
         const el = document.getElementById(id);
@@ -1395,9 +1404,9 @@
     const title = document.getElementById('project-title').value;
     const desc = document.getElementById('project-desc').value;
     const deadline = document.getElementById('project-deadline').value;
-    const delivery = document.getElementById('project-delivery').value;
-    const budget = document.getElementById('project-budget').value;
-    const location = document.getElementById('project-location').value;
+    const city = document.getElementById('project-city').value;
+    const state = document.getElementById('project-state').value;
+    const location = city && state ? `${city}, ${state}` : (city || state || '');
     const visibility = document.getElementById('rfq-visibility');
     const visibilityText = visibility.options[visibility.selectedIndex].text;
 
@@ -1436,8 +1445,6 @@
       <div class="review-row"><span class="review-label">Project name</span><span class="review-value">${title}</span></div>
       <div class="review-row"><span class="review-label">Description</span><span class="review-value" style="font-size:13px;color:var(--slate-light);">${desc.substring(0,120)}${desc.length > 120 ? '...' : ''}</span></div>
       <div class="review-row"><span class="review-label">Bid deadline</span><span class="review-value">${formatDate(deadline)}</span></div>
-      <div class="review-row"><span class="review-label">Delivery date</span><span class="review-value">${delivery ? formatDate(delivery) : 'Not specified'}</span></div>
-      <div class="review-row"><span class="review-label">Budget</span><span class="review-value">${budget ? '$' + Number(budget).toLocaleString() : 'Not disclosed'}</span></div>
       <div class="review-row"><span class="review-label">HQ location</span><span class="review-value">${location}</span></div>
       <div class="review-row"><span class="review-label">Bidding</span><span class="review-value">${selectedStrategy === 'sole' ? '🤝 One reseller bids everything' : '⚖️ Each vendor bid separately'}</span></div>
       <div class="review-row"><span class="review-label">Who can bid</span><span class="review-value">${tierLabel}</span></div>
@@ -1471,10 +1478,9 @@
     const title = document.getElementById('project-title').value.trim();
     const notes = document.getElementById('project-desc').value.trim();
     const deadline = document.getElementById('project-deadline').value;
-    const deliveryDate = document.getElementById('project-delivery').value || null;
-    const hqLocation = document.getElementById('project-location').value.trim() || null;
-    const budgetRaw = document.getElementById('project-budget').value;
-    const budget = budgetRaw ? parseFloat(budgetRaw) : null;
+    const city = document.getElementById('project-city').value.trim();
+    const state = document.getElementById('project-state').value;
+    const hqLocation = city && state ? `${city}, ${state}` : (city || state || null);
     const visibilityEl = document.getElementById('rfq-visibility');
     const visibility = visibilityEl ? visibilityEl.value : 'all';
     const tierFilter = tierFilterEnabled ? selectedTier : null;
@@ -1487,9 +1493,7 @@
         title,
         notes,
         deadline,
-        delivery_date: deliveryDate,
         hq_location: hqLocation,
-        budget,
         strategy: selectedStrategy,
         tier_filter: tierFilter,
         visibility,
@@ -1600,17 +1604,12 @@
     deadline.value = d.toISOString().split('T')[0];
     deadline.min = new Date().toISOString().split('T')[0];
 
-    const delivery = document.getElementById('project-delivery');
-    delivery.min = new Date().toISOString().split('T')[0];
-
-    // Auto-close date pickers when a date is selected
-    ['project-deadline', 'project-delivery'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('change', function() { this.blur(); });
-    });
+    // Auto-close date picker when a date is selected
+    const deadlineEl = document.getElementById('project-deadline');
+    if (deadlineEl) deadlineEl.addEventListener('change', function() { this.blur(); });
 
     // Live validation — clear errors on input
-    ['project-title','project-desc','project-deadline','project-location'].forEach(id => {
+    ['project-title','project-desc','project-deadline','project-city','project-state'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', () => {
         el.classList.remove('error');

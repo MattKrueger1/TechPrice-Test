@@ -1408,7 +1408,7 @@
     const state = document.getElementById('project-state').value;
     const location = city && state ? `${city}, ${state}` : (city || state || '');
     const visibility = document.getElementById('rfq-visibility');
-    const visibilityText = visibility.options[visibility.selectedIndex].text;
+    const visibilityText = visibility ? visibility.options[visibility.selectedIndex].text : 'All verified resellers';
 
     // Collect vendors
     const vendorItems = document.querySelectorAll('.vendor-item');

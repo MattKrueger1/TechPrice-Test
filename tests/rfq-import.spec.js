@@ -14,14 +14,15 @@ test('Step 2 loads without JS errors and shows import bar', async ({ page }) => 
   await page.fill('#project-title', 'Import Test RFQ');
   await page.fill('#project-desc', 'Testing the spreadsheet import feature');
   await page.fill('#project-deadline', '2026-06-01');
-  await page.fill('#project-location', 'Boston, MA');
+  await page.fill('#project-city', 'Boston');
+  await page.selectOption('#project-state', 'MA');
   await page.locator('#section-1 button.btn-next').click();
   await page.waitForTimeout(500);
 
   // Import bar should be visible
   await expect(page.locator('.import-bar')).toBeVisible();
   const barText = await page.locator('.import-bar').textContent();
-  expect(barText).toMatch(/Have IT fill out a spreadsheet/i);
+  expect(barText).toMatch(/vendor account manager/i);
   expect(barText).toMatch(/Download template/i);
   expect(barText).toMatch(/Upload spreadsheet/i);
   console.log('✅ Import bar visible with correct labels');
@@ -40,7 +41,8 @@ test('Download template button is clickable and XLSX library loaded', async ({ p
   await page.fill('#project-title', 'Import Test RFQ');
   await page.fill('#project-desc', 'Testing');
   await page.fill('#project-deadline', '2026-06-01');
-  await page.fill('#project-location', 'Boston, MA');
+  await page.fill('#project-city', 'Boston');
+  await page.selectOption('#project-state', 'MA');
   await page.locator('#section-1 button.btn-next').click();
   await page.waitForTimeout(500);
 
@@ -63,7 +65,8 @@ test('CSV upload populates vendor and SKU fields correctly', async ({ page }) =>
   await page.fill('#project-title', 'Import Test RFQ');
   await page.fill('#project-desc', 'Testing CSV import');
   await page.fill('#project-deadline', '2026-06-01');
-  await page.fill('#project-location', 'Boston, MA');
+  await page.fill('#project-city', 'Boston');
+  await page.selectOption('#project-state', 'MA');
   await page.locator('#section-1 button.btn-next').click();
   await page.waitForTimeout(500);
 
@@ -134,7 +137,8 @@ test('Misspelled vendor triggers suggestion and "Use this" corrects it', async (
   await page.fill('#project-title', 'Spell Check Test RFQ');
   await page.fill('#project-desc', 'Testing vendor suggestion on typo');
   await page.fill('#project-deadline', '2026-06-01');
-  await page.fill('#project-location', 'Boston, MA');
+  await page.fill('#project-city', 'Boston');
+  await page.selectOption('#project-state', 'MA');
   await page.locator('#section-1 button.btn-next').click();
   await page.waitForTimeout(500);
 

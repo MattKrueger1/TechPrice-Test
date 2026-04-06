@@ -13,7 +13,8 @@ test('Step 3 loads without JS errors and shows plain-English labels', async ({ p
   await page.fill('#project-title', 'Test RFQ');
   await page.fill('#project-desc', 'A test project description for step navigation');
   await page.fill('#project-deadline', '2026-06-01');
-  await page.fill('#project-location', 'Boston, MA');
+  await page.fill('#project-city', 'Boston');
+  await page.selectOption('#project-state', 'MA');
   await page.locator('#section-1 button.btn-next').click();
   await page.waitForTimeout(500);
 

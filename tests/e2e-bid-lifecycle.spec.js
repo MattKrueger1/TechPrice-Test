@@ -59,7 +59,8 @@ test('Full bid lifecycle — submit, bid, edit, revise, award', async ({ browser
     const future = new Date();
     future.setDate(future.getDate() + 30);
     await buyer.fill('#project-deadline', future.toISOString().slice(0, 10));
-    await buyer.fill('#project-location', 'Boston, MA');
+    await buyer.fill('#project-city', 'Boston');
+    await buyer.selectOption('#project-state', 'MA');
     console.log('📋 Step 1: Clicking Next (step 1 → 2)...');
     await buyer.click('#section-1 button.btn-next');
 

@@ -48,7 +48,8 @@ async function submitRFQ(buyer, title, strategy, vendors) {
   await buyer.fill('#project-desc', 'Playwright test RFQ — ignore');
   const future = new Date(); future.setDate(future.getDate() + 30);
   await buyer.fill('#project-deadline', future.toISOString().slice(0, 10));
-  await buyer.fill('#project-location', 'Boston, MA');
+  await buyer.fill('#project-city', 'Boston');
+    await buyer.selectOption('#project-state', 'MA');
   await buyer.click('#section-1 button.btn-next');
 
   // Step 2 — Vendors
@@ -176,7 +177,8 @@ test('Tier enforcement — reseller below required tier cannot see RFQ', async (
     await buyer.fill('#project-desc', 'Tier enforcement test — ignore');
     const future = new Date(); future.setDate(future.getDate() + 30);
     await buyer.fill('#project-deadline', future.toISOString().slice(0, 10));
-    await buyer.fill('#project-location', 'Boston, MA');
+    await buyer.fill('#project-city', 'Boston');
+    await buyer.selectOption('#project-state', 'MA');
     await buyer.click('#section-1 button.btn-next');
 
     await buyer.waitForSelector('#vendor-name-1', { timeout: 10000 });
@@ -283,7 +285,8 @@ test('Split-bid — reseller bid form only shows authorized vendor line items', 
     await buyer.fill('#project-desc', 'Split bid test — ignore');
     const future = new Date(); future.setDate(future.getDate() + 30);
     await buyer.fill('#project-deadline', future.toISOString().slice(0, 10));
-    await buyer.fill('#project-location', 'Boston, MA');
+    await buyer.fill('#project-city', 'Boston');
+    await buyer.selectOption('#project-state', 'MA');
     await buyer.click('#section-1 button.btn-next');
 
     await buyer.waitForSelector('#vendor-name-1', { timeout: 10000 });
@@ -404,7 +407,8 @@ test('Full split-bid lifecycle — per-vendor award flow', async ({ browser }) =
     await buyer.fill('#project-desc', 'Split lifecycle test');
     const future = new Date(); future.setDate(future.getDate() + 30);
     await buyer.fill('#project-deadline', future.toISOString().slice(0, 10));
-    await buyer.fill('#project-location', 'Boston, MA');
+    await buyer.fill('#project-city', 'Boston');
+    await buyer.selectOption('#project-state', 'MA');
     await buyer.click('#section-1 button.btn-next');
 
     await buyer.waitForSelector('#vendor-name-1', { timeout: 10000 });

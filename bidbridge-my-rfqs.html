@@ -585,7 +585,7 @@
     /* Load RFQs */
     const { data: rfqs, error } = await _supabase
       .from('rfqs')
-      .select('id, title, status, deadline, created_at, notes, budget, hq_location, strategy, tier_filter, winner_reseller_id, winner_price, sku_updated_at, rfq_items(vendor), bids(id, total_price, created_at)')
+      .select('id, title, status, deadline, created_at, notes, hq_location, strategy, tier_filter, winner_reseller_id, winner_price, sku_updated_at, rfq_items(vendor), bids(id, total_price, created_at)')
       .eq('buyer_id', session.user.id)
       .order('created_at', { ascending: false });
 
@@ -607,7 +607,6 @@
         maxBids: 10,
         deadline: rfq.deadline,
         posted: rfq.created_at?.split('T')[0],
-        budget: rfq.budget || null,
         hasNew: false,
         newCount: 0,
         skuUpdatedAt: rfq.sku_updated_at || null,
@@ -934,7 +933,7 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
 
     const { data, error } = await _supabase
       .from('rfqs')
-      .select('id, title, notes, deadline, delivery_date, budget, hq_location, rfq_items(id, vendor, sku, quantity, description)')
+      .select('id, title, notes, deadline, hq_location, rfq_items(id, vendor, sku, quantity, description)')
       .eq('id', id)
       .single();
 
@@ -1259,7 +1258,7 @@ const cardClick = (rfq.status === 'active' || rfq.status === 'review')
     /* Fetch full detail including all SKU items */
     const { data, error } = await _supabase
       .from('rfqs')
-      .select('id, title, status, deadline, created_at, notes, budget, delivery_date, hq_location, strategy, tier_filter, visibility, rfq_items(vendor, sku, quantity, description)')
+      .select('id, title, status, deadline, created_at, notes, hq_location, strategy, tier_filter, visibility, rfq_items(vendor, sku, quantity, description)')
       .eq('id', rfqId)
       .single();
 

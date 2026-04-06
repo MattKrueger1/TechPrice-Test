@@ -557,7 +557,6 @@
               <select class="sort-select" onchange="sortOpenRFQs(this.value)">
                 <option value="newest">Newest first</option>
                 <option value="deadline">Deadline soonest</option>
-                <option value="budget-desc">Largest budget</option>
               </select>
             </div>
           </div>
@@ -1079,7 +1078,6 @@ if (vendorNames.length > 0) {
       wonEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;">' + wonBids.map(function(b) {
         const myPrice = b.myPrice || 0;
         const vendorTags = b.vendor && b.vendor !== '—' ? b.vendor.split(' · ').map(function(v) { return '<span class="rfq-tag vendor">' + v + '</span>'; }).join('') : '';
-        const budgetLabel = b.budget ? '$' + b.budget.toLocaleString() : 'Not disclosed';
         return '<div class="rfq-card" style="border-color:rgba(0,200,150,0.4);background:rgba(0,200,150,0.03);cursor:pointer;" onclick="openBidReadOnly(MY_BIDS.find(function(x){return x.id===\'' + b.id + '\';}))">' +
           '<div class="new-tag" style="background:var(--accent);color:var(--navy);">&#127942; WON</div>' +
           '<div class="rfq-card-top"><div>' +
@@ -1092,7 +1090,6 @@ if (vendorNames.length > 0) {
           '</div>' +
           '<div class="rfq-card-meta">' +
             '<div class="rfq-meta-item">&#128205; <strong>' + (b.location || '—') + '</strong></div>' +
-            '<div class="rfq-meta-item">&#128176; Budget: <strong>' + budgetLabel + '</strong></div>' +
           '</div>' +
           '<div class="rfq-card-footer"><div class="rfq-tags">' + vendorTags + '</div>' +
             '<span style="font-size:13px;color:var(--accent);font-weight:600;">Bid closed — awarded to you</span>' +
@@ -1107,7 +1104,6 @@ if (vendorNames.length > 0) {
       lostEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:14px;">' + lostBids.map(function(b) {
         const myPrice = b.myPrice || 0;
         const vendorTags = b.vendor && b.vendor !== '—' ? b.vendor.split(' · ').map(function(v) { return '<span class="rfq-tag vendor">' + v + '</span>'; }).join('') : '';
-        const budgetLabel = b.budget ? '$' + b.budget.toLocaleString() : 'Not disclosed';
         return '<div class="rfq-card" style="border-color:rgba(136,150,169,0.25);opacity:0.8;cursor:pointer;" onclick="openBidReadOnly(MY_BIDS.find(function(x){return x.id===\'' + b.id + '\';}))">' +
           '<div class="new-tag" style="background:rgba(136,150,169,0.3);color:var(--slate-light);">NOT SELECTED</div>' +
           '<div class="rfq-card-top"><div>' +
@@ -1120,7 +1116,6 @@ if (vendorNames.length > 0) {
           '</div>' +
           '<div class="rfq-card-meta">' +
             '<div class="rfq-meta-item">&#128205; <strong>' + (b.location || '—') + '</strong></div>' +
-            '<div class="rfq-meta-item">&#128176; Budget: <strong>' + budgetLabel + '</strong></div>' +
           '</div>' +
           '<div class="rfq-card-footer"><div class="rfq-tags">' + vendorTags + '</div>' +
             '<span style="font-size:13px;color:var(--slate);">Bid closed</span>' +
@@ -1342,7 +1337,6 @@ if (vendorNames.length > 0) {
     let sorted = [...OPEN_RFQS];
     if (val === 'newest') sorted.sort((a,b) => b.id - a.id);
     else if (val === 'deadline') sorted.sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
-    else if (val === 'budget-desc') sorted.sort((a,b) => b.budget - a.budget);
     renderOpenRFQs(sorted);
   }
 
@@ -1355,7 +1349,6 @@ if (vendorNames.length > 0) {
       const days = daysUntil(rfq.deadline);
       const dlClass = days <= 2 ? 'deadline-urgent' : days <= 5 ? 'deadline-soon' : 'deadline-ok';
       const dlLabel = days <= 0 ? 'Deadline passed' : days === 1 ? 'Closes tomorrow' : (days + ' days left');
-      const budgetLabel = rfq.budget ? '$' + rfq.budget.toLocaleString() : 'Not disclosed';
       const hasBid = !!rfq.myBid;
       const rank = hasBid ? (rfq.myBid.rank || 1) : 0;
       const totalBids = hasBid ? (rfq.myBid.totalBids || 1) : 0;
@@ -1961,11 +1954,9 @@ if (vendorNames.length > 0) {
       : '';
 
     const rfqObj = (window._ALL_VENDOR_RFQS || []).find(function(r) { return r.id === rfqId; });
-    const modalBudgetLabel = rfqObj?.budget ? '$' + Number(rfqObj.budget).toLocaleString() : 'Not disclosed';
     const rfqDetailStrip = rfqObj
       ? '<div style="display:flex;gap:20px;flex-wrap:wrap;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:var(--slate-light);">' +
           '<span>&#128205; <strong style="color:var(--text);">' + (rfqObj.location || '—') + '</strong></span>' +
-          '<span>&#128176; Budget: <strong style="color:var(--text);">' + modalBudgetLabel + '</strong></span>' +
           '<span>&#128101; <strong style="color:var(--text);">' + (rfqObj.bids || 0) + '</strong> bids so far</span>' +
         '</div>'
       : '';
@@ -2215,11 +2206,9 @@ if (vendorNames.length > 0) {
     }
 
     const roRfqObj = (window._ALL_VENDOR_RFQS || []).find(function(r) { return r.id === bid.rfqId; });
-    const roBudgetLabel = roRfqObj?.budget ? '$' + Number(roRfqObj.budget).toLocaleString() : 'Not disclosed';
     const roDetailStrip = roRfqObj
       ? '<div style="display:flex;gap:20px;flex-wrap:wrap;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:var(--slate-light);">' +
           '<span>&#128205; <strong style="color:var(--text);">' + (roRfqObj.location || '—') + '</strong></span>' +
-          '<span>&#128176; Budget: <strong style="color:var(--text);">' + roBudgetLabel + '</strong></span>' +
           '<span>&#128101; <strong style="color:var(--text);">' + (roRfqObj.bids || 0) + '</strong> bids so far</span>' +
         '</div>'
       : '';

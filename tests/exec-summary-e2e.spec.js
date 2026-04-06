@@ -100,7 +100,8 @@ test('Exec Summary E2E — RFQ receives multiple bids, buyer awards winner, view
     const deadline = new Date();
     deadline.setDate(deadline.getDate() + 14);
     await buyer.fill('#project-deadline', deadline.toISOString().slice(0, 10));
-    await buyer.fill('#project-location', 'Dallas, TX');
+    await buyer.fill('#project-city', 'Dallas');
+    await buyer.selectOption('#project-state', 'TX');
     await buyer.locator('#section-1 button.btn-next').click();
 
     await buyer.waitForSelector('#vendor-name-1', { timeout: 10000 });

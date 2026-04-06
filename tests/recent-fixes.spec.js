@@ -24,14 +24,14 @@ test.describe('Submit RFQ — date picker auto-close', () => {
     expect(blurCalled).toBe(true);
   });
 
-  test('delivery date picker blur is called on change', async ({ page }) => {
+  test('deadline date picker blur is called on change', async ({ page }) => {
     await page.goto(`${BASE}/bidbridge-submit-rfq_2.html`);
 
     // Wait for auth+init to complete (deadline gets a default value)
     await expect(page.locator('#project-deadline')).toHaveValue(/\d{4}-\d{2}-\d{2}/, { timeout: 15000 });
 
-    const deliveryInput = page.locator('#project-delivery');
-    const blurCalled = await deliveryInput.evaluate(el => {
+    const deadlineInput = page.locator('#project-deadline');
+    const blurCalled = await deadlineInput.evaluate(el => {
       let called = false;
       const orig = el.blur.bind(el);
       el.blur = function() { called = true; orig(); };

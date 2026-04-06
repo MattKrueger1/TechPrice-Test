@@ -151,7 +151,7 @@
 
     // Load RFQ
     const { data: rfq } = await _supabase.from('rfqs')
-      .select('id, title, status, created_at, deadline, delivery_location, winner_reseller_id, winner_price, buyer_id')
+      .select('id, title, status, created_at, deadline, hq_location, winner_reseller_id, winner_price, buyer_id')
       .eq('id', rfqId).single();
 
     if (!rfq) { showError('RFQ not found.'); return; }

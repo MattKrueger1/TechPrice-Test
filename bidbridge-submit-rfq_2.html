@@ -974,6 +974,29 @@
       if (vendorCount === 0) {
         alert('Please add at least one vendor before continuing.');
         valid = false;
+      } else {
+        // Every SKU row must have a part number and a quantity
+        document.querySelectorAll('.vendor-item').forEach(item => {
+          const id = item.id.replace('vendor-item-', '');
+          item.querySelectorAll('.sku-row').forEach(row => {
+            const rowId = row.id.replace('sku-' + id + '-', '');
+            const partEl = document.getElementById('sku-part-' + id + '-' + rowId);
+            const qtyEl  = document.getElementById('sku-qty-'  + id + '-' + rowId);
+            if (partEl && !partEl.value.trim()) {
+              partEl.style.borderColor = 'var(--error)';
+              valid = false;
+            } else if (partEl) {
+              partEl.style.borderColor = '';
+            }
+            if (qtyEl && (!qtyEl.value || parseInt(qtyEl.value) < 1)) {
+              qtyEl.style.borderColor = 'var(--error)';
+              valid = false;
+            } else if (qtyEl) {
+              qtyEl.style.borderColor = '';
+            }
+          });
+        });
+        if (!valid) alert('Please enter a part number and quantity for every SKU row.');
       }
     }
 
@@ -1044,7 +1067,7 @@
           <label style="margin-bottom:0;">SKUs &amp; quantities <span class="required">*</span></label>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:12px; margin-bottom:6px;">
-          <label style="font-size:12px;color:var(--slate);margin-bottom:0;">Part number <span class="optional">(optional)</span></label>
+          <label style="font-size:12px;color:var(--slate);margin-bottom:0;">Part number <span class="required">*</span></label>
           <label style="font-size:12px;color:var(--slate);margin-bottom:0;">Quantity</label>
           <div></div>
         </div>

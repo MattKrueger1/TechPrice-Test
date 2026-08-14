@@ -104,7 +104,7 @@ test('Reseller only sees RFQs matching their authorized vendors', async ({ brows
 
     // First, find out what vendors the reseller is authorized for
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`, { waitUntil: 'domcontentloaded' });
-    await reseller.waitForSelector('.tab-btn', { timeout: 20000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 20000 });
     await reseller.waitForTimeout(4000); // let data load
 
     // Capture authorized vendors from sidebar
@@ -121,7 +121,7 @@ test('Reseller only sees RFQs matching their authorized vendors', async ({ brows
     console.log('✅ Authorized vendors:', authorizedVendors);
 
     // Check the Open RFQs tab — every card should only be for authorized vendors
-    await reseller.click('button:has-text("Open RFQs")');
+    // Open RFQs section always visible
     await reseller.waitForTimeout(2000);
     const cards = reseller.locator('#open-rfq-grid .rfq-card');
     const cardCount = await cards.count();
@@ -158,7 +158,7 @@ test('Tier enforcement — reseller below required tier cannot see RFQ', async (
 
     // Check reseller's tier for Dell (or their first vendor)
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`, { waitUntil: 'domcontentloaded' });
-    await reseller.waitForSelector('.tab-btn', { timeout: 20000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 20000 });
     await reseller.waitForTimeout(4000);
 
     // Get reseller's first authorized vendor and its tier
@@ -209,9 +209,9 @@ test('Tier enforcement — reseller below required tier cannot see RFQ', async (
 
     // Reload reseller dashboard and check if Platinum RFQ is visible
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`, { waitUntil: 'domcontentloaded' });
-    await reseller.waitForSelector('.tab-btn', { timeout: 20000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 20000 });
     await reseller.waitForTimeout(5000);
-    await reseller.click('button:has-text("Open RFQs")');
+    // Open RFQs section always visible
     await reseller.waitForTimeout(2000);
 
     const cards = reseller.locator('#open-rfq-grid .rfq-card');
@@ -259,7 +259,7 @@ test('Split-bid — reseller bid form only shows authorized vendor line items', 
 
     // Find out reseller's authorized vendor(s)
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`, { waitUntil: 'domcontentloaded' });
-    await reseller.waitForSelector('.tab-btn', { timeout: 20000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 20000 });
     await reseller.waitForTimeout(4000);
     const tierRows = reseller.locator('.profile-tier-row');
     const authorizedVendors = [];
@@ -319,9 +319,9 @@ test('Split-bid — reseller bid form only shows authorized vendor line items', 
 
     // Reseller goes to their dashboard and finds the split RFQ
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`, { waitUntil: 'domcontentloaded' });
-    await reseller.waitForSelector('.tab-btn', { timeout: 20000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 20000 });
     await reseller.waitForTimeout(5000);
-    await reseller.click('button:has-text("Open RFQs")');
+    // Open RFQs section always visible
     await reseller.waitForTimeout(2000);
 
     await reseller.waitForSelector('#open-rfq-grid .rfq-card', { timeout: 15000 });
@@ -389,7 +389,7 @@ test('Full split-bid lifecycle — per-vendor award flow', async ({ browser }) =
 
     // Find reseller's authorized vendor
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`, { waitUntil: 'domcontentloaded' });
-    await reseller.waitForSelector('.tab-btn', { timeout: 20000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 20000 });
     await reseller.waitForTimeout(4000);
     const firstVendorEl = reseller.locator('.profile-tier-vendor').first();
     const resellerVendor = (await firstVendorEl.textContent()).trim();
@@ -436,9 +436,9 @@ test('Full split-bid lifecycle — per-vendor award flow', async ({ browser }) =
 
     /* ── Step 2: Reseller bids on their vendor portion ── */
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`, { waitUntil: 'domcontentloaded' });
-    await reseller.waitForSelector('.tab-btn', { timeout: 20000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 20000 });
     await reseller.waitForTimeout(5000);
-    await reseller.click('button:has-text("Open RFQs")');
+    // Open RFQs section always visible
     await reseller.waitForTimeout(2000);
 
     await reseller.waitForSelector('#open-rfq-grid .rfq-card', { timeout: 20000 });
@@ -461,6 +461,8 @@ test('Full split-bid lifecycle — per-vendor award flow', async ({ browser }) =
       await priceInputs.nth(i).fill('500');
     }
 
+    const authCb = reseller.locator('#bid-auth-checkbox');
+    if (await authCb.count() > 0) await authCb.check();
     await reseller.click('#bid-submit-btn');
     await reseller.waitForTimeout(3000);
     console.log('✅ Step 2: Reseller bid submitted for their authorized vendor');
@@ -502,9 +504,9 @@ test('Full split-bid lifecycle — per-vendor award flow', async ({ browser }) =
 
     /* ── Step 5: Reseller sees WON status ── */
     await reseller.goto(`${BASE}/bidbridge-reseller-dashboard.html`);
-    await reseller.waitForSelector('.tab-btn', { timeout: 15000 });
+    await reseller.waitForSelector('#open-rfq-grid', { timeout: 15000 });
     await reseller.waitForTimeout(3000);
-    await reseller.click('button:has-text("My bids")');
+    // My Bids section always visible
     await reseller.click('#mybids-pill-won');
     await expect(reseller.locator('.new-tag:has-text("WON")').first()).toBeVisible({ timeout: 10000 });
     console.log('✅ Step 5: Reseller sees WON — split-bid lifecycle complete!');

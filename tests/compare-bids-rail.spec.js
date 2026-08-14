@@ -111,18 +111,21 @@ test('View toggle (card/table) still works', async ({ page }) => {
   console.log('✅ View toggle card/table works');
 });
 
-test('Navigating from dashboard via View button lands on correct RFQ in rail', async ({ page }) => {
-  // Go to dashboard first
+test('Navigating from My RFQs via View button lands on correct RFQ in rail', async ({ page }) => {
+  // RFQ table lives on My RFQs page — navigate there directly
   await page.goto(`${BASE}/bidbridge-auth_1.html`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('#login-email', { timeout: 10000 });
   await page.fill('#login-email', BUYER_EMAIL);
   await page.fill('#login-password', BUYER_PASSWORD);
   await page.click('#login-btn');
   await page.waitForURL(/dashboard/, { timeout: 15000 });
+
+  // Navigate to My RFQs where RFQ cards with View buttons live
+  await page.goto(`${BASE}/bidbridge-my-rfqs.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(5000);
 
-  // Click the first View button in the RFQ table
-  const viewBtn = page.locator('#rfq-tbody .btn-view').first();
+  // Click the first "View bids →" button in the RFQ card list
+  const viewBtn = page.locator('#rfq-list .btn-compare').first();
   await viewBtn.click();
   await page.waitForURL(/compare-bids/, { timeout: 10000 });
   await page.waitForTimeout(5000);
@@ -130,5 +133,5 @@ test('Navigating from dashboard via View button lands on correct RFQ in rail', a
   // Should have an active rail item
   const activeItem = page.locator('.rfq-rail-item.active');
   await expect(activeItem).toHaveCount(1);
-  console.log('✅ Navigating from dashboard highlights correct rail item');
+  console.log('✅ Navigating from My RFQs highlights correct rail item');
 });

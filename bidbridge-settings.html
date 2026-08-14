@@ -4,67 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Settings</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   :root {
-    --navy: #0B1B33;
-    --navy-mid: #112240;
-    --navy-light: #1A3356;
-    --accent: #00C896;
-    --accent-dim: #00a87b;
-    --accent-glow: rgba(0,200,150,0.12);
-    --gold: #F5C842;
-    --gold-glow: rgba(245,200,66,0.08);
-    --slate: #8896A9;
-    --slate-light: #A8B8CC;
-    --white: #F0F4FA;
-    --error: #FF6B6B;
-    --card-border: rgba(255,255,255,0.08);
-    --card-bg: rgba(255,255,255,0.04);
-    --font-head: 'Syne', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --surface-alt: #F0F2F5;
+    --border: #E5E7EB;
+    --navy: #1E2337;
+    --accent: #2563EB;
+    --accent-dim: #1D4ED8;
+    --accent-bg: #EFF6FF;
+    --accent-glow: rgba(37,99,235,0.08);
+    --gold: #D97706;
+    --error: #DC2626;
+    --error-bg: #FEF2F2;
+    --success: #059669;
+    --text: #111827;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+    --slate: #6B7280;
+    --slate-light: #9CA3AF;
+    --card-border: #E5E7EB;
+    --card-bg: #FFFFFF;
+    --white: #111827;
+    --font-body: 'Inter', sans-serif;
   }
 
-  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
   .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
 
   /* ─── SIDEBAR ─── */
-  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 36px; display: block; }
+  .sidebar { background: var(--navy); border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-family: var(--font-body); font-size: 20px; font-weight: 800; color: #E2E8F0; text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 36px; display: block; }
   .sidebar-logo span { color: var(--accent); }
-  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 24px; }
-  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
-  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
-  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #64748B; padding: 0 24px; margin-bottom: 8px; margin-top: 24px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #94A3B8; font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: #E2E8F0; background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: #93C5FD; background: rgba(37,99,235,0.12); border-left-color: var(--accent); font-weight: 500; }
   .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
-  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
+  .nav-badge { margin-left: auto; background: var(--accent); color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
   .user-block { display: flex; align-items: center; gap: 12px; }
-  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
-  .user-name { font-size: 13px; font-weight: 500; }
-  .user-role { font-size: 11px; color: var(--slate); }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-body); font-size: 13px; font-weight: 700; color: #93C5FD; flex-shrink: 0; }
+  .user-name { font-size: 13px; font-weight: 500; color: #E2E8F0; }
+  .user-role { font-size: 11px; color: #64748B; }
 
   /* ─── MAIN ─── */
   .main-content { display: flex; flex-direction: column; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; }
-  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
-  .btn-signout { width: 100%; margin-top: 12px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; text-align: left; display: flex; align-items: center; gap: 8px; }
-  .btn-signout:hover { border-color: rgba(255,107,107,0.35); color: #FF6B6B; background: rgba(255,107,107,0.05); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(255,255,255,0.95); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+  .topbar-left h1 { font-family: var(--font-body); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .topbar-left p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .btn-signout { width: 100%; margin-top: 12px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #94A3B8; font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; text-align: left; display: flex; align-items: center; gap: 8px; }
+  .btn-signout:hover { border-color: rgba(248,113,113,0.35); color: #F87171; background: rgba(248,113,113,0.05); }
 
   /* ─── PAGE LAYOUT ─── */
   .page-body { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 36px 40px; align-items: start; }
 
   /* ─── SETTINGS NAV ─── */
   .settings-nav { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 2px; }
-  .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 9px; font-size: 14px; color: var(--slate-light); cursor: pointer; transition: all .2s; border: 1px solid transparent; }
-  .settings-nav-item:hover { background: rgba(255,255,255,0.04); color: var(--white); }
-  .settings-nav-item.active { background: rgba(0,200,150,0.08); border-color: rgba(0,200,150,0.15); color: var(--accent); font-weight: 500; }
+  .settings-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 9px; font-size: 14px; color: var(--text-muted); cursor: pointer; transition: all .2s; border: 1px solid transparent; }
+  .settings-nav-item:hover { background: var(--surface-alt); color: var(--text); }
+  .settings-nav-item.active { background: var(--accent-bg); border-color: rgba(37,99,235,0.15); color: var(--accent); font-weight: 500; }
   .settings-nav-icon { font-size: 15px; width: 18px; text-align: center; }
-  .settings-nav-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 14px 4px; margin-top: 8px; }
+  .settings-nav-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 14px 4px; margin-top: 8px; }
 
   /* ─── SETTINGS CONTENT ─── */
   .settings-content { display: flex; flex-direction: column; gap: 20px; max-width: 680px; }
@@ -72,13 +79,13 @@
   .settings-section { display: none; }
   .settings-section.active { display: flex; flex-direction: column; gap: 20px; }
 
-  .settings-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 28px 30px; }
-  .settings-card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 30px; }
+  .settings-card-title { font-family: var(--font-body); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .settings-card-sub { font-size: 13px; color: var(--slate); margin-bottom: 24px; line-height: 1.6; }
 
   /* ─── TOGGLE ROWS ─── */
   .toggle-section { display: flex; flex-direction: column; gap: 0; }
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 20px; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border); gap: 20px; }
   .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
   .toggle-row:first-child { padding-top: 0; }
   .toggle-info { flex: 1; }
@@ -87,55 +94,55 @@
 
   .toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
   .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 999px; cursor: pointer; transition: background .2s; }
+  .toggle-track { position: absolute; inset: 0; background: #D1D5DB; border-radius: 999px; cursor: pointer; transition: background .2s; }
   .toggle input:checked + .toggle-track { background: var(--accent); }
-  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--white); transition: transform .2s; pointer-events: none; }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #FFFFFF; transition: transform .2s; pointer-events: none; }
   .toggle input:checked ~ .toggle-thumb { transform: translateX(18px); }
 
   /* ─── SELECT ROWS ─── */
-  .select-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 20px; }
+  .select-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); gap: 20px; }
   .select-row:last-child { border-bottom: none; padding-bottom: 0; }
   .select-row:first-child { padding-top: 0; }
   .select-info { flex: 1; }
   .select-label { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
   .select-sub { font-size: 12px; color: var(--slate); }
 
-  .inline-select { padding: 8px 32px 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--white); font-family: var(--font-body); font-size: 13px; outline: none; cursor: pointer; appearance: none; min-width: 160px; }
+  .inline-select { padding: 8px 32px 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font-body); font-size: 13px; outline: none; cursor: pointer; appearance: none; min-width: 160px; }
   .inline-select:focus { border-color: var(--accent); }
-  .inline-select option { background: var(--navy-mid); }
+  .inline-select option { background: var(--surface); }
   .select-wrap-inline { position: relative; flex-shrink: 0; }
   .select-wrap-inline::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
 
   /* ─── BILLING CARD ─── */
-  .plan-card { background: rgba(0,200,150,0.06); border: 1px solid rgba(0,200,150,0.15); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  .plan-name { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .plan-card { background: var(--accent-bg); border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .plan-name { font-family: var(--font-body); font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
   .plan-detail { font-size: 13px; color: var(--slate-light); }
-  .btn-primary { padding: 10px 20px; background: var(--accent); border: none; border-radius: 10px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s; white-space: nowrap; }
+  .btn-primary { padding: 10px 20px; background: var(--accent); border: none; border-radius: 10px; color: #FFFFFF; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .2s; white-space: nowrap; }
   .btn-primary:hover { background: var(--accent-dim); }
-  .btn-outline-sm { padding: 9px 18px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
-  .btn-outline-sm:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+  .btn-outline-sm { padding: 9px 18px; background: transparent; border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-outline-sm:hover { border-color: var(--accent); color: var(--accent); }
 
-  .invoice-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+  .invoice-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .invoice-row:last-child { border-bottom: none; }
   .invoice-date { color: var(--slate-light); }
   .invoice-amount { font-weight: 500; }
-  .invoice-status { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
+  .invoice-status { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(37,99,235,0.2); }
   .btn-invoice { background: none; border: none; color: var(--accent); font-family: var(--font-body); font-size: 12px; cursor: pointer; }
   .btn-invoice:hover { text-decoration: underline; }
 
   /* ─── DANGER ZONE ─── */
-  .danger-zone { background: rgba(255,107,107,0.04); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; padding: 28px 30px; }
-  .danger-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--error); margin-bottom: 8px; }
+  .danger-zone { background: rgba(248,113,113,0.04); border: 1px solid rgba(248,113,113,0.15); border-radius: 16px; padding: 28px 30px; }
+  .danger-title { font-family: var(--font-body); font-size: 16px; font-weight: 700; color: var(--error); margin-bottom: 8px; }
   .danger-sub { font-size: 13px; color: var(--slate-light); margin-bottom: 20px; line-height: 1.6; }
-  .danger-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,107,107,0.08); gap: 20px; }
+  .danger-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(248,113,113,0.08); gap: 20px; }
   .danger-row:last-child { border-bottom: none; padding-bottom: 0; }
   .danger-row-info h4 { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
   .danger-row-info p { font-size: 12px; color: var(--slate); }
-  .btn-danger { padding: 9px 18px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.25); border-radius: 10px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
-  .btn-danger:hover { background: rgba(255,107,107,0.18); }
+  .btn-danger { padding: 9px 18px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); border-radius: 10px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-danger:hover { background: rgba(248,113,113,0.18); }
 
   /* ─── TOAST ─── */
-  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: var(--navy); padding: 12px 22px; border-radius: 10px; font-family: var(--font-body); font-weight: 600; font-size: 14px; z-index: 999; animation: slideUp .3s ease; }
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: #FFFFFF; padding: 12px 22px; border-radius: 10px; font-family: var(--font-body); font-weight: 600; font-size: 14px; z-index: 999; animation: slideUp .3s ease; }
   @keyframes slideUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
   @media (max-width: 1024px) {
@@ -174,6 +181,7 @@
     </div>
   </aside>
 
+
   <!-- MAIN -->
   <div class="main-content">
     <div class="topbar">
@@ -197,6 +205,9 @@
         <div class="settings-nav-item" onclick="showSection('rfq', this)">
           <span class="settings-nav-icon">📋</span> RFQ defaults
         </div>
+        <div class="settings-nav-item" onclick="showSection('display', this)">
+          <span class="settings-nav-icon">🖥</span> Display
+        </div>
         <div class="settings-nav-label">Account</div>
         <div class="settings-nav-item" onclick="showSection('billing', this)">
           <span class="settings-nav-icon">💳</span> Billing
@@ -216,42 +227,42 @@
         <div class="settings-section active" id="section-notifications">
           <div class="settings-card">
             <div class="settings-card-title">Email notifications</div>
-            <div class="settings-card-sub">Choose which events trigger an email to james.mitchell@acmecorp.com</div>
+            <div class="settings-card-sub">Choose which events trigger an email to <span id="notif-email">your account email</span></div>
             <div class="toggle-section">
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">New bids on my RFQs</div>
                   <div class="toggle-sub">Email me each time a reseller submits a bid</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="email_new_bids" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Bid deadline reminders</div>
                   <div class="toggle-sub">Remind me 48h and 24h before each deadline closes</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="email_deadline_reminders" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Messages from resellers</div>
                   <div class="toggle-sub">Email me when a reseller sends a question about my RFQ</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="email_messages" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Award confirmations</div>
                   <div class="toggle-sub">Confirm when I award a bid and when the deal is closed</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="email_award_confirmations" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Platform updates &amp; news</div>
                   <div class="toggle-sub">New features, vendor additions, and platform announcements</div>
                 </div>
-                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="email_platform_updates" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
             </div>
           </div>
@@ -265,21 +276,21 @@
                   <div class="toggle-label">Show notification badge</div>
                   <div class="toggle-sub">Show the unread count badge on the notifications icon</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="inapp_notification_badge" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Desktop push notifications</div>
                   <div class="toggle-sub">Allow IT Pricing Network to send browser push notifications</div>
                 </div>
-                <label class="toggle"><input type="checkbox" onchange="requestPush(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="inapp_push" onchange="savePref(this); requestPush(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Digest summary</div>
                   <div class="toggle-sub">Send a daily summary of activity instead of individual alerts</div>
                 </div>
-                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="inapp_digest" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
             </div>
           </div>
@@ -294,8 +305,8 @@
                   <div class="select-sub">How often to bundle bid notifications for a single RFQ</div>
                 </div>
                 <div class="select-wrap-inline">
-                  <select class="inline-select" onchange="savePref(this)">
-                    <option selected>Every new bid</option>
+                  <select class="inline-select" data-key="bid_update_frequency" onchange="savePref(this)">
+                    <option>Every new bid</option>
                     <option>Every 3 bids</option>
                     <option>Daily summary</option>
                   </select>
@@ -307,8 +318,8 @@
                   <div class="select-sub">Wait before sending email for new messages</div>
                 </div>
                 <div class="select-wrap-inline">
-                  <select class="inline-select" onchange="savePref(this)">
-                    <option selected>Immediately</option>
+                  <select class="inline-select" data-key="message_notification_delay" onchange="savePref(this)">
+                    <option>Immediately</option>
                     <option>After 15 minutes</option>
                     <option>After 1 hour</option>
                     <option>Batched daily</option>
@@ -331,8 +342,8 @@
                   <div class="select-sub">Applied automatically when you post a new RFQ. Can be changed per RFQ.</div>
                 </div>
                 <div class="select-wrap-inline">
-                  <select class="inline-select" onchange="savePref(this)">
-                    <option selected>Anonymous</option>
+                  <select class="inline-select" data-key="default_anonymity" onchange="savePref(this)">
+                    <option>Anonymous</option>
                     <option>Partial — industry only</option>
                     <option>Revealed</option>
                   </select>
@@ -343,14 +354,14 @@
                   <div class="toggle-label">Reveal identity after award</div>
                   <div class="toggle-sub">Automatically reveal your name and company to the winning reseller after you award a bid</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="reveal_identity_after_award" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Allow resellers to see your RFQ history count</div>
                   <div class="toggle-sub">Show resellers that you are an active buyer (e.g. "6 RFQs posted") without revealing specifics</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="show_rfq_history_count" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
             </div>
           </div>
@@ -364,14 +375,14 @@
                   <div class="toggle-label">Analytics &amp; usage data</div>
                   <div class="toggle-sub">Allow IT Pricing Network to collect anonymous usage data to improve the platform</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="analytics_usage_data" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Appear in reseller search results</div>
                   <div class="toggle-sub">Allow verified resellers to see that your company is an active IT Pricing Network buyer</div>
                 </div>
-                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="appear_in_reseller_search" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
             </div>
           </div>
@@ -389,9 +400,9 @@
                   <div class="select-sub">How long resellers have to submit bids</div>
                 </div>
                 <div class="select-wrap-inline">
-                  <select class="inline-select" onchange="savePref(this)">
+                  <select class="inline-select" data-key="default_bid_window" onchange="savePref(this)">
                     <option>3 days</option>
-                    <option selected>7 days</option>
+                    <option>7 days</option>
                     <option>14 days</option>
                     <option>30 days</option>
                   </select>
@@ -403,8 +414,8 @@
                   <div class="select-sub">How multi-vendor RFQs are bid by default</div>
                 </div>
                 <div class="select-wrap-inline">
-                  <select class="inline-select" onchange="savePref(this)">
-                    <option selected>Sole source</option>
+                  <select class="inline-select" data-key="default_strategy" onchange="savePref(this)">
+                    <option>Sole source</option>
                     <option>Split bid per vendor</option>
                   </select>
                 </div>
@@ -415,8 +426,8 @@
                   <div class="select-sub">Minimum tier resellers must hold to bid on your RFQs</div>
                 </div>
                 <div class="select-wrap-inline">
-                  <select class="inline-select" onchange="savePref(this)">
-                    <option selected>No minimum</option>
+                  <select class="inline-select" data-key="default_min_tier" onchange="savePref(this)">
+                    <option>No minimum</option>
                     <option>Authorized</option>
                     <option>Silver / Select</option>
                     <option>Gold</option>
@@ -430,8 +441,8 @@
                   <div class="select-sub">Who can see and bid on your RFQs by default</div>
                 </div>
                 <div class="select-wrap-inline">
-                  <select class="inline-select" onchange="savePref(this)">
-                    <option selected>All verified resellers</option>
+                  <select class="inline-select" data-key="default_visibility" onchange="savePref(this)">
+                    <option>All verified resellers</option>
                     <option>Tier-filtered only</option>
                   </select>
                 </div>
@@ -441,14 +452,92 @@
                   <div class="toggle-label">Auto-close RFQ after deadline</div>
                   <div class="toggle-sub">Automatically close bidding when the deadline passes. You can still review and award after closing.</div>
                 </div>
-                <label class="toggle"><input type="checkbox" checked onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="auto_close_rfq" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
               <div class="toggle-row">
                 <div class="toggle-info">
                   <div class="toggle-label">Show budget to resellers</div>
                   <div class="toggle-sub">Reveal your budget on new RFQs by default. This can help resellers target their bids more accurately.</div>
                 </div>
-                <label class="toggle"><input type="checkbox" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                <label class="toggle"><input type="checkbox" data-key="show_budget" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DISPLAY -->
+        <div class="settings-section" id="section-display">
+          <div class="settings-card">
+            <div class="settings-card-title">Compare bids view</div>
+            <div class="settings-card-sub">Customize how bids are displayed when you compare submissions for an RFQ</div>
+            <div class="toggle-section">
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Default sort order</div>
+                  <div class="select-sub">How bids are sorted when you open the compare page</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" data-key="compare_default_sort" onchange="savePref(this)">
+                    <option>Price: low to high</option>
+                    <option>Price: high to low</option>
+                    <option>Partner tier</option>
+                    <option>Submitted date</option>
+                  </select>
+                </div>
+              </div>
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Row density</div>
+                  <div class="select-sub">How much vertical space each bid row uses</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" data-key="bid_row_density" onchange="savePref(this)">
+                    <option>Comfortable</option>
+                    <option>Compact</option>
+                  </select>
+                </div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Auto-expand lowest bid</div>
+                  <div class="toggle-sub">Automatically open the line-item detail for the lowest-priced bid when you open the compare view</div>
+                </div>
+                <label class="toggle"><input type="checkbox" data-key="auto_expand_lowest" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Show savings column</div>
+                  <div class="toggle-sub">Display the savings vs. highest bid column in the bid list</div>
+                </div>
+                <label class="toggle"><input type="checkbox" data-key="show_savings_column" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-card-title">Dashboard</div>
+            <div class="settings-card-sub">Control what you see when you first land on your buyer dashboard</div>
+            <div class="toggle-section">
+              <div class="select-row">
+                <div class="select-info">
+                  <div class="select-label">Default RFQ filter</div>
+                  <div class="select-sub">Which RFQ status is pre-selected when you open My RFQs</div>
+                </div>
+                <div class="select-wrap-inline">
+                  <select class="inline-select" data-key="default_rfq_filter" onchange="savePref(this)">
+                    <option>All</option>
+                    <option>Active</option>
+                    <option>Review</option>
+                    <option>Awarded</option>
+                  </select>
+                </div>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Show getting started checklist</div>
+                  <div class="toggle-sub">Display the onboarding checklist on your dashboard until all steps are complete</div>
+                </div>
+                <label class="toggle"><input type="checkbox" data-key="show_getting_started" onchange="savePref(this)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
               </div>
             </div>
           </div>
@@ -594,7 +683,47 @@
 </div>
 
 <script>
-  /* ─── SECTION NAVIGATION ─── */
+  const { createClient: _createClient } = supabase;
+  const _supabase = _createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  let _session = null;
+  let _prefs = {};
+
+  /* Defaults mirror the visual defaults in the HTML */
+  const PREF_DEFAULTS = {
+    email_new_bids: true,
+    email_deadline_reminders: true,
+    email_messages: true,
+    email_award_confirmations: true,
+    email_platform_updates: false,
+    inapp_notification_badge: true,
+    inapp_push: false,
+    inapp_digest: false,
+    bid_update_frequency: 'Every new bid',
+    message_notification_delay: 'Immediately',
+    default_anonymity: 'Anonymous',
+    reveal_identity_after_award: true,
+    show_rfq_history_count: true,
+    analytics_usage_data: true,
+    appear_in_reseller_search: false,
+    default_bid_window: '7 days',
+    default_strategy: 'Sole source',
+    default_min_tier: 'No minimum',
+    default_visibility: 'All verified resellers',
+    auto_close_rfq: true,
+    show_budget: false,
+    compare_default_sort: 'Price: low to high',
+    bid_row_density: 'Comfortable',
+    auto_expand_lowest: false,
+    show_savings_column: true,
+    default_rfq_filter: 'All',
+    show_getting_started: true
+  };
+
+  /* ─── SECTION NAV ─── */
   function showSection(id, navEl) {
     document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
@@ -602,46 +731,48 @@
     navEl.classList.add('active');
   }
 
-  /* ─── SAVE PREFERENCE ─── */
-  function savePref(el) {
-    /*
-     * ─────────────────────────────────────────────────────────────
-     * BACKEND INTEGRATION POINT — Save user preference
-     *
-     * const key = el.closest('.toggle-row, .select-row')
-     *   ?.querySelector('.toggle-label, .select-label')?.textContent;
-     * const value = el.type === 'checkbox' ? el.checked : el.value;
-     *
-     * await fetch('/api/settings/preference', {
-     *   method: 'PATCH',
-     *   headers: {
-     *     'Content-Type': 'application/json',
-     *     Authorization: 'Bearer ' + localStorage.getItem('bb_token')
-     *   },
-     *   body: JSON.stringify({ key, value })
-     * });
-     * ─────────────────────────────────────────────────────────────
-     */
-    showToast('Preference saved');
+  /* ─── APPLY LOADED PREFS TO ALL CONTROLS ─── */
+  function applyPrefs() {
+    document.querySelectorAll('[data-key]').forEach(el => {
+      const key = el.dataset.key;
+      const val = _prefs[key] !== undefined ? _prefs[key] : PREF_DEFAULTS[key];
+      if (val === undefined) return;
+      if (el.type === 'checkbox') el.checked = val;
+      else el.value = val;
+    });
   }
 
-  /* ─── PUSH NOTIFICATIONS ─── */
+  /* ─── SAVE A SINGLE PREFERENCE ─── */
+  async function savePref(el) {
+    if (!_session) return;
+    const key = el.dataset.key;
+    if (!key) return;
+    const value = el.type === 'checkbox' ? el.checked : el.value;
+    _prefs[key] = value;
+
+    const { error } = await _supabase
+      .from('user_settings')
+      .upsert({ user_id: _session.user.id, preferences: _prefs });
+
+    if (error) showToast('Could not save — ' + error.message, true);
+    else showToast('Preference saved');
+  }
+
+  /* ─── PUSH PERMISSION ─── */
   function requestPush(el) {
     if (el.checked && 'Notification' in window) {
       Notification.requestPermission().then(perm => {
-        if (perm !== 'granted') { el.checked = false; showToast('Push notifications blocked in browser settings', true); }
-        else showToast('Push notifications enabled');
+        if (perm !== 'granted') { el.checked = false; _prefs['inapp_push'] = false; showToast('Push notifications blocked in browser settings', true); }
       });
     }
   }
 
-  /* ─── CONFIRM ACTIONS ─── */
+  /* ─── DANGER ZONE ACTIONS ─── */
   function confirmCancel() {
-    if (confirm('Are you sure you want to cancel your subscription? You will keep access until April 12, 2026.')) {
-      showToast('Subscription cancellation confirmed. Access continues until April 12, 2026.');
+    if (confirm('Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.')) {
+      showToast('Cancellation requested. You will receive a confirmation email shortly.');
     }
   }
-
   function confirmDeactivate() {
     if (confirm('Are you sure? This will permanently deactivate your account and cancel all active RFQs.')) {
       showToast('Deactivation request submitted. Our team will follow up within 24 hours.');
@@ -652,36 +783,33 @@
   function showToast(msg, isError = false) {
     const existing = document.querySelector('.toast');
     if (existing) existing.remove();
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.style.background = isError ? 'var(--error)' : 'var(--accent)';
-    toast.style.color = isError ? 'var(--white)' : 'var(--navy)';
-    toast.textContent = (isError ? '✗ ' : '✓ ') + msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.style.background = isError ? 'var(--error)' : 'var(--accent)';
+    t.style.color = '#FFFFFF';
+    t.textContent = (isError ? '✗ ' : '✓ ') + msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
   }
-
-  const { createClient: _createClient } = supabase;
-  const _supabase = _createClient(
-    'https://kgejpzjoiewrgwzixcaa.supabase.co',
-    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
-  );
 
   async function signOut() {
     await _supabase.auth.signOut();
     window.location.href = 'bidbridge-auth_1.html';
   }
 
+  /* ─── INIT ─── */
   (async () => {
     const { data: { session } } = await _supabase.auth.getSession();
     if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+    _session = session;
 
-    // Populate sidebar profile
-    const { data: profile } = await _supabase
-      .from('profiles')
-      .select('first_name, last_name, company')
-      .eq('id', session.user.id)
-      .single();
+    // Sidebar profile
+    const [{ data: profile }, { data: rfqsBadge }, { data: settingsRow }] = await Promise.all([
+      _supabase.from('profiles').select('first_name, last_name, company').eq('id', session.user.id).maybeSingle(),
+      _supabase.from('rfqs').select('id, status').eq('buyer_id', session.user.id),
+      _supabase.from('user_settings').select('preferences').eq('user_id', session.user.id).maybeSingle()
+    ]);
+
     if (profile) {
       const name = ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || session.user.email;
       const initials = ((profile.first_name?.[0] || '') + (profile.last_name?.[0] || '')).toUpperCase() || '?';
@@ -689,16 +817,18 @@
       document.getElementById('sidebar-name').textContent = name;
       document.getElementById('sidebar-role').textContent = 'Buyer' + (profile.company ? ' · ' + profile.company : '');
     }
+    document.getElementById('notif-email').textContent = session.user.email;
 
-    // Populate sidebar nav badges
-    const { data: rfqsBadge } = await _supabase
-      .from('rfqs').select('id, status').eq('buyer_id', session.user.id);
     if (rfqsBadge) {
       const active = rfqsBadge.filter(r => r.status === 'active').length;
       const review = rfqsBadge.filter(r => r.status === 'review').length;
       if (active > 0) { const b = document.getElementById('badge-rfqs'); b.textContent = active; b.style.display = ''; }
       if (review > 0) { const b = document.getElementById('badge-review'); b.textContent = review; b.style.display = ''; }
     }
+
+    // Load saved prefs and apply to controls
+    _prefs = (settingsRow && settingsRow.preferences) ? { ...PREF_DEFAULTS, ...settingsRow.preferences } : { ...PREF_DEFAULTS };
+    applyPrefs();
   })();
 </script>
 

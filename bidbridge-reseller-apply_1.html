@@ -4,39 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — Apply as an Authorized Reseller</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   :root {
-    --navy: #0B1B33;
-    --navy-mid: #112240;
-    --navy-light: #1A3356;
-    --accent: #00C896;
-    --accent-dim: #00a87b;
-    --accent-glow: rgba(0,200,150,0.12);
-    --gold: #F5C842;
-    --gold-glow: rgba(245,200,66,0.08);
-    --slate: #8896A9;
-    --slate-light: #A8B8CC;
-    --white: #F0F4FA;
-    --error: #FF6B6B;
+    --navy: #0C0F1A;
+    --navy-mid: #141828;
+    --navy-light: #1E2336;
+    --accent: #7C3AED;
+    --accent-dim: #6D28D9;
+    --accent-glow: rgba(124,58,237,0.12);
+    --gold: #FBBF24;
+    --gold-glow: rgba(251,191,36,0.08);
+    --slate: #8B98B8;
+    --slate-light: #A8B4CC;
+    --white: #EEF2FF;
+    --error: #F87171;
     --card-bg: rgba(255,255,255,0.04);
     --card-border: rgba(255,255,255,0.08);
-    --font-head: 'Syne', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
   }
 
   html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
 
   /* ─── NAV ─── */
-  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 64px; background: rgba(11,27,51,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
-  .logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--white); text-decoration: none; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 64px; background: rgba(12,15,26,0.92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+  .logo { font-family: var(--font-body); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--white); text-decoration: none; }
   .logo span { color: var(--accent); }
   .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; }
   .nav-links a { color: var(--slate-light); text-decoration: none; transition: color .2s; }
   .nav-links a:hover { color: var(--white); }
-  .btn-signin { padding: 9px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; transition: all .2s; text-decoration: none; }
+  .btn-signin { padding: 9px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; transition: all .2s; text-decoration: none; }
   .btn-signin:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
 
   /* ─── HERO ─── */
@@ -51,7 +51,7 @@
   }
 
   .hero-left h1 {
-    font-family: var(--font-head);
+    font-family: var(--font-body);
     font-size: clamp(36px, 4vw, 56px);
     font-weight: 700;
     letter-spacing: -0.5px;
@@ -64,7 +64,7 @@
 
   .benefit-list { display: flex; flex-direction: column; gap: 14px; }
   .benefit-item { display: flex; align-items: flex-start; gap: 14px; font-size: 15px; color: var(--slate-light); }
-  .benefit-icon { width: 34px; height: 34px; min-width: 34px; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-top: 1px; }
+  .benefit-icon { width: 34px; height: 34px; min-width: 34px; background: var(--accent-glow); border: 1px solid rgba(124,58,237,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-top: 1px; }
 
   .hero-right {
     background: var(--navy-mid);
@@ -76,7 +76,7 @@
   .process-steps { display: flex; flex-direction: column; gap: 0; }
   .process-step { display: flex; align-items: flex-start; gap: 16px; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .process-step:last-child { border-bottom: none; }
-  .step-circle { width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.25); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--accent); }
+  .step-circle { width: 36px; height: 36px; min-width: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(124,58,237,0.25); display: flex; align-items: center; justify-content: center; font-family: var(--font-body); font-size: 14px; font-weight: 700; color: var(--accent); }
   .step-text h4 { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
   .step-text p { font-size: 13px; color: var(--slate); line-height: 1.5; }
 
@@ -87,9 +87,9 @@
   .step-indicator { display: flex; align-items: center; margin-bottom: 48px; }
   .step-item { display: flex; align-items: center; gap: 10px; flex: 1; }
   .step-item:not(:last-child)::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); margin: 0 12px; }
-  .step-num { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--slate); transition: all .3s; }
+  .step-num { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-body); font-size: 13px; font-weight: 700; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--slate); transition: all .3s; }
   .step-item.active .step-num { background: var(--accent); border-color: var(--accent); color: var(--navy); }
-  .step-item.completed .step-num { background: rgba(0,200,150,0.15); border-color: rgba(0,200,150,0.4); color: var(--accent); }
+  .step-item.completed .step-num { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); color: var(--accent); }
   .step-label { font-size: 13px; font-weight: 500; color: var(--slate); white-space: nowrap; }
   .step-item.active .step-label { color: var(--white); }
   .step-item.completed .step-label { color: var(--accent); }
@@ -100,7 +100,7 @@
   @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
   .panel-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 36px; margin-bottom: 20px; }
-  .panel-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
+  .panel-title { font-family: var(--font-body); font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
   .panel-sub { font-size: 14px; color: var(--slate-light); margin-bottom: 28px; }
 
   /* ─── FORM FIELDS ─── */
@@ -128,7 +128,7 @@
   .pwd-toggle:hover { color: var(--white); }
   textarea { resize: vertical; min-height: 90px; line-height: 1.6; font-size: 14px; }
   input::placeholder, textarea::placeholder { color: var(--slate); }
-  input:focus, textarea:focus, select:focus { border-color: var(--accent); background: rgba(0,200,150,0.04); }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); background: rgba(124,58,237,0.04); }
   input.error, select.error { border-color: var(--error); }
   .field-error { font-size: 12px; color: var(--error); margin-top: 5px; display: none; }
   .field-error.visible { display: block; }
@@ -150,12 +150,12 @@
     animation: fadeUp .25s ease;
   }
 
-  .vendor-auth-item.verified { border-color: rgba(0,200,150,0.2); }
+  .vendor-auth-item.verified { border-color: rgba(124,58,237,0.2); }
 
   .vendor-auth-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .vendor-auth-num { font-size: 13px; font-weight: 600; color: var(--accent); }
   .btn-remove-vendor { background: none; border: none; color: var(--slate); cursor: pointer; font-size: 13px; padding: 4px 10px; border-radius: 6px; transition: all .2s; }
-  .btn-remove-vendor:hover { color: var(--error); background: rgba(255,107,107,0.08); }
+  .btn-remove-vendor:hover { color: var(--error); background: rgba(248,113,113,0.08); }
 
   .vendor-auth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
 
@@ -163,7 +163,7 @@
   .tier-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .tier-option { padding: 10px 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; text-align: center; cursor: pointer; transition: all .2s; }
   .tier-option:hover { border-color: rgba(255,255,255,0.2); }
-  .tier-option.selected { border-color: var(--gold); background: rgba(245,200,66,0.07); }
+  .tier-option.selected { border-color: var(--gold); background: rgba(251,191,36,0.07); }
   .tier-option input[type="radio"] { display: none; }
   .tier-option-name { font-size: 12px; font-weight: 600; display: block; margin-bottom: 2px; }
   .tier-option-sub { font-size: 10px; color: var(--slate); }
@@ -180,24 +180,24 @@
     transition: border-color .2s, background .2s;
     position: relative;
   }
-  .doc-upload-row:hover { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.03); }
+  .doc-upload-row:hover { border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.03); }
   .doc-upload-row input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
   .doc-upload-icon { font-size: 20px; }
   .doc-upload-text { flex: 1; font-size: 13px; color: var(--slate-light); }
   .doc-upload-text strong { color: var(--accent); }
   .doc-upload-hint { font-size: 11px; color: var(--slate); }
-  .doc-uploaded { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(0,200,150,0.08); border: 1px solid rgba(0,200,150,0.2); border-radius: 9px; font-size: 13px; color: var(--accent); }
+  .doc-uploaded { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); border-radius: 9px; font-size: 13px; color: var(--accent); }
   .doc-uploaded button { background: none; border: none; color: var(--slate); cursor: pointer; margin-left: auto; font-size: 16px; }
   .doc-uploaded button:hover { color: var(--error); }
 
   .btn-add-vendor-auth {
     display: flex; align-items: center; gap: 8px;
-    background: rgba(0,200,150,0.06); border: 1px dashed rgba(0,200,150,0.25);
+    background: rgba(124,58,237,0.06); border: 1px dashed rgba(124,58,237,0.25);
     border-radius: 10px; padding: 13px 18px; color: var(--accent);
     font-family: var(--font-body); font-size: 14px; font-weight: 500;
     cursor: pointer; width: 100%; transition: all .2s;
   }
-  .btn-add-vendor-auth:hover { background: rgba(0,200,150,0.1); border-color: rgba(0,200,150,0.4); }
+  .btn-add-vendor-auth:hover { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.4); }
 
   /* ─── REFERENCES ─── */
   .reference-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 20px 22px; margin-bottom: 12px; }
@@ -209,8 +209,8 @@
   .agreement-block p { margin-bottom: 10px; }
 
   .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s; }
-  .check-item:hover { border-color: rgba(0,200,150,0.25); }
-  .check-item.checked { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.04); }
+  .check-item:hover { border-color: rgba(124,58,237,0.25); }
+  .check-item.checked { border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.04); }
   .check-item input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
   .check-text { font-size: 13px; color: var(--slate-light); line-height: 1.6; }
   .check-text strong { color: var(--white); }
@@ -235,8 +235,8 @@
   /* ─── SUCCESS ─── */
   .success-screen { display: none; text-align: center; padding: 80px 32px; animation: fadeUp .4s ease; }
   .success-screen.visible { display: block; }
-  .success-ring { width: 80px; height: 80px; border-radius: 50%; background: rgba(0,200,150,0.1); border: 2px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; }
-  .success-screen h2 { font-family: var(--font-head); font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 14px; }
+  .success-ring { width: 80px; height: 80px; border-radius: 50%; background: rgba(124,58,237,0.1); border: 2px solid rgba(124,58,237,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 36px; }
+  .success-screen h2 { font-family: var(--font-body); font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 14px; }
   .success-screen p { font-size: 16px; color: var(--slate-light); line-height: 1.7; max-width: 520px; margin: 0 auto 32px; }
   .success-steps { display: flex; flex-direction: column; gap: 12px; max-width: 480px; margin: 0 auto 40px; text-align: left; }
   .success-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px; background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 12px; font-size: 14px; }
@@ -287,7 +287,7 @@
     </div>
   </div>
   <div class="hero-right">
-    <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:20px;">How the application works</div>
+    <div style="font-family:var(--font-body);font-size:16px;font-weight:700;margin-bottom:20px;">How the application works</div>
     <div class="process-steps">
       <div class="process-step">
         <div class="step-circle">1</div>
@@ -467,7 +467,7 @@
         <span style="font-size:18px;">+</span> Add another vendor authorization
       </button>
 
-      <div style="margin-top:20px;padding:14px 16px;background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.14);border-radius:10px;font-size:13px;color:var(--slate-light);line-height:1.6;">
+      <div style="margin-top:20px;padding:14px 16px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.14);border-radius:10px;font-size:13px;color:var(--slate-light);line-height:1.6;">
         ⭐ <strong style="color:var(--gold);">Partner tier matters.</strong> Buyers can filter RFQs to only accept bids from resellers at specific tier levels. Higher tiers unlock more opportunities. Make sure your tier selection matches your current certification level exactly — misrepresentation may result in removal.
       </div>
     </div>
@@ -521,7 +521,7 @@
 
     <div class="form-nav">
       <button class="btn-back" onclick="goToStep(2)">← Back</button>
-      <div id="submit-error-banner" style="display:none;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.35);border-radius:10px;padding:12px 16px;font-size:13px;color:#FF6B6B;margin-bottom:12px;line-height:1.5;"></div>
+      <div id="submit-error-banner" style="display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);border-radius:10px;padding:12px 16px;font-size:13px;color:#F87171;margin-bottom:12px;line-height:1.5;"></div>
       <div class="field-error" id="submit-check-error" style="margin-bottom:10px;text-align:right;">Please agree to all terms above before submitting.</div>
       <button class="btn-next" id="submit-btn" onclick="submitApplication()">Submit application →</button>
     </div>

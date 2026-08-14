@@ -11,3 +11,13 @@ playwright-report/
 
 # OS files
 .DS_Store
+
+# MCP config (contains secret keys)
+.mcp.json
+
+# Playwright MCP session data
+.playwright-mcp/
+
+# Screenshots and local scripts
+screenshots/
+scripts/

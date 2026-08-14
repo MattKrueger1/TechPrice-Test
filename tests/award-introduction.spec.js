@@ -59,17 +59,17 @@ test('Award confirmation modal shows correct text', async ({ page }) => {
   await page.goto(`${BASE}/bidbridge-compare-bids_1.html`);
 
   // Wait for bids to load
-  try {
-    await page.waitForSelector('.btn-award, .btn-award-sm, .drawer-btn-award', { timeout: 15000 });
-  } catch {
-    console.log('No award buttons visible — RFQ may be already awarded or have no bids');
+  await page.waitForTimeout(5000); // let data load
+  const hasNonAwardedBtn = await page.locator('.btn-award:not(.awarded), .btn-award-sm:not(.awarded)').count() > 0;
+  if (!hasNonAwardedBtn) {
+    console.log('No non-awarded award buttons visible — RFQ may be already awarded or have no bids');
     return;
   }
 
-  // Click first award button
-  const awardBtn = page.locator('.btn-award, .btn-award-sm').first();
+  // Click first non-awarded award button
+  const awardBtn = page.locator('.btn-award:not(.awarded), .btn-award-sm:not(.awarded)').first();
   if (await awardBtn.count() === 0) {
-    console.log('No award button found');
+    console.log('No non-awarded award button found — RFQ may already be awarded');
     return;
   }
 

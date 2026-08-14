@@ -13,10 +13,12 @@ test('Messages nav item appears in buyer sidebar', async ({ page }) => {
 
 test('Clicking Messages nav opens messages panel', async ({ page }) => {
   await page.goto(`${BASE}/bidbridge-buyer-dashboard_2.html`);
-  await page.waitForTimeout(3000); // let init complete
+  await page.waitForSelector('#nav-messages', { timeout: 15000 });
+  await page.waitForTimeout(2000); // let init complete
 
   await page.locator('#nav-messages').click();
-  await expect(page.locator('#panel-messages')).toHaveClass(/active/, { timeout: 5000 });
+  // showPanel() uses inline style display:block, not .active class
+  await expect(page.locator('#panel-messages')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('#msg-inbox-threads')).toBeVisible();
   await expect(page.locator('#msg-inbox-conv')).toBeVisible();
 });
@@ -79,11 +81,14 @@ test('Clicking an RFQ group header expands reseller threads', async ({ page }) =
     return;
   }
 
-  // Before clicking, reseller rows should be hidden (collapsed)
-  await firstGroupHeader.click();
-  await page.waitForTimeout(500);
+  // First group auto-expands on load — if already open, just verify; otherwise click to expand
+  const alreadyOpen = page.locator('#msg-inbox-threads .msg-reseller-list.open').first();
+  const isAlreadyOpen = await alreadyOpen.count() > 0;
+  if (!isAlreadyOpen) {
+    await firstGroupHeader.click();
+    await page.waitForTimeout(500);
+  }
 
-  // After clicking, the reseller list inside should be open
   const openList = page.locator('#msg-inbox-threads .msg-reseller-list.open').first();
   await expect(openList).toBeVisible({ timeout: 5000 });
 
@@ -106,9 +111,13 @@ test('Clicking a reseller thread opens a conversation', async ({ page }) => {
     return;
   }
 
-  // Expand the first group
-  await firstGroupHeader.click();
-  await page.waitForTimeout(500);
+  // First group auto-expands — if not already open, click to expand
+  const alreadyOpen = page.locator('#msg-inbox-threads .msg-reseller-list.open').first();
+  const isAlreadyOpen = await alreadyOpen.count() > 0;
+  if (!isAlreadyOpen) {
+    await firstGroupHeader.click();
+    await page.waitForTimeout(500);
+  }
 
   // Click first reseller thread
   const firstThread = page.locator('#msg-inbox-threads .msg-reseller-list.open .msg-thread-item').first();

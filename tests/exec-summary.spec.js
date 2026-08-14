@@ -92,7 +92,8 @@ test('Exec summary loads real data for awarded RFQ', async ({ page }) => {
   const body = await page.locator('body').textContent();
   expect(body).toMatch(/Executive Summary|Procurement Report/i);
   expect(body).toMatch(/Days on market|Bids received/i);
-  expect(body).toMatch(/Your savings/i);
+  // "Your savings" OR "Pricing outcome" — both are valid depending on which bid was awarded
+  expect(body).toMatch(/Your savings|Pricing outcome/i);
   expect(errors).toHaveLength(0);
   console.log('✅ Exec summary loaded real RFQ data successfully');
 });

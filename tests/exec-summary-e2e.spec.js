@@ -143,6 +143,8 @@ test('Exec Summary E2E — RFQ receives multiple bids, buyer awards winner, view
 
     // Fill in unit price and submit
     await reseller.fill('#price-0', '850'); // $8,500 total (850 × 10)
+    const authCb = reseller.locator('#bid-auth-checkbox');
+    if (await authCb.count() > 0) await authCb.check();
     await reseller.locator('#bid-submit-btn').click();
     // Wait for success state confirming bid was saved
     await reseller.waitForSelector('.bid-success', { timeout: 15000 });

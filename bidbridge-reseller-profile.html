@@ -4,173 +4,209 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IT Pricing Network — My Profile</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   :root {
-    --navy: #0B1B33; --navy-mid: #112240; --navy-light: #1A3356;
-    --accent: #00C896; --accent-dim: #00a87b; --accent-glow: rgba(0,200,150,0.12);
-    --gold: #F5C842; --slate: #8896A9; --slate-light: #A8B8CC;
-    --white: #F0F4FA; --error: #FF6B6B;
-    --card-border: rgba(255,255,255,0.08); --card-bg: rgba(255,255,255,0.04);
-    --font-head: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+    /* Light theme — main content */
+    --bg:          #F7F8FA;
+    --surface:     #FFFFFF;
+    --surface-alt: #F0F2F5;
+    --border:      #E5E7EB;
+    --border-mid:  #D1D5DB;
+    --accent:      #2563EB;
+    --accent-dim:  #1D4ED8;
+    --accent-bg:   #EFF6FF;
+    --accent-text: #1E40AF;
+    --gold:        #D97706;
+    --gold-bg:     #FFFBEB;
+    --gold-border: #FDE68A;
+    --error:       #DC2626;
+    --error-bg:    #FEF2F2;
+    --success:     #059669;
+    --success-bg:  #ECFDF5;
+    --text:        #111827;
+    --text-muted:  #6B7280;
+    --text-light:  #9CA3AF;
+    /* Sidebar stays dark — also used as compat aliases */
+    --navy:        #1E2337;
+    --navy-mid:    #252B3B;
+    --navy-light:  #2D3448;
+    --white:       #111827;   /* mapped to text-dark for JS compat */
+    --slate:       #6B7280;
+    --slate-light: #9CA3AF;
+    --accent-glow: rgba(37,99,235,0.1);
+    --card-border: var(--border);
+    --card-bg:     var(--surface);
+    --font-body:   'Inter', sans-serif;
   }
-  html, body { min-height: 100%; background: var(--navy); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
   .app-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
 
-  /* SIDEBAR */
-  .sidebar { background: var(--navy-mid); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-  .sidebar-logo { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 28px; display: block; }
-  .sidebar-logo span { color: var(--accent); }
-  .sidebar-profile { margin: 0 16px 24px; padding: 14px 16px; background: rgba(0,200,150,0.06); border: 1px solid rgba(0,200,150,0.15); border-radius: 12px; }
-  .profile-company { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-  .profile-verified { font-size: 11px; color: var(--accent); }
-  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: var(--slate-light); font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
-  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
-  .nav-item.active { color: var(--accent); background: rgba(0,200,150,0.07); border-left-color: var(--accent); font-weight: 500; }
+  /* ─── SIDEBAR (dark) ─── */
+  .sidebar { background: var(--navy); border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; padding: 28px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { font-size: 20px; font-weight: 800; color: #F3F4F6; text-decoration: none; letter-spacing: -0.5px; padding: 0 24px; margin-bottom: 28px; display: block; }
+  .sidebar-logo span { color: #60A5FA; }
+  .sidebar-profile { margin: 0 16px 24px; padding: 14px 16px; background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2); border-radius: 12px; }
+  .profile-company { font-size: 14px; font-weight: 700; color: #F3F4F6; margin-bottom: 2px; }
+  .profile-verified { font-size: 11px; color: #60A5FA; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #CBD5E1; font-size: 14px; text-decoration: none; border-left: 2px solid transparent; transition: color .2s, background .2s, border-color .2s; }
+  .nav-item:hover { color: #F3F4F6; background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: #60A5FA; background: rgba(37,99,235,0.1); border-left-color: #60A5FA; font-weight: 500; }
   .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-  .nav-badge { margin-left: auto; background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
-  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); padding: 0 24px; margin-bottom: 8px; margin-top: 20px; }
-  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--card-border); }
-  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-glow); border: 1px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .sidebar-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #64748B; padding: 0 24px; margin-bottom: 8px; margin-top: 20px; }
+  .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.07); }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(37,99,235,0.2); border: 1px solid rgba(37,99,235,0.35); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #60A5FA; flex-shrink: 0; }
   .user-block { display: flex; align-items: center; gap: 12px; }
-  .user-name { font-size: 13px; font-weight: 500; }
-  .user-role { font-size: 11px; color: var(--slate); }
-  .btn-signout { display: block; width: 100%; margin-top: 12px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,107,107,0.25); border-radius: 8px; color: var(--error); font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px; }
+  .user-name { font-size: 13px; font-weight: 500; color: #F3F4F6; }
+  .user-role { font-size: 11px; color: #64748B; }
+  .btn-signout { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 12px; padding: 9px 14px; background: transparent; border: 1px solid rgba(220,38,38,0.3); border-radius: 8px; color: #F87171; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-signout:hover { background: rgba(220,38,38,0.08); }
 
-  /* MAIN */
-  .main-content { display: flex; flex-direction: column; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; background: rgba(11,27,51,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 50; }
-  .topbar-left h1 { font-family: var(--font-head); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-  .topbar-left p { font-size: 13px; color: var(--slate-light); margin-top: 2px; }
-  .page-body { padding: 32px 40px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
+  /* ─── MAIN (light) ─── */
+  .main-content { display: flex; flex-direction: column; background: var(--bg); min-height: 100vh; }
 
-  /* PROFILE SIDEBAR */
-  .profile-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
-  .profile-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; text-align: center; }
-  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--accent-glow); border: 2px solid rgba(0,200,150,0.3); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 24px; font-weight: 700; color: var(--accent); margin: 0 auto 14px; }
-  .profile-name { font-family: var(--font-head); font-size: 17px; font-weight: 700; margin-bottom: 2px; }
-  .profile-title { font-size: 12px; color: var(--slate-light); margin-bottom: 2px; }
-  .profile-company-name { font-size: 12px; color: var(--slate); margin-bottom: 12px; }
-  .verified-badge { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; background: rgba(0,200,150,0.07); border: 1px solid rgba(0,200,150,0.15); border-radius: 8px; font-size: 12px; color: var(--accent); margin-bottom: 14px; }
-  .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  .profile-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; }
-  .profile-stat-value { font-family: var(--font-head); font-size: 20px; font-weight: 700; color: var(--accent); }
+  /* ─── TOPBAR ─── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+  .topbar-left h1 { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.4px; }
+  .topbar-left p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── PAGE LAYOUT ─── */
+  .page-body { padding: 28px 32px; display: grid; grid-template-columns: 272px 1fr; gap: 24px; align-items: start; }
+
+  /* ─── PROFILE SIDEBAR CARD ─── */
+  .profile-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 74px; }
+  .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--accent-bg); border: 2px solid #BFDBFE; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: var(--accent); margin: 0 auto 14px; }
+  .profile-name { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .profile-title { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+  .profile-company-name { font-size: 12px; color: var(--text-light); margin-bottom: 14px; }
+  .verified-badge { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; background: var(--accent-bg); border: 1px solid #BFDBFE; border-radius: 8px; font-size: 12px; color: var(--accent); margin-bottom: 16px; }
+  .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .profile-stat { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+  .profile-stat-value { font-size: 20px; font-weight: 700; color: var(--accent); }
   .profile-stat-value.gold { color: var(--gold); }
-  .profile-stat-label { font-size: 11px; color: var(--slate); margin-top: 2px; }
+  .profile-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-  /* SECTION CARDS */
+  /* ─── SECTION CARDS ─── */
   .profile-forms { display: flex; flex-direction: column; gap: 20px; }
-  .section-card { background: var(--navy-mid); border: 1px solid var(--card-border); border-radius: 16px; padding: 26px 30px; }
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
-  .section-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-  .section-sub { font-size: 13px; color: var(--slate); margin-top: 3px; }
+  .section-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
   .section-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
 
-  /* FORM */
+  /* ─── FORM ─── */
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form-group { margin-bottom: 16px; }
   .form-group:last-child { margin-bottom: 0; }
-  label { display: block; font-size: 13px; font-weight: 500; color: var(--slate-light); margin-bottom: 7px; }
-  .field-view { font-size: 15px; color: var(--white); padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 40px; }
-  .field-empty { color: var(--slate); font-style: italic; }
-  input[type="text"], input[type="email"], input[type="tel"], input[type="url"], textarea, select {
-    width: 100%; padding: 10px 13px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--white); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color .2s; appearance: none; display: none;
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 7px; }
+  .field-view { font-size: 14px; color: var(--text); padding: 10px 0; border-bottom: 1px solid var(--border); min-height: 40px; }
+  .field-empty { color: var(--text-light); font-style: italic; }
+  .field-hint { font-size: 12px; color: var(--text-light); margin-top: 6px; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="password"], textarea, select {
+    width: 100%; padding: 9px 12px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 9px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color .15s, background .15s; appearance: none; display: none;
   }
   input.editing, textarea.editing, select.editing { display: block; }
-  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-  input::placeholder, textarea::placeholder { color: var(--slate); }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); background: var(--surface); }
+  input::placeholder, textarea::placeholder { color: var(--text-light); }
   textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
   .select-wrap { position: relative; }
-  .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--slate); font-size: 11px; pointer-events: none; }
-  select option { background: var(--navy-mid); }
+  .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: 11px; pointer-events: none; }
+  select option { background: var(--surface); color: var(--text); }
 
-  /* BUTTONS */
-  .btn-edit { padding: 7px 16px; background: transparent; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--slate-light); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; }
-  .btn-edit:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-save { padding: 7px 16px; background: var(--accent); border: none; border-radius: 8px; color: var(--navy); font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s; display: none; }
+  /* ─── BUTTONS ─── */
+  .btn-edit { padding: 7px 15px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .15s; }
+  .btn-edit:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+  .btn-save { padding: 7px 16px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; display: none; }
   .btn-save:hover { background: var(--accent-dim); }
-  .btn-cancel-edit { padding: 7px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--slate); font-family: var(--font-body); font-size: 13px; cursor: pointer; display: none; }
-  .btn-danger-outline { width: 100%; padding: 9px; background: transparent; border: 1px solid rgba(255,107,107,0.2); border-radius: 9px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; }
-  .btn-danger-outline:hover { background: rgba(255,107,107,0.08); }
+  .btn-cancel-edit { padding: 7px 14px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-family: var(--font-body); font-size: 13px; cursor: pointer; display: none; }
+  .btn-cancel-edit:hover { border-color: var(--border-mid); color: var(--text); }
+  .btn-danger-outline { width: 100%; padding: 9px; background: transparent; border: 1px solid rgba(220,38,38,0.25); border-radius: 9px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .15s; }
+  .btn-danger-outline:hover { background: var(--error-bg); border-color: rgba(220,38,38,0.4); }
 
-  /* VENDOR AUTHORIZATION CARDS */
+  /* ─── VENDOR AUTHORIZATION CARDS ─── */
   .vendor-auth-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
-  .vendor-auth-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px 20px; }
-  .vendor-auth-card.verified-card { border-color: rgba(0,200,150,0.2); }
-  .vendor-auth-card.pending-card { border-color: rgba(245,200,66,0.25); }
+  .vendor-auth-card { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .vendor-auth-card.verified-card { border-color: #BFDBFE; background: var(--accent-bg); }
+  .vendor-auth-card.pending-card { border-color: var(--gold-border); background: var(--gold-bg); }
   .vac-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .vac-vendor { font-family: var(--font-head); font-size: 14px; font-weight: 700; }
+  .vac-vendor { font-size: 14px; font-weight: 700; color: var(--text); }
   .vac-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
-  .vac-status.verified { background: rgba(0,200,150,0.1); color: var(--accent); border: 1px solid rgba(0,200,150,0.2); }
-  .vac-status.pending { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.2); }
+  .vac-status.verified { background: var(--accent-bg); color: var(--accent); border: 1px solid #BFDBFE; }
+  .vac-status.pending { background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); }
   .vac-details { display: flex; flex-wrap: wrap; gap: 16px; }
-  .vac-detail-label { font-size: 11px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-  .vac-detail-value { font-size: 13px; font-weight: 500; color: var(--white); }
+  .vac-detail-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .vac-detail-value { font-size: 13px; font-weight: 500; color: var(--text); }
   .tier-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
-  .tier-gold { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
-  .tier-platinum { background: rgba(168,184,204,0.12); color: var(--slate-light); border: 1px solid rgba(168,184,204,0.25); }
-  .tier-silver { background: rgba(136,150,169,0.1); color: var(--slate); border: 1px solid rgba(136,150,169,0.2); }
-  .btn-add-vendor { display: flex; align-items: center; gap: 8px; background: rgba(0,200,150,0.06); border: 1px dashed rgba(0,200,150,0.25); border-radius: 10px; padding: 12px 18px; color: var(--accent); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; width: 100%; transition: all .2s; }
-  .btn-add-vendor:hover { background: rgba(0,200,150,0.1); border-color: rgba(0,200,150,0.4); }
+  .tier-gold { background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); }
+  .tier-platinum { background: var(--surface-alt); color: var(--text-muted); border: 1px solid var(--border-mid); }
+  .tier-silver { background: var(--surface-alt); color: var(--text-light); border: 1px solid var(--border); }
+  .btn-add-vendor { display: flex; align-items: center; gap: 8px; background: var(--accent-bg); border: 1px dashed #93C5FD; border-radius: 10px; padding: 12px 18px; color: var(--accent); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; width: 100%; transition: all .15s; }
+  .btn-add-vendor:hover { background: #DBEAFE; border-color: var(--accent); }
 
-  /* ADD VENDOR MODAL */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  /* ─── ADD VENDOR MODAL ─── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.hidden { display: none; }
-  .modal-box { background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; width: 100%; max-width: 540px; padding: 32px; }
-  .modal-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-  .modal-sub { font-size: 13px; color: var(--slate-light); margin-bottom: 24px; line-height: 1.5; }
+  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 540px; padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.12); }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
   .tier-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
-  .tier-option { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; cursor: pointer; transition: all .2s; text-align: center; }
-  .tier-option:hover { border-color: rgba(255,255,255,0.2); }
-  .tier-option.selected { border-color: var(--accent); background: rgba(0,200,150,0.06); }
-  .tier-option-name { font-size: 13px; font-weight: 600; display: block; margin-bottom: 3px; }
-  .tier-option-sub { font-size: 11px; color: var(--slate); }
-  .doc-upload-row { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.12); border-radius: 10px; cursor: pointer; transition: all .2s; overflow: hidden; }
-  .doc-upload-row:hover { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.03); }
+  .tier-option { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; transition: all .15s; text-align: center; }
+  .tier-option:hover { border-color: var(--border-mid); }
+  .tier-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+  .tier-option-name { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 3px; }
+  .tier-option-sub { font-size: 11px; color: var(--text-muted); }
+  .doc-upload-row { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--surface-alt); border: 1px dashed var(--border-mid); border-radius: 10px; cursor: pointer; transition: all .15s; overflow: hidden; }
+  .doc-upload-row:hover { border-color: var(--accent); background: var(--accent-bg); }
   .doc-upload-row input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .doc-uploaded { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(0,200,150,0.08); border: 1px solid rgba(0,200,150,0.2); border-radius: 10px; font-size: 13px; color: var(--accent); }
-  .doc-uploaded button { background: none; border: none; color: var(--slate); cursor: pointer; margin-left: auto; font-size: 16px; line-height: 1; }
+  .doc-uploaded { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--accent-bg); border: 1px solid #BFDBFE; border-radius: 10px; font-size: 13px; color: var(--accent); }
+  .doc-uploaded button { background: none; border: none; color: var(--text-muted); cursor: pointer; margin-left: auto; font-size: 16px; line-height: 1; }
   .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-  .btn-modal-cancel { padding: 10px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; color: var(--slate-light); font-family: var(--font-body); font-size: 14px; cursor: pointer; }
-  .btn-modal-submit { padding: 10px 24px; background: var(--accent); border: none; border-radius: 9px; color: var(--navy); font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
+  .btn-modal-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border); border-radius: 9px; color: var(--text-muted); font-family: var(--font-body); font-size: 14px; cursor: pointer; }
+  .btn-modal-cancel:hover { border-color: var(--border-mid); color: var(--text); }
+  .btn-modal-submit { padding: 10px 24px; background: var(--accent); border: none; border-radius: 9px; color: #fff; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
   .btn-modal-submit:hover { background: var(--accent-dim); }
   .btn-modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
   .modal-error { color: var(--error); font-size: 13px; margin-top: 8px; display: none; }
 
-  /* PASSWORD */
+  /* ─── PASSWORD ─── */
   .pwd-fields { display: none; margin-top: 16px; }
   .pwd-fields.visible { display: block; }
 
-  /* SMS NOTIFICATIONS */
+  /* ─── SMS NOTIFICATIONS ─── */
   .sms-main-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  .sms-label-title { font-size: 14px; font-weight: 500; color: var(--white); }
-  .sms-label-sub { font-size: 12px; color: var(--slate); margin-top: 3px; line-height: 1.5; }
+  .sms-label-title { font-size: 14px; font-weight: 500; color: var(--text); }
+  .sms-label-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
   .toggle-switch { position: relative; display: inline-flex; align-items: center; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
   .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 99px; transition: background .2s; }
+  .toggle-track { position: absolute; inset: 0; background: var(--border-mid); border-radius: 99px; transition: background .2s; }
   .toggle-switch input:checked + .toggle-track { background: var(--accent); }
   .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform .2s; pointer-events: none; }
   .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(20px); }
-  .sms-sub-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); display: none; }
+  .sms-sub-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); display: none; }
   .sms-sub-section.visible { display: block; }
   .sms-event-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-  .sms-event-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; cursor: pointer; transition: border-color .2s; }
-  .sms-event-row:hover { border-color: rgba(0,200,150,0.25); }
+  .sms-event-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color .15s; }
+  .sms-event-row:hover { border-color: #93C5FD; background: var(--accent-bg); }
   .sms-event-check { width: 16px; height: 16px; accent-color: var(--accent); margin-top: 3px; flex-shrink: 0; cursor: pointer; }
-  .sms-event-title { font-size: 14px; font-weight: 500; color: var(--white); }
-  .sms-event-sub { font-size: 12px; color: var(--slate); margin-top: 3px; line-height: 1.5; }
+  .sms-event-title { font-size: 14px; font-weight: 500; color: var(--text); }
+  .sms-event-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
 
-  /* DANGER ZONE */
-  .danger-zone { background: rgba(255,107,107,0.04); border: 1px solid rgba(255,107,107,0.15); border-radius: 16px; padding: 26px 30px; }
-  .danger-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--error); margin-bottom: 6px; }
-  .danger-sub { font-size: 13px; color: var(--slate-light); margin-bottom: 16px; line-height: 1.6; }
-  .btn-danger { padding: 10px 20px; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.25); border-radius: 9px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .2s; }
-  .btn-danger:hover { background: rgba(255,107,107,0.18); }
+  /* ─── DANGER ZONE ─── */
+  .danger-zone { background: var(--error-bg); border: 1px solid rgba(220,38,38,0.2); border-radius: 14px; padding: 26px 28px; }
+  .danger-title { font-size: 15px; font-weight: 700; color: var(--error); margin-bottom: 6px; }
+  .danger-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.6; }
+  .btn-danger { padding: 10px 20px; background: transparent; border: 1px solid rgba(220,38,38,0.35); border-radius: 9px; color: var(--error); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all .15s; }
+  .btn-danger:hover { background: rgba(220,38,38,0.08); border-color: var(--error); }
 
-  /* TOAST */
-  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: var(--navy); padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: 14px; z-index: 999; animation: toastIn .3s ease; pointer-events: none; }
+  /* ─── TOAST ─── */
+  .toast { position: fixed; bottom: 32px; right: 32px; background: var(--accent); color: #fff; padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: 14px; z-index: 999; animation: toastIn .3s ease; pointer-events: none; box-shadow: 0 4px 16px rgba(37,99,235,0.25); }
   @keyframes toastIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 </style>
 </head>
@@ -345,12 +381,12 @@
             </div>
           </div>
           <div class="vendor-auth-list" id="vendor-list">
-            <div style="color:var(--slate);font-size:13px;">Loading...</div>
+            <div style="color:var(--text-muted);font-size:13px;">Loading...</div>
           </div>
           <button class="btn-add-vendor" onclick="openAddVendorModal()">
             <span style="font-size:18px;">+</span> Add a new vendor authorization
           </button>
-          <div style="margin-top:12px;font-size:12px;color:var(--slate);line-height:1.6;">
+          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);line-height:1.6;">
             Adding a new vendor requires uploading your certification document. Admin will verify within 1–2 business days. You will not be able to bid on that vendor's RFQs until approved.
           </div>
         </div>
@@ -413,7 +449,7 @@
               <div class="field-hint">Can be different from your profile phone. Must be a US mobile number.</div>
             </div>
 
-            <div style="font-size:13px;font-weight:500;color:var(--slate-light);margin-bottom:10px;">Notify me when:</div>
+            <div style="font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:10px;">Notify me when:</div>
             <div class="sms-event-list">
               <label class="sms-event-row">
                 <input type="checkbox" id="sms-notify-rfq" class="sms-event-check">
@@ -502,8 +538,8 @@
           <input type="file" accept=".pdf,.jpg,.jpeg,.png,.docx" onchange="handleAvDocUpload(this)">
           <span style="font-size:20px;">📎</span>
           <div>
-            <div style="font-size:13px;color:var(--slate-light);"><strong>Upload certification document</strong></div>
-            <div style="font-size:11px;color:var(--slate);">PDF, JPG, PNG, or DOCX — max 10MB</div>
+            <div style="font-size:13px;color:var(--text);"><strong>Upload certification document</strong></div>
+            <div style="font-size:11px;color:var(--text-muted);">PDF, JPG, PNG, or DOCX — max 10MB</div>
           </div>
         </div>
       </div>
@@ -551,17 +587,59 @@
     // Load vendors
     await loadVendors();
 
-    // Load stats from bids
+    // Load stats from bids — include rfq_id and line_items for split bid award detection
     const { data: bids } = await _supabase
       .from('bids')
-      .select('id, total_price, status')
+      .select('id, rfq_id, total_price, status, line_items')
       .eq('reseller_id', _userId);
 
-    if (bids) {
+    if (bids && bids.length > 0) {
+      // Fetch associated RFQs to check vendor_awards for split bids
+      const rfqIds = [...new Set(bids.map(b => b.rfq_id))];
+      const { data: rfqRows } = await _supabase
+        .from('rfqs')
+        .select('id, status, strategy, vendor_awards')
+        .in('id', rfqIds);
+      const rfqMap = {};
+      (rfqRows || []).forEach(r => { rfqMap[r.id] = r; });
+
+      // Derive won/lost the same way the dashboard does — check vendor_awards for split bids
+      const isWon = (bid) => {
+        const rfq = rfqMap[bid.rfq_id];
+        if (rfq?.strategy === 'split' && rfq?.vendor_awards) {
+          return Object.values(rfq.vendor_awards).includes(bid.id);
+        }
+        return bid.status === 'accepted';
+      };
+      const isLost = (bid) => {
+        const rfq = rfqMap[bid.rfq_id];
+        if (rfq?.strategy === 'split' && rfq?.vendor_awards) {
+          const rfqStatus = rfq.status;
+          return !Object.values(rfq.vendor_awards).includes(bid.id) && (rfqStatus === 'awarded' || rfqStatus === 'closed');
+        }
+        return bid.status === 'rejected';
+      };
+
       const total = bids.length;
-      const won = bids.filter(b => b.status === 'accepted').length;
-      const lost = bids.filter(b => b.status === 'rejected').length;
-      const revenue = bids.filter(b => b.status === 'accepted').reduce((s, b) => s + (b.total_price || 0), 0);
+      const wonBids = bids.filter(isWon);
+      const won = wonBids.length;
+      const lost = bids.filter(isLost).length;
+
+      // Revenue: for split bid partial wins, sum only the awarded vendor's line items
+      const revenue = wonBids.reduce((s, bid) => {
+        const rfq = rfqMap[bid.rfq_id];
+        if (rfq?.strategy === 'split' && rfq?.vendor_awards && bid.line_items) {
+          const awardedVendors = new Set(
+            Object.entries(rfq.vendor_awards).filter(([, bidId]) => bidId === bid.id).map(([v]) => v)
+          );
+          const portionTotal = bid.line_items
+            .filter(li => !li.vendor || awardedVendors.has(li.vendor))
+            .reduce((ps, li) => ps + parseFloat(li.line_total || (parseFloat(li.unit_price || 0) * (li.quantity || 1))), 0);
+          return s + portionTotal;
+        }
+        return s + (bid.total_price || 0);
+      }, 0);
+
       const totalDecided = won + lost;
       const rate = totalDecided > 0 ? Math.round((won / totalDecided) * 100) : 0;
       document.getElementById('stat-bids-total').textContent = total;
@@ -625,7 +703,7 @@
 
     const list = document.getElementById('vendor-list');
     if (!vendors || vendors.length === 0) {
-      list.innerHTML = '<div style="color:var(--slate);font-size:13px;">No vendor authorizations on file.</div>';
+      list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">No vendor authorizations on file.</div>';
       return;
     }
 
@@ -647,7 +725,7 @@
             </div>
             <div>
               <div class="vac-detail-label">Status</div>
-              <div class="vac-detail-value" style="color:${isVerified ? 'var(--accent)' : 'var(--gold)'};">
+              <div class="vac-detail-value" style="color:${isVerified ? 'var(--accent)' : 'var(--gold)'}; font-weight:500;">
                 ${isVerified ? 'Eligible for RFQs' : 'Awaiting admin approval'}
               </div>
             </div>
@@ -656,7 +734,7 @@
               <div class="vac-detail-value">${v.submitted_at.slice(0, 10)}</div>
             </div>` : ''}
           </div>
-          ${!isVerified ? `<div style="margin-top:10px;padding:8px 12px;background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;font-size:12px;color:var(--gold);">
+          ${!isVerified ? `<div style="margin-top:10px;padding:8px 12px;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;font-size:12px;color:var(--gold);">
             ⏳ Your ${v.vendor} certification is under review. You'll be able to bid on ${v.vendor} RFQs once approved.
           </div>` : ''}
         </div>
@@ -774,8 +852,8 @@
         <input type="file" accept=".pdf,.jpg,.jpeg,.png,.docx" onchange="handleAvDocUpload(this)">
         <span style="font-size:20px;">📎</span>
         <div>
-          <div style="font-size:13px;color:var(--slate-light);"><strong>Upload certification document</strong></div>
-          <div style="font-size:11px;color:var(--slate);">PDF, JPG, PNG, or DOCX — max 10MB</div>
+          <div style="font-size:13px;color:var(--text);"><strong>Upload certification document</strong></div>
+          <div style="font-size:11px;color:var(--text-muted);">PDF, JPG, PNG, or DOCX — max 10MB</div>
         </div>
       </div>`;
     document.getElementById('av-error').style.display = 'none';
@@ -805,7 +883,7 @@
     document.getElementById('av-doc-area').innerHTML = `
       <div class="doc-uploaded" id="av-upload-row">
         📄 ${file.name}
-        <span style="font-size:11px;color:var(--slate);margin-left:4px;">(${(file.size/1024/1024).toFixed(1)} MB)</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:4px;">(${(file.size/1024/1024).toFixed(1)} MB)</span>
         <button onclick="clearAvDoc()">×</button>
       </div>`;
   }
@@ -817,8 +895,8 @@
         <input type="file" accept=".pdf,.jpg,.jpeg,.png,.docx" onchange="handleAvDocUpload(this)">
         <span style="font-size:20px;">📎</span>
         <div>
-          <div style="font-size:13px;color:var(--slate-light);"><strong>Upload certification document</strong></div>
-          <div style="font-size:11px;color:var(--slate);">PDF, JPG, PNG, or DOCX — max 10MB</div>
+          <div style="font-size:13px;color:var(--text);"><strong>Upload certification document</strong></div>
+          <div style="font-size:11px;color:var(--text-muted);">PDF, JPG, PNG, or DOCX — max 10MB</div>
         </div>
       </div>`;
   }

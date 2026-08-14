@@ -18,27 +18,29 @@ const RESELLER_PASS  = process.env.RESELLER_PASS  || '';
 
 test('Save buyer session → auth.json', async ({ page, context }) => {
   test.setTimeout(30000);
-  if (!BUYER_PASS) throw new Error('Set BUYER_PASS env var');
+  test.skip(!BUYER_PASS, 'Set BUYER_PASS env var to run this session refresh');
+  if (!BUYER_PASS) return;
 
   await page.goto(`${BASE}/bidbridge-auth_1.html`, { waitUntil: 'domcontentloaded' });
   await page.fill('#login-email', BUYER_EMAIL);
   await page.fill('#login-password', BUYER_PASS);
-  await page.click('#login-btn');
+  await page.locator('#login-form').evaluate(f => f.requestSubmit());
 
   // Wait for redirect to dashboard
-  await page.waitForURL(/buyer-dashboard/, { timeout: 20000 });
+  await page.waitForURL(/buyer-dashboard_2/, { timeout: 20000 });
   await context.storageState({ path: 'auth.json' });
   console.log('✅ Buyer session saved to auth.json');
 });
 
 test('Save reseller session → reseller-auth.json', async ({ page, context }) => {
   test.setTimeout(30000);
-  if (!RESELLER_PASS || !RESELLER_EMAIL) throw new Error('Set RESELLER_EMAIL and RESELLER_PASS env vars');
+  test.skip(!RESELLER_PASS || !RESELLER_EMAIL, 'Set RESELLER_EMAIL and RESELLER_PASS env vars to run this session refresh');
+  if (!RESELLER_PASS || !RESELLER_EMAIL) return;
 
   await page.goto(`${BASE}/bidbridge-auth_1.html`, { waitUntil: 'domcontentloaded' });
   await page.fill('#login-email', RESELLER_EMAIL);
   await page.fill('#login-password', RESELLER_PASS);
-  await page.click('#login-btn');
+  await page.locator('#login-form').evaluate(f => f.requestSubmit());
 
   // Wait for redirect to reseller dashboard
   await page.waitForURL(/reseller-dashboard/, { timeout: 20000 });

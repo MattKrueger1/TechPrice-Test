@@ -416,13 +416,33 @@
       return;
     }
 
+    // Collapse repetitive notifications: group same-type, same-RFQ items.
+    // Keep the newest as the primary; show "+N more" summary.
+    const grouped = {};
+    const collapsed = [];
+    filtered.forEach(n => {
+      const key = (n.type || '') + '::' + (n.rfq_id || 'no-rfq');
+      // Never group non-RFQ notifications
+      if (!n.rfq_id) { collapsed.push(n); return; }
+      if (!grouped[key]) {
+        grouped[key] = { ...n, _count: 1, _unreadCount: n.unread ? 1 : 0, _ids: [n.id] };
+        collapsed.push(grouped[key]);
+      } else {
+        grouped[key]._count++;
+        if (n.unread) grouped[key]._unreadCount++;
+        grouped[key]._ids.push(n.id);
+        // Keep the newest timestamp as primary
+        if (new Date(n.created_at) > new Date(grouped[key].created_at)) grouped[key].created_at = n.created_at;
+      }
+    });
+
     // Group by date
     const now = new Date();
     const todayStr = now.toDateString();
     const yesterdayStr = new Date(now - 86400000).toDateString();
     const groups = { today: [], yesterday: [], earlier: [] };
 
-    filtered.forEach(n => {
+    collapsed.forEach(n => {
       const d = new Date(n.created_at).toDateString();
       if (d === todayStr) groups.today.push(n);
       else if (d === yesterdayStr) groups.yesterday.push(n);
@@ -454,11 +474,17 @@
           ? `Bid not selected${n.rfqTitle ? ' — ' + n.rfqTitle : ''}`
           : n.message?.split('.')[0] || 'Notification';
 
+        // If this notification is grouped (multiple of same type+RFQ), show a count badge
+        const groupBadge = n._count > 1
+          ? `<span style="display:inline-flex;align-items:center;background:var(--accent-bg);color:var(--accent);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:8px;">+${n._count - 1} more</span>`
+          : '';
+        const groupTitle = n._count > 1 ? `${title} (${n._count} updates)` : title;
+
         html += `
           <div class="notif-item ${borderClass}" onclick="handleClick('${n.id}', '${ctaLink}')" id="notif-${n.id}" style="cursor:pointer;">
             <div class="notif-icon-wrap ${cfg.iconClass}">${cfg.icon}</div>
             <div class="notif-content">
-              <div class="notif-title">${title}</div>
+              <div class="notif-title">${groupTitle}${groupBadge}</div>
               <div class="notif-body">${n.message || ''}</div>
               <div class="notif-meta">
                 <span class="notif-time">${formatTimeAgo(n.created_at)}</span>

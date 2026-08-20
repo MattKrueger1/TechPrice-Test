@@ -630,15 +630,36 @@
     const dlLabel = days <= 0 ? 'Deadline passed' : days === 1 ? 'Closes tomorrow' : (days + ' days left');
     const effectiveRank = bid.isSplitRank ? (bid.bestRank || bid.rank) : bid.rank;
     const isLeading = effectiveRank === 1;
-    const bidColorRgb = isLeading ? '37,99,235' : '217,119,6';
-    const bidColor = isLeading ? 'var(--accent)' : 'var(--gold)';
+
+    // Rank-based urgency coloring (scannable at row level in a long list):
+    //   #1        → green (leading, hold)
+    //   #2        → gold (close, revise if it matters)
+    //   #3+       → red  (likely to lose without action)
+    //   urgent    → red border stripe when rank > 1 AND deadline ≤ 2 days
+    let bidColorRgb, bidColor, urgencyLabel, urgencyBg;
+    if (effectiveRank === 1) {
+      bidColorRgb = '5,150,105'; bidColor = 'var(--success)';
+      urgencyLabel = '🏆 Leading'; urgencyBg = 'var(--success-bg)';
+    } else if (effectiveRank === 2) {
+      bidColorRgb = '217,119,6'; bidColor = 'var(--gold)';
+      urgencyLabel = '#2 — close'; urgencyBg = 'var(--gold-bg)';
+    } else {
+      bidColorRgb = '220,38,38'; bidColor = 'var(--error)';
+      urgencyLabel = '#' + effectiveRank + ' — revise to win'; urgencyBg = 'var(--error-bg)';
+    }
+    // Deadline < 2 days AND not #1 = escalated urgency
+    const isCritical = !isLeading && days >= 0 && days <= 2;
+    const leftBorder = isCritical
+      ? 'border-left:5px solid var(--error);'
+      : 'border-left:5px solid rgba(' + bidColorRgb + ',0.7);';
+
     let rankNudge = bid.rank === 1 ? 'Looking good!' : 'Consider revising.';
     if (bid.isSplitRank && bid.vendorRanks) {
       const allFirst = Object.values(bid.vendorRanks).every(v => v.rank === 1);
       rankNudge = allFirst ? 'Leading on all!' : "Revise where you're not #1.";
     }
-    return '<div id="bid-card-' + bid.id + '" class="rfq-card" style="border-color:rgba(' + bidColorRgb + ',0.3);" onclick="openBidForm(\'' + bid.rfqId + '\', \'' + safeTitle + '\')">' +
-      '<div class="new-tag" style="background:rgba(' + bidColorRgb + ',1);color:#fff;">BID SUBMITTED</div>' +
+    return '<div id="bid-card-' + bid.id + '" class="rfq-card" style="border-color:rgba(' + bidColorRgb + ',0.25);' + leftBorder + '" onclick="openBidForm(\'' + bid.rfqId + '\', \'' + safeTitle + '\')">' +
+      '<div class="new-tag" style="background:rgba(' + bidColorRgb + ',1);color:#fff;">' + urgencyLabel + '</div>' +
       '<div class="rfq-card-top"><div>' +
         '<div class="rfq-card-title">RFQ #' + bid.rfqId.slice(0,8).toUpperCase() + ' — ' + bid.title + '</div>' +
         '<div class="rfq-card-sub">' + bid.description + '</div>' +

@@ -262,8 +262,9 @@
       </div>
       <div class="sort-wrap">
         <select class="sort-select" onchange="sortOpenRFQs(this.value)">
-          <option value="newest">Newest first</option>
+          <option value="urgent">Urgent first (default)</option>
           <option value="deadline">Deadline soonest</option>
+          <option value="newest">Newest first</option>
         </select>
       </div>
     </div>
@@ -539,7 +540,8 @@
       if (b) { b.textContent = OPEN_RFQS.length; b.style.display = ''; }
     }
 
-    renderOpenRFQs(OPEN_RFQS);
+    // Default to urgent sort (unbid + deadline soonest first)
+    sortOpenRFQs('urgent');
     updateOpenRFQFilterCounts();
     document.getElementById('topbar-sub').textContent = OPEN_RFQS.length + ' RFQ' + (OPEN_RFQS.length !== 1 ? 's' : '') + ' available to bid on';
   }
@@ -572,8 +574,20 @@
 
   function sortOpenRFQs(val) {
     let sorted = [...OPEN_RFQS];
-    if (val === 'newest') sorted.sort((a,b) => new Date(b.id) - new Date(a.id));
-    else if (val === 'deadline') sorted.sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+    if (val === 'newest') {
+      sorted.sort((a,b) => new Date(b.id) - new Date(a.id));
+    } else if (val === 'deadline') {
+      sorted.sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+    } else {
+      // 'urgent' (default): unbid RFQs come first, then by deadline within each group.
+      // Bids you've already submitted are lower priority — they need revising only if outbid.
+      sorted.sort((a,b) => {
+        const unbidA = !a.myBid ? 0 : 1;
+        const unbidB = !b.myBid ? 0 : 1;
+        if (unbidA !== unbidB) return unbidA - unbidB;
+        return new Date(a.deadline || '2100-01-01') - new Date(b.deadline || '2100-01-01');
+      });
+    }
     renderOpenRFQs(sorted);
   }
 

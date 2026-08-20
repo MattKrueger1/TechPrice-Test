@@ -1235,16 +1235,36 @@ if (vendorNames.length > 0) {
       list.innerHTML = '<div class="notif-empty"><div class="notif-empty-icon">🔔</div>No notifications yet</div>';
       return;
     }
-    list.innerHTML = _ALL_NOTIFS.map(function(n) {
+
+    // Group repetitive notifications (same type + RFQ) to cut noise at scale.
+    // Keep newest as primary and count the rest.
+    const grouped = {};
+    const collapsed = [];
+    _ALL_NOTIFS.forEach(function(n) {
+      const key = (n.type || '') + '::' + (n.rfq_id || 'no-rfq');
+      if (!n.rfq_id) { collapsed.push(n); return; }
+      if (!grouped[key]) {
+        grouped[key] = Object.assign({}, n, { _count: 1 });
+        collapsed.push(grouped[key]);
+      } else {
+        grouped[key]._count++;
+        if (new Date(n.created_at) > new Date(grouped[key].created_at)) grouped[key].created_at = n.created_at;
+      }
+    });
+
+    list.innerHTML = collapsed.map(function(n) {
       const isUnread = !n.read && !_notifDismissed.includes(n.id);
       const accent = getNotifAccent(n.type);
       const accentClass = isUnread ? ' unread-' + accent : '';
       const unreadClass = isUnread ? ' unread' : '';
+      const countBadge = n._count > 1
+        ? ' <span style="display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px;margin-left:4px;">+' + (n._count - 1) + '</span>'
+        : '';
       return '<div class="notif-item' + unreadClass + accentClass + '" onclick="handleNotifClick(\'' + n.id + '\', \'' + n.type + '\', \'' + (n.rfq_id || '') + '\')">' +
         (isUnread ? '<div class="notif-dot ' + (accent !== 'accent' ? accent : '') + '"></div>' : '<div style="width:7px;flex-shrink:0;"></div>') +
         '<div class="notif-icon">' + getNotifIcon(n.type) + '</div>' +
         '<div class="notif-body">' +
-          '<div class="notif-msg">' + (n.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' +
+          '<div class="notif-msg">' + (n.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;') + countBadge + '</div>' +
           '<div class="notif-time">' + notifTimeAgo(n.created_at) + '</div>' +
         '</div></div>';
     }).join('');

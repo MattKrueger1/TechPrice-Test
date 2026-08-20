@@ -219,18 +219,17 @@
     <a href="bidbridge-reseller-dashboard.html" class="sidebar-logo">IT Pricing <span>Network</span></a>
     <div class="sidebar-profile">
       <div class="profile-company" id="sidebar-company">—</div>
-      <div class="profile-verified">✓ Verified reseller</div>
+      <div class="profile-tiers-count" id="sidebar-tiers" style="font-size:12px;color:#94A3B8;margin-top:3px;">✓ Verified reseller</div>
     </div>
-    <div class="sidebar-section-label">Main</div>
-    <a class="nav-item" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
-    <a class="nav-item" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">🔍</span> Open RFQs</a>
-    <a class="nav-item" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">📨</span> My bids</a>
-    <a class="nav-item" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">🏆</span> Won / Lost</a>
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" id="nav-dashboard" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a class="nav-item" id="nav-browse" href="bidbridge-reseller-open-rfqs.html"><span class="nav-icon">🔍</span> Browse RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
+    <a class="nav-item" id="nav-mybids" href="bidbridge-reseller-my-bids.html"><span class="nav-icon">📋</span> My Bids <span class="nav-badge" id="badge-bids" style="display:none"></span></a>
+    <a class="nav-item" href="bidbridge-reseller-messages.html"><span class="nav-icon">💬</span> Messages <span class="nav-badge" id="badge-messages" style="display:none"></span></a>
+    <a class="nav-item" href="#" onclick="openNotifPanel && openNotifPanel(); return false;"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge gold" id="notif-badge" style="display:none"></span></a>
     <div class="sidebar-section-label">Account</div>
-    <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Notifications</a>
-    <a class="nav-item" href="bidbridge-reseller-dashboard.html#section-messages"><span class="nav-icon">💬</span> Messages</a>
-    <a class="nav-item active" href="bidbridge-reseller-profile.html"><span class="nav-icon">⭐</span> My profile</a>
-    <a class="nav-item" href="#"><span class="nav-icon">⚙</span> Settings</a>
+    <a class="nav-item active" href="bidbridge-reseller-profile.html"><span class="nav-icon">👤</span> My Profile</a>
+    <a class="nav-item" href="bidbridge-reseller-settings.html"><span class="nav-icon">⚙️</span> Settings</a>
     <div class="sidebar-footer">
       <div class="user-block">
         <div class="user-avatar" id="sidebar-avatar">—</div>
@@ -433,7 +432,7 @@
           <div class="sms-main-row">
             <div>
               <div class="sms-label-title">Enable SMS notifications</div>
-              <div class="sms-label-sub">We'll text you from a BidBridge number. Standard messaging rates apply.</div>
+              <div class="sms-label-sub">We'll text you from an IT Pricing Network number. Standard messaging rates apply.</div>
             </div>
             <label class="toggle-switch" title="Toggle SMS notifications">
               <input type="checkbox" id="sms-enabled" onchange="toggleSmsSection()">

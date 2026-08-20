@@ -137,21 +137,21 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <a class="sidebar-logo" href="bidbridge-reseller-dashboard.html">Bid<span>Bridge</span></a>
+    <a class="sidebar-logo" href="bidbridge-reseller-dashboard.html">IT Pricing <span>Network</span></a>
 
     <div class="sidebar-profile">
       <div class="profile-company" id="sidebar-company">Loading…</div>
       <div class="profile-tiers-count" id="sidebar-tiers"></div>
     </div>
 
-    <span class="sidebar-section-label">Menu</span>
-    <a class="nav-item" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+    <div class="sidebar-section-label">Menu</div>
+    <a class="nav-item" id="nav-dashboard" href="bidbridge-reseller-dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
     <a class="nav-item" id="nav-browse" href="bidbridge-reseller-open-rfqs.html"><span class="nav-icon">🔍</span> Browse RFQs <span class="nav-badge" id="badge-rfqs" style="display:none"></span></a>
-    <a class="nav-item" href="bidbridge-reseller-my-bids.html"><span class="nav-icon">📋</span> My Bids <span class="nav-badge" id="badge-bids" style="display:none"></span></a>
+    <a class="nav-item" id="nav-mybids" href="bidbridge-reseller-my-bids.html"><span class="nav-icon">📋</span> My Bids <span class="nav-badge" id="badge-bids" style="display:none"></span></a>
     <a class="nav-item active" href="bidbridge-reseller-messages.html"><span class="nav-icon">💬</span> Messages <span class="nav-badge" id="badge-messages" style="display:none"></span></a>
-    <a class="nav-item" href="bidbridge-reseller-dashboard.html#notifications"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge gold" id="notif-badge" style="display:none"></span></a>
+    <a class="nav-item" href="#" onclick="openNotifPanel(); return false;"><span class="nav-icon">🔔</span> Notifications <span class="nav-badge gold" id="notif-badge" style="display:none"></span></a>
 
-    <span class="sidebar-section-label">Account</span>
+    <div class="sidebar-section-label">Account</div>
     <a class="nav-item" href="bidbridge-reseller-profile.html"><span class="nav-icon">👤</span> My Profile</a>
     <a class="nav-item" href="bidbridge-reseller-settings.html"><span class="nav-icon">⚙️</span> Settings</a>
 
@@ -184,7 +184,10 @@
       <!-- Thread list -->
       <div class="msg-thread-list" id="msg-inbox-threads">
         <div class="thread-list-header"><div class="thread-list-title">Conversations</div></div>
-        <div class="msg-thread-empty">Loading…</div>
+        <div class="msg-thread-empty" style="padding:24px 16px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:8px;opacity:0.5;">💬</div>
+          <div style="font-size:12px;color:var(--text-muted);">Loading your conversations…</div>
+        </div>
       </div>
 
       <!-- Conversation pane -->
@@ -246,25 +249,40 @@
     _notifDismissedKey = 'bb_notif_dismissed_' + userId;
     _notifDismissed = JSON.parse(localStorage.getItem(_notifDismissedKey) || '[]');
 
-    const { data: profile } = await _supabase.from('reseller_profiles').select('company, status').eq('id', userId).maybeSingle();
+    // Load profile, vendors, notifications, and bids in parallel — cuts initial load from
+    // 5 sequential round-trips to 1 parallel batch (~5x faster on messages page)
+    const [
+      { data: profile },
+      { data: { user } },
+      { data: myVendors },
+      { data: notifRows },
+      { data: bidRows },
+    ] = await Promise.all([
+      _supabase.from('reseller_profiles').select('company, status, contact_first, contact_last').eq('id', userId).maybeSingle(),
+      _supabase.auth.getUser(),
+      _supabase.from('reseller_vendors').select('vendor, tier').eq('reseller_id', userId).eq('verified', true),
+      _supabase.from('notifications').select('id, type, message, rfq_id, read, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(40),
+      _supabase.from('bids').select('rfq_id, total_price, status').eq('reseller_id', userId),
+    ]);
+
     if (!profile || profile.status !== 'approved') { window.location.href = 'bidbridge-reseller-dashboard.html'; return; }
     document.getElementById('sidebar-company').textContent = profile.company || '—';
 
-    const { data: { user } } = await _supabase.auth.getUser();
     const email = user?.email || '';
-    const avatarEl = document.getElementById('sidebar-avatar'); if (avatarEl) avatarEl.textContent = email.slice(0,2).toUpperCase();
-    const nameEl = document.getElementById('sidebar-name'); if (nameEl) nameEl.textContent = email;
+    const fullName = ((profile.contact_first || '') + ' ' + (profile.contact_last || '')).trim();
+    const initials = fullName
+      ? ((profile.contact_first?.[0] || '') + (profile.contact_last?.[0] || '')).toUpperCase()
+      : (email.slice(0,2).toUpperCase() || '?');
+    const avatarEl = document.getElementById('sidebar-avatar'); if (avatarEl) avatarEl.textContent = initials;
+    const nameEl = document.getElementById('sidebar-name'); if (nameEl) nameEl.textContent = fullName || email;
 
-    const { data: myVendors } = await _supabase.from('reseller_vendors').select('vendor, tier').eq('reseller_id', userId).eq('verified', true);
     const tiersEl = document.getElementById('sidebar-tiers');
     if (tiersEl) tiersEl.textContent = myVendors?.length ? myVendors.length + ' vendor authorization' + (myVendors.length !== 1 ? 's' : '') : 'No vendor authorizations';
 
-    const { data: notifRows } = await _supabase.from('notifications').select('id, type, message, rfq_id, read, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(40);
     _ALL_NOTIFS = notifRows || [];
     updateNotifBadge();
 
-    // Load bids to get rfq titles and buyer IDs
-    const { data: bidRows } = await _supabase.from('bids').select('rfq_id, total_price, status').eq('reseller_id', userId);
+    // Load bids to get rfq titles and buyer IDs (bidRows already loaded above)
     const myRfqIds = [...new Set((bidRows || []).map(b => b.rfq_id))];
 
     if (myRfqIds.length > 0) {

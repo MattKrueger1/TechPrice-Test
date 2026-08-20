@@ -1014,12 +1014,17 @@
       const hasBids = rfq.bids > 0;
       const expandId = 'bids-expand-' + rfq.id;
 
+      // Contextual button label — say "Waiting for bids" when there aren't any yet
+      // instead of the misleading "View bids →"
+      const bidCount = rfq.bidCount || rfq.bid_count || 0;
       const primaryAction = rfq.status === 'review'
         ? `<button class="btn-action btn-compare" onclick="navigateToCompareBids('${rfq.id}')">Compare bids →</button>`
         : rfq.status === 'draft'
         ? `<button class="btn-action btn-compare" onclick="window.location='bidbridge-submit-rfq.html'">Continue editing →</button>`
         : rfq.status === 'active'
-        ? `<button class="btn-action btn-compare" onclick="navigateToCompareBids('${rfq.id}')">View bids →</button>`
+        ? (bidCount === 0
+            ? `<button class="btn-action btn-secondary-action" onclick="navigateToCompareBids('${rfq.id}')">Waiting for bids…</button>`
+            : `<button class="btn-action btn-compare" onclick="navigateToCompareBids('${rfq.id}')">View ${bidCount} bid${bidCount !== 1 ? 's' : ''} →</button>`)
         : `<button class="btn-action btn-secondary-action" onclick="navigateToCompareBids('${rfq.id}')">View results →</button>`;
 
       const vendorList = rfq.vendors.length

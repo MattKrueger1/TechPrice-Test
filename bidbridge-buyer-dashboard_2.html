@@ -1559,6 +1559,7 @@
     const soon = allRFQs.filter(r => r.status === 'active' && r.deadline && (() => {
       const d = new Date(r.deadline + 'T00:00:00'); return (d - today) / 86400000 <= 7 && (d - today) / 86400000 >= 0;
     })());
+    const soonIds = new Set(soon.map(r => r.id));
     soon.forEach(rfq => {
       const days = Math.ceil((new Date(rfq.deadline + 'T00:00:00') - today) / 86400000);
       const urgency = days === 0 ? 'Closes today — last chance for bids' : days === 1 ? 'Closes tomorrow — resellers can still bid' : `Closes in ${days} days on ${new Date(rfq.deadline + 'T00:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'})}`;
@@ -1572,6 +1573,31 @@
           <a class="action-cta cta-ghost" href="bidbridge-compare-bids_1.html?rfq=${rfq.id}">View bids →</a>
         </div>`);
     });
+
+    // Recently-posted active RFQs with 0 bids yet — surface as "waiting for bids" opportunities.
+    // Skips RFQs already flagged as urgent above (soonIds) to avoid duplicates.
+    const waitingForBids = allRFQs.filter(r =>
+      r.status === 'active' && (r.bidCount || 0) === 0 && !soonIds.has(r.id)
+    );
+    if (waitingForBids.length > 0) {
+      // Bundle into a single card so we don't drown the UI with 20+ items
+      const firstTitle = waitingForBids[0].title;
+      const bundleTitle = waitingForBids.length === 1
+        ? `Waiting for first bids on <em>${firstTitle}</em>`
+        : `${waitingForBids.length} RFQs waiting for their first bids`;
+      const sub = waitingForBids.length === 1
+        ? 'Most RFQs receive their first bid within 24 hours.'
+        : `Includes ${firstTitle}${waitingForBids.length > 1 ? ' + ' + (waitingForBids.length - 1) + ' more' : ''}`;
+      actions.push(`
+        <div class="action-card ac-review">
+          <div class="action-card-icon">⏳</div>
+          <div class="action-card-body">
+            <div class="action-card-title">${bundleTitle}</div>
+            <div class="action-card-sub">${sub}</div>
+          </div>
+          <a class="action-cta cta-ghost" href="bidbridge-my-rfqs.html?filter=active">View RFQs →</a>
+        </div>`);
+    }
 
     const totalUnreadMsg = _BUYER_MSG_GROUPS.reduce((s, g) => s + g.totalUnread, 0);
     if (totalUnreadMsg > 0) {

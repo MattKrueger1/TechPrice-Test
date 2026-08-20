@@ -1026,7 +1026,11 @@ if (vendorNames.length > 0) {
           banner.classList.remove('visible');
         }
       } else {
+        // Fresh reseller with 0 bids — still need to render Action Needed + Recent Activity
+        // so their empty states show instead of "Loading activity…" being stuck.
         renderWonLost([], []);
+        renderNeedsAttention();
+        renderRecentActivity([], [], []);
         document.getElementById('new-rfq-banner').classList.remove('visible');
         const elWR = document.getElementById('stat-win-rate'); if (elWR) elWR.textContent = '0%';
         const elWRS = document.getElementById('stat-win-rate-sub'); if (elWRS) elWRS.textContent = '0 of 0 bids won';
@@ -1648,16 +1652,20 @@ if (vendorNames.length > 0) {
       }
     });
 
-    // New RFQs posted (unread new_rfq notifications where reseller hasn't bid yet)
+    // Unbid open RFQs — surface as opportunities.
+    // Use OPEN_RFQS directly (authoritative) rather than notification history (can miss stuff).
     const bidRfqIds = new Set(MY_BIDS.map(function(b) { return b.rfqId; }));
-    const newRfqNotifs = (_ALL_NOTIFS || []).filter(function(n) {
-      return n.type === 'new_rfq' && !n.read && !(_notifDismissed || []).includes(n.id) && !bidRfqIds.has(n.rfq_id);
+    const unbidOpen = (OPEN_RFQS || []).filter(function(r) {
+      return !bidRfqIds.has(r.id) && (r.status === 'active' || r.status === 'open');
     });
-    if (newRfqNotifs.length > 0) {
-      items.push('<div class="attn-item" onclick="window.location.href=\'bidbridge-reseller-open-rfqs.html\'">' +
-        '<span class="attn-icon">📋</span>' +
-        '<div class="attn-text"><strong>' + newRfqNotifs.length + ' new RFQ' + (newRfqNotifs.length !== 1 ? 's' : '') + '</strong> posted for your authorized vendors — ready to bid</div>' +
-        '<span class="attn-cta">View RFQs →</span></div>');
+    if (unbidOpen.length > 0) {
+      const label = unbidOpen.length === 1
+        ? '<strong>1 open opportunity</strong> ready to bid on: <em>' + unbidOpen[0].title + '</em>'
+        : '<strong>' + unbidOpen.length + ' open opportunities</strong> ready to bid on';
+      items.push('<div class="attn-item msg" onclick="window.location.href=\'bidbridge-reseller-open-rfqs.html\'">' +
+        '<span class="attn-icon">💼</span>' +
+        '<div class="attn-text">' + label + '</div>' +
+        '<span class="attn-cta">Browse RFQs →</span></div>');
     }
 
     // Deadlines ≤ 3 days on open bids you haven't submitted
@@ -1672,28 +1680,10 @@ if (vendorNames.length > 0) {
     }
 
     if (items.length === 0) {
-      const openRfqs = OPEN_RFQS.filter(function(r) { return !r.myBid; });
-      const openCount = openRfqs.length;
       const hasBids = MY_BIDS.length > 0;
-
-      // If there are open RFQs matching authorizations, surface them as opportunities
-      if (openCount > 0) {
-        const first = openRfqs[0];
-        const deadline = first.deadline ? ' — closes in ' + daysUntil(first.deadline) + ' day' + (daysUntil(first.deadline) !== 1 ? 's' : '') : '';
-        strip.innerHTML =
-          '<div class="attn-item msg" onclick="window.location.href=\'bidbridge-reseller-open-rfqs.html\'">' +
-            '<span class="attn-icon">💼</span>' +
-            '<div class="attn-text"><strong>' + openCount + ' open opportunit' + (openCount !== 1 ? 'ies' : 'y') + '</strong> ready to bid on' +
-              (first.title ? ' — starting with "' + first.title + '"' + deadline : '') +
-            '</div>' +
-            '<span class="attn-cta">Browse RFQs →</span>' +
-          '</div>';
-        return;
-      }
-
-      // No open RFQs at all — show a helpful message with new-reseller framing
+      // No open RFQs and no bid activity — helpful new-reseller framing
       const message = hasBids
-        ? 'You\'re all caught up — no action needed right now. New RFQs matching your vendors appear here.'
+        ? 'You\'re all caught up — no action needed right now. New RFQs matching your vendors will appear here.'
         : 'No open RFQs match your vendor authorizations yet. New RFQs for your vendors will appear here as buyers post them.';
       strip.innerHTML = '<div class="attn-all-good"><span style="font-size:20px;">✅</span><span>' + message + '</span></div>';
       return;

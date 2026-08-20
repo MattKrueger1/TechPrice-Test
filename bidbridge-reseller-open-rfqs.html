@@ -405,14 +405,29 @@
     updateNotifBadge();
 
     if (vendorNames.length === 0) {
-      document.getElementById('open-rfq-grid').innerHTML = '<div class="empty-state"><h3>No vendor authorizations yet</h3><p>Your authorized vendors will appear here once approved.</p></div>';
+      document.getElementById('open-rfq-grid').innerHTML =
+        '<div class="empty-state" style="padding:64px 24px;">' +
+          '<div style="font-size:44px;margin-bottom:16px;opacity:0.6;">🏢</div>' +
+          '<h3>Add vendors to see RFQs</h3>' +
+          '<p style="max-width:360px;margin:0 auto 20px;">Add the vendors you\'re authorized to sell so we can match you with relevant RFQs. Verification is usually complete within 1–2 business days.</p>' +
+          '<a href="bidbridge-reseller-profile.html" style="display:inline-block;background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">Add my vendors →</a>' +
+        '</div>';
       return;
     }
 
     // RFQ items for these vendors
     const { data: items } = await _supabase.from('rfq_items').select('rfq_id, vendor').in('vendor', vendorNames);
     if (!items?.length) {
-      document.getElementById('open-rfq-grid').innerHTML = '<div class="empty-state"><h3>No open RFQs available</h3><p>There are no open RFQs for your authorized vendors right now. Check back soon.</p></div>';
+      document.getElementById('open-rfq-grid').innerHTML =
+        '<div class="empty-state" style="padding:64px 24px;">' +
+          '<div style="font-size:44px;margin-bottom:16px;opacity:0.6;">🔍</div>' +
+          '<h3>No RFQs match your vendors right now</h3>' +
+          '<p style="max-width:380px;margin:0 auto 20px;">New RFQs are posted daily. You\'ll get a notification the moment a buyer posts an RFQ for one of your authorized vendors.</p>' +
+          '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
+            '<a href="bidbridge-reseller-profile.html" style="background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">Add more vendors →</a>' +
+            '<a href="bidbridge-reseller-settings.html" style="background:var(--surface-alt);color:var(--text);padding:10px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:500;border:1px solid var(--border);">Set up alerts</a>' +
+          '</div>' +
+        '</div>';
       return;
     }
 

@@ -328,8 +328,8 @@ test('7.1 Exec summary page loads for awarded RFQ', async ({ page }) => {
   await signIn(page, BUYER.email, BUYER.password, /buyer-dashboard/);
   await page.goto(`${BASE}/bidbridge-exec-summary.html?rfq=${rfqId}`);
   await page.waitForTimeout(5000);
-  // Page renders either report content (.doc-title) or a valid error state — both indicate it loaded
-  const rendered = await page.locator('.doc-title, .doc-eyebrow, .loading-state, [class*="error"], [class*="empty"]').count();
+  // Page renders either report content (.doc-title) or the improved empty-state h2 with a CTA
+  const rendered = await page.locator('.doc-title, .doc-eyebrow, #doc-wrap h2, #doc-wrap a').count();
   expect(rendered).toBeGreaterThan(0);
 });
 

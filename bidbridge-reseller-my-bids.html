@@ -507,9 +507,44 @@
     const statusMap = { active: 'pending', won: 'won', lost: 'lost', cancelled: 'cancelled' };
     const filtered = MY_BIDS.filter(b => b.status === statusMap[_currentTab]);
     if (!filtered.length) {
-      const labels = { active: 'active bids', won: 'won bids', lost: 'lost bids', cancelled: 'cancelled bids' };
-      list.innerHTML = '<div class="empty-state"><h3>No ' + labels[_currentTab] + '</h3>' +
-        (_currentTab === 'active' ? '<p>Submit a bid on an open RFQ to see it here.</p><a href="bidbridge-reseller-open-rfqs.html" class="empty-cta">Browse open RFQs →</a>' : '') +
+      const activeCount = MY_BIDS.filter(b => b.status === 'pending').length;
+      const emptyStates = {
+        active: {
+          icon: '📋',
+          title: 'No active bids yet',
+          desc: 'Submit a bid on an open RFQ to see it here. Most bids receive a response within 24 hours.',
+          cta: { href: 'bidbridge-reseller-open-rfqs.html', label: 'Browse open RFQs →' }
+        },
+        won: {
+          icon: '🏆',
+          title: 'Your wins will appear here',
+          desc: activeCount > 0
+            ? 'You have ' + activeCount + ' active bid' + (activeCount !== 1 ? 's' : '') + ' — keep bidding to increase your win rate.'
+            : 'Start bidding to unlock your first win. Resellers with 3+ bids see the strongest win rates.',
+          cta: activeCount > 0
+            ? { href: '#', label: 'View active bids →', onclick: "setTab('active')" }
+            : { href: 'bidbridge-reseller-open-rfqs.html', label: 'Browse open RFQs →' }
+        },
+        lost: {
+          icon: '📊',
+          title: 'No lost bids',
+          desc: 'You haven\'t lost any bids yet — keep it up! Losses will appear here so you can learn from each one.',
+          cta: null
+        },
+        cancelled: {
+          icon: '🚫',
+          title: 'No cancelled bids',
+          desc: 'RFQs cancelled by buyers before award will appear here.',
+          cta: null
+        }
+      };
+      const s = emptyStates[_currentTab] || emptyStates.active;
+      list.innerHTML =
+        '<div class="empty-state" style="padding:64px 24px;">' +
+          '<div style="font-size:44px;margin-bottom:16px;opacity:0.6;">' + s.icon + '</div>' +
+          '<h3>' + s.title + '</h3>' +
+          '<p style="margin-bottom:20px;">' + s.desc + '</p>' +
+          (s.cta ? '<a href="' + s.cta.href + '" ' + (s.cta.onclick ? 'onclick="event.preventDefault();' + s.cta.onclick + '"' : '') + ' class="empty-cta" style="display:inline-block;background:var(--accent);color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">' + s.cta.label + '</a>' : '') +
         '</div>';
       return;
     }

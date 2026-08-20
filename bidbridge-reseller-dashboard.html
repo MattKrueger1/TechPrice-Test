@@ -1652,11 +1652,30 @@ if (vendorNames.length > 0) {
     }
 
     if (items.length === 0) {
-      const openCount = OPEN_RFQS.filter(function(r) { return !r.myBid; }).length;
-      const cta = openCount > 0
-        ? '<a href="bidbridge-reseller-open-rfqs.html" style="margin-left:12px;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;">Browse ' + openCount + ' open RFQ' + (openCount !== 1 ? 's' : '') + ' →</a>'
-        : '';
-      strip.innerHTML = '<div class="attn-all-good"><span style="font-size:20px;">✅</span><span>You\'re all caught up — no action needed right now.' + cta + '</span></div>';
+      const openRfqs = OPEN_RFQS.filter(function(r) { return !r.myBid; });
+      const openCount = openRfqs.length;
+      const hasBids = MY_BIDS.length > 0;
+
+      // If there are open RFQs matching authorizations, surface them as opportunities
+      if (openCount > 0) {
+        const first = openRfqs[0];
+        const deadline = first.deadline ? ' — closes in ' + daysUntil(first.deadline) + ' day' + (daysUntil(first.deadline) !== 1 ? 's' : '') : '';
+        strip.innerHTML =
+          '<div class="attn-item msg" onclick="window.location.href=\'bidbridge-reseller-open-rfqs.html\'">' +
+            '<span class="attn-icon">💼</span>' +
+            '<div class="attn-text"><strong>' + openCount + ' open opportunit' + (openCount !== 1 ? 'ies' : 'y') + '</strong> ready to bid on' +
+              (first.title ? ' — starting with "' + first.title + '"' + deadline : '') +
+            '</div>' +
+            '<span class="attn-cta">Browse RFQs →</span>' +
+          '</div>';
+        return;
+      }
+
+      // No open RFQs at all — show a helpful message with new-reseller framing
+      const message = hasBids
+        ? 'You\'re all caught up — no action needed right now. New RFQs matching your vendors appear here.'
+        : 'No open RFQs match your vendor authorizations yet. New RFQs for your vendors will appear here as buyers post them.';
+      strip.innerHTML = '<div class="attn-all-good"><span style="font-size:20px;">✅</span><span>' + message + '</span></div>';
       return;
     }
     const visible = items.slice(0, 5);

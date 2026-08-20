@@ -334,7 +334,15 @@
     if (!listEl) return;
     const header = '<div class="thread-list-header"><div class="thread-list-title">Conversations</div></div>';
     if (_MSG_THREADS.length === 0) {
-      listEl.innerHTML = header + '<div class="msg-thread-empty">No conversations yet.<br><span style="font-size:12px;">Use the Message button on your active bids to start a conversation.</span></div>';
+      listEl.innerHTML = header +
+        '<div class="msg-thread-empty" style="padding:40px 20px;">' +
+          '<div style="font-size:36px;margin-bottom:12px;opacity:0.6;">💬</div>' +
+          '<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;">No conversations yet</div>' +
+          '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">' +
+            'Buyer messages appear here after you submit a bid. Start by browsing open RFQs.' +
+          '</div>' +
+          '<a href="bidbridge-reseller-open-rfqs.html" style="display:inline-block;background:var(--accent);color:#fff;padding:8px 16px;border-radius:7px;text-decoration:none;font-size:12px;font-weight:600;">Browse open RFQs →</a>' +
+        '</div>';
       return;
     }
     listEl.innerHTML = header + _MSG_THREADS.map(function(t) {
@@ -505,7 +513,23 @@
   (async () => {
     const { data: { session } } = await _supabase.auth.getSession();
     if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
-    await loadPage(session);
+
+    // Safety net: if loadPage errors, replace loading spinner with a retry state
+    // instead of leaving the user staring at "Loading…" forever
+    try {
+      await loadPage(session);
+    } catch (err) {
+      console.error('Failed to load messages:', err);
+      const list = document.getElementById('msg-inbox-threads');
+      if (list) {
+        list.innerHTML = '<div class="thread-list-header"><div class="thread-list-title">Conversations</div></div>' +
+          '<div class="msg-thread-empty" style="padding:32px 16px;">' +
+            '<div style="font-size:28px;margin-bottom:10px;">⚠️</div>' +
+            '<div style="font-size:13px;color:var(--text);margin-bottom:12px;">Couldn\'t load conversations</div>' +
+            '<button onclick="window.location.reload()" style="background:var(--accent);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Retry</button>' +
+          '</div>';
+      }
+    }
   })();
 </script>
 </body>

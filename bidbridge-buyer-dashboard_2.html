@@ -1587,7 +1587,19 @@
     }
 
     if (actions.length === 0) {
-      container.innerHTML = '<div class="action-catchup"><span>✓</span> You\'re all caught up — no action needed right now.</div>';
+      // Check if user has any RFQs at all — if not, show a first-time onboarding prompt
+      const hasAnyRfq = (typeof MY_RFQS !== 'undefined' && MY_RFQS.length > 0);
+      if (!hasAnyRfq) {
+        container.innerHTML =
+          '<div style="padding:24px;background:var(--surface-alt);border:1px dashed var(--border-mid);border-radius:12px;text-align:center;">' +
+            '<div style="font-size:32px;margin-bottom:10px;">👋</div>' +
+            '<div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;">Welcome! Ready to get competing quotes?</div>' +
+            '<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Post your first RFQ (Request for Quote) and authorized resellers will start submitting bids within 24 hours.</div>' +
+            '<a href="bidbridge-submit-rfq_2.html" style="display:inline-block;background:var(--accent);color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">Post your first RFQ →</a>' +
+          '</div>';
+      } else {
+        container.innerHTML = '<div class="action-catchup"><span>✓</span> You\'re all caught up — no action needed right now.</div>';
+      }
     } else {
       const PREVIEW = 3;
       const visible = actions.slice(0, PREVIEW);

@@ -34,7 +34,8 @@ const BUYER     = { email: 'mattkrueger@comcast.net', id: '46ea832d-5c57-4570-95
 const RESELLER1 = { email: 'mk@comcast.net',          id: 'ad52644c-96d8-4936-a5a5-8c82c1c56851', vendors: ['Cisco', 'Dell Technologies', 'Palo Alto Networks'] };
 const RESELLER2 = { email: 'mk2@comcast.net',         id: 'c7961587-bbc5-411a-bd86-40f4f3f61076', vendors: ['Dell Technologies'] };
 
-const SCALE_PREFIX = '[SCALE] ';
+const SCALE_MARKER = 'Scale test — auto-generated for performance and volume testing.';
+const SCALE_PREFIX = ''; // Kept for backward-compat with existing helper calls; new rows use notes-based marker
 
 // Vendor pool: mix of what resellers ARE authorized for + some they aren't
 const AUTHORIZED_VENDORS   = ['Cisco', 'Dell Technologies', 'Palo Alto Networks'];
@@ -53,28 +54,98 @@ const SKUS = {
   'Lenovo':              ['SR650-V3',    'SR630-V3',   'ST250-V2',      'M90n-Nano'],
 };
 
+// Realistic, varied RFQ titles that mimic how procurement managers actually name their requests
 const RFQ_TITLES = [
-  'Network switch refresh',
-  'Data center server procurement',
-  'Firewall upgrade',
-  'Wireless infrastructure buildout',
-  'Storage array expansion',
-  'Branch office network refresh',
-  'Campus fabric modernization',
-  'SD-WAN deployment hardware',
-  'End-user compute refresh',
-  'Server consolidation',
-  'Virtual desktop infrastructure',
-  'DR site hardware',
-  'Edge networking rollout',
-  'Cloud gateway hardware',
-  'Cybersecurity infrastructure',
-  'IoT gateway deployment',
-  'Video conferencing hardware',
-  'Backup infrastructure upgrade',
+  // Refresh / upgrade projects
+  'Q3 network switch refresh — HQ campus',
+  'Aging server fleet replacement — 40 units',
+  'Perimeter firewall replacement — end of life',
+  'Wireless AP refresh — retail locations',
+  'Enterprise storage array — capacity expansion',
+  // Buildouts / rollouts
+  'New office buildout — Denver location',
+  'Manufacturing plant network — greenfield',
+  'Warehouse WiFi deployment — 6 sites',
+  'Branch network standardization initiative',
+  'Retail POS network refresh — 22 stores',
+  // Modernization
+  'Campus fabric modernization — VXLAN migration',
+  'SD-WAN pilot — 12 branch offices',
+  'Zero-trust access rollout — hardware phase',
+  'Data center refresh — hyperconverged migration',
+  'Legacy PBX to VoIP migration hardware',
+  // Compute
+  'Executive laptop refresh — leadership team',
+  'Engineering workstation upgrade — 60 seats',
+  'Virtual desktop hardware — call center',
+  'Server consolidation — 3:1 ratio target',
+  'Blade chassis expansion — Q4 growth',
+  // DR / continuity
+  'DR site infrastructure — active-active setup',
+  'Off-site backup appliance refresh',
+  'Cold site standby hardware',
+  'Ransomware recovery hardware — air-gap',
+  // Networking specialty
+  'Edge networking rollout — retail IoT',
+  'Cloud on-ramp gateway — Azure ExpressRoute',
+  'Multi-cloud interconnect hardware',
+  'SASE hardware refresh — remote workers',
+  // Security
+  'Perimeter security refresh — next-gen firewalls',
+  'Endpoint security appliance rollout',
+  'Network segmentation — micro-segmentation gear',
+  'DDoS mitigation appliance',
+  // Collab / IoT
+  'Conference room AV standardization',
+  'IoT gateway deployment — smart building',
+  'Video wall hardware — NOC',
+  'Digital signage rollout — 40 displays',
+  // Renewals
+  'Annual license renewal + hardware bundle',
+  'Support contract renewal with fresh hardware',
+  'End-of-life gear replacement — SKU list attached',
+  'Emergency replacement — failed core switch',
+  // Fun edge cases
+  'M&A integration — connect new subsidiary',
+  'CMMC compliance — segregated network gear',
+  'HIPAA-compliant network refresh — clinic sites',
 ];
 
-const LOCATIONS = ['Austin, TX', 'Chicago, IL', 'New York, NY', 'San Francisco, CA', 'Denver, CO', 'Atlanta, GA', 'Seattle, WA', 'Boston, MA'];
+const LOCATIONS = [
+  'Austin, TX', 'Chicago, IL', 'New York, NY', 'San Francisco, CA', 'Denver, CO',
+  'Atlanta, GA', 'Seattle, WA', 'Boston, MA', 'Miami, FL', 'Dallas, TX',
+  'Portland, OR', 'Phoenix, AZ', 'Nashville, TN', 'Minneapolis, MN', 'Charlotte, NC',
+];
+
+// Message templates for realistic buyer/reseller conversations
+const BUYER_QUESTIONS = [
+  'Hi — quick question on your bid, do you have stock available for the timeline in the RFQ?',
+  'Are the units in the bid new-in-box or refurbished? Need to confirm before I take this to my CFO.',
+  'Can you break down the warranty terms and NBD replacement coverage on this bid?',
+  'What are the lead times looking like for delivery to our Denver DC?',
+  'The unit pricing looks strong. Can you also provide install/rack-and-stack quoting?',
+  'Would you consider a small discount if we increase the qty by 15%? We may need more units.',
+  'Do these ship with the latest firmware? We need at least IOS-XE 17.9.',
+  'Can you attach the reseller authorization letter from the vendor for our records?',
+  'Payment terms — are you flexible on net-45 vs net-30?',
+  'Delivery to a bonded warehouse works? We need customs handling.',
+  'Just checking — can you commit to the deadline listed in the RFQ?',
+];
+
+const RESELLER_REPLIES = [
+  'Yes, all units are in stock at our regional DC and can ship next-day. Happy to jump on a call.',
+  'All units are brand new in factory-sealed boxes. Serial numbers documented at shipment.',
+  'Full manufacturer warranty (3 years standard) plus we can add SmartNet 24x7x4 as an option.',
+  'Lead time to Denver is 2 business days from PO acceptance. Free freight over $10K.',
+  'Absolutely — I\'ll get you a full deployment services quote by EOD. Rack-and-stack is a common add.',
+  'Yes, we can offer a 4% volume discount at 15+ additional units. Let me update the bid.',
+  'Ships with the current shipping-code firmware. We can pre-stage 17.9 before delivery if needed.',
+  'No problem — sending vendor authorization + our platinum-tier certification separately.',
+  'Net-45 works for orders over $50K. I can confirm in writing once we have PO in hand.',
+  'Yes, we\'ve delivered to bonded facilities before. I\'ll loop in our logistics team.',
+  'Committed. We have inventory reserved and a delivery slot booked. You\'re good.',
+  'Great question — let me confirm with our sourcing team and circle back this afternoon.',
+];
 
 test.setTimeout(600000);
 
@@ -137,12 +208,22 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
   // ── Build the 50 RFQs with a realistic mix ────────────────────────────
   const rfqPlans = [];
 
+  // Track titles used so we get distinct ones across all 45 authorized RFQs
+  const usedTitles = new Set();
+  function uniqueTitle() {
+    const available = RFQ_TITLES.filter(t => !usedTitles.has(t));
+    const pool = available.length > 0 ? available : RFQ_TITLES;
+    const t = pick(pool);
+    usedTitles.add(t);
+    return t;
+  }
+
   // 20 sole-source RFQs
   for (let i = 0; i < 20; i++) {
     const vendor = pick(ALL_VENDORS);
     const status = pick(['active', 'active', 'active', 'review', 'awarded', 'closed', 'cancelled']);
     rfqPlans.push({
-      title:    `${SCALE_PREFIX}${pick(RFQ_TITLES)} — ${vendor}`,
+      title:    uniqueTitle(),
       strategy: 'sole',
       vendors:  [vendor],
       status,
@@ -157,7 +238,7 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
     const vendors    = pickN(ALL_VENDORS, numVendors);
     const status     = pick(['active', 'active', 'active', 'review', 'awarded']);
     rfqPlans.push({
-      title:    `${SCALE_PREFIX}${pick(RFQ_TITLES)} — Multi-vendor (${vendors.length})`,
+      title:    uniqueTitle(),
       strategy: 'split',
       vendors,
       status,
@@ -167,12 +248,13 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
   }
 
   // 5 RFQs with vendors NEITHER test reseller is authorized for
-  // These MUST NOT appear on either reseller's dashboard (filter validation)
+  // These MUST NOT appear on either reseller's dashboard (filter validation).
+  // Keep prefix on THESE so tests can grep for them by name.
   for (let i = 0; i < 5; i++) {
     const numVendors = 1 + Math.floor(Math.random() * 2);
     const vendors    = pickN(UNAUTHORIZED_VENDORS, numVendors);
     rfqPlans.push({
-      title:    `${SCALE_PREFIX}FILTER-TEST — ${vendors.join(' + ')} (should not appear)`,
+      title:    `FILTER-TEST — ${uniqueTitle()}`,
       strategy: numVendors > 1 ? 'split' : 'sole',
       vendors,
       status:   'active',
@@ -291,7 +373,7 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
         sender_id: BUYER.id,
         recipient_id: talker.id,
         sender_role: 'buyer',
-        content: 'Hi — quick question on your bid, do you have stock available for the timeline in the RFQ?',
+        content: pick(BUYER_QUESTIONS),
         is_broadcast: false,
       });
       await restPost('messages', {
@@ -299,16 +381,21 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
         sender_id: talker.id,
         recipient_id: BUYER.id,
         sender_role: 'reseller',
-        content: 'Yes, we have all units in stock and can ship next-day. Happy to jump on a call.',
+        content: pick(RESELLER_REPLIES),
         is_broadcast: false,
       });
       stats.messagesCreated += 2;
 
-      // Notify buyer of the reply
+      // Notify buyer of the reply — varied wording so a scrollable list doesn't look duplicated
+      const buyerMsgTemplates = [
+        `New reply from reseller on "${plan.title.replace(SCALE_PREFIX, '')}"`,
+        `Reseller responded to your question on "${plan.title.replace(SCALE_PREFIX, '')}"`,
+        `Message received — "${plan.title.replace(SCALE_PREFIX, '')}"`,
+      ];
       await restPost('notifications', {
         user_id: BUYER.id,
         type: 'new_message',
-        message: `New message on "${plan.title.replace(SCALE_PREFIX, '')}"`,
+        message: pick(buyerMsgTemplates),
         rfq_id: plan.rfqId,
         read: false,
       });
@@ -317,11 +404,16 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
 
     // ── Seed new_rfq notifications for authorized resellers ─────────────
     if (plan.status === 'active') {
+      const rfqNotifTemplates = [
+        title => `New RFQ posted: "${title}"`,
+        title => `Bid opportunity — "${title}"`,
+        title => `RFQ available for your authorized vendors: "${title}"`,
+      ];
       if (r1Overlap.length > 0) {
         await restPost('notifications', {
           user_id: RESELLER1.id,
           type: 'new_rfq',
-          message: `New RFQ: ${plan.title.replace(SCALE_PREFIX, '')}`,
+          message: pick(rfqNotifTemplates)(plan.title.replace(SCALE_PREFIX, '')),
           rfq_id: plan.rfqId,
           read: Math.random() < 0.4,
         });
@@ -331,7 +423,7 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
         await restPost('notifications', {
           user_id: RESELLER2.id,
           type: 'new_rfq',
-          message: `New RFQ: ${plan.title.replace(SCALE_PREFIX, '')}`,
+          message: pick(rfqNotifTemplates)(plan.title.replace(SCALE_PREFIX, '')),
           rfq_id: plan.rfqId,
           read: Math.random() < 0.4,
         });
@@ -339,12 +431,17 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
       }
     }
 
-    // Award notifications
+    // Award notifications — varied for realism
     if (plan.status === 'awarded' && plan.r1BidId) {
+      const wonTemplates = [
+        title => `🏆 You won: ${title}`,
+        title => `Bid selected — ${title}`,
+        title => `Congratulations! Awarded ${title}`,
+      ];
       await restPost('notifications', {
         user_id: RESELLER1.id,
         type: 'bid_won',
-        message: `You won: ${plan.title.replace(SCALE_PREFIX, '')}`,
+        message: pick(wonTemplates)(plan.title.replace(SCALE_PREFIX, '')),
         rfq_id: plan.rfqId,
         read: false,
       });

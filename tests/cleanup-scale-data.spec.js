@@ -1,6 +1,7 @@
 /**
  * CLEANUP SCALE DATA
- * Removes everything created by seed-scale-data.spec.js (rows tagged "[SCALE] ").
+ * Removes everything created by seed-scale-data.spec.js.
+ * Identifies seeded rows by the exact notes-field marker (set by the seeder).
  *
  * Usage:
  *   export SUPABASE_SERVICE_KEY="..."
@@ -9,9 +10,10 @@
 
 const { test } = require('@playwright/test');
 
-const SUPABASE_URL = 'https://kgejpzjoiewrgwzixcaa.supabase.co';
-const SERVICE_KEY  = process.env.SUPABASE_SERVICE_KEY || '';
-const SCALE_PREFIX = '[SCALE]%20';  // URL-encoded
+const SUPABASE_URL  = 'https://kgejpzjoiewrgwzixcaa.supabase.co';
+const SERVICE_KEY   = process.env.SUPABASE_SERVICE_KEY || '';
+// Match on notes field: seed script writes this exact marker into every seeded RFQ
+const SCALE_MARKER  = 'Scale test — auto-generated for performance and volume testing.';
 
 test.setTimeout(120000);
 
@@ -23,8 +25,9 @@ test('Cleanup scale test data', async () => {
     'Prefer': 'return=representation',
   };
 
-  // Get all RFQ IDs matching the scale prefix
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/rfqs?title=like.${SCALE_PREFIX}*&select=id,title`, { headers });
+  // Get all RFQ IDs whose notes match the scale marker
+  const notesFilter = encodeURIComponent('eq.' + SCALE_MARKER);
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rfqs?notes=${notesFilter}&select=id,title`, { headers });
   const rfqs = await res.json();
   console.log(`\n🧹 Found ${rfqs.length} scale test RFQs to remove\n`);
 

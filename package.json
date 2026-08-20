@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/MattKrueger1/TechPrice-Test#readme",
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@playwright/test": "^1.59.1"
   }
 }

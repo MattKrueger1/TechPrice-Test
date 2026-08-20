@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidBridge — Reseller (v2 prototype)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #F7F8FA;
+    --surface:   #FFFFFF;
+    --border:    #E2E5EA;
+    --border-dk: #CDD1D8;
+    --text:      #111827;
+    --text-2:    #4B5563;
+    --text-3:    #9CA3AF;
+    --accent:    #2563EB;
+    --accent-lt: #EFF6FF;
+    --green:     #16A34A;
+    --green-lt:  #F0FDF4;
+    --red:       #DC2626;
+    --red-lt:    #FEF2F2;
+    --amber:     #D97706;
+    --amber-lt:  #FFFBEB;
+    --font:      'Inter', sans-serif;
+    --radius:    6px;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 20px; gap: 16px;
+  }
+  .topbar-logo { font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: -0.3px; }
+  .topbar-divider { width: 1px; height: 20px; background: var(--border); }
+  .topbar-company { font-size: 13px; color: var(--text-2); font-weight: 500; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .topbar-user { font-size: 13px; color: var(--text-2); }
+  .btn-logout {
+    font-size: 12px; color: var(--text-3); border: 1px solid var(--border);
+    background: none; border-radius: var(--radius); padding: 4px 10px; cursor: pointer;
+  }
+  .btn-logout:hover { color: var(--text); border-color: var(--border-dk); }
+
+  /* ── MAIN LAYOUT ── */
+  .layout {
+    display: flex;
+    height: 100vh;
+    padding-top: 48px;
+  }
+
+  /* ── LEFT PANE ── */
+  .left-pane {
+    width: 300px;
+    min-width: 260px;
+    max-width: 340px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pane-section {
+    flex-shrink: 0;
+  }
+
+  .pane-section-header {
+    padding: 12px 16px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pane-count {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0 7px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-2);
+    line-height: 18px;
+  }
+
+  .pane-list {
+    overflow-y: auto;
+  }
+
+  .rfq-row {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .rfq-row:hover { background: var(--bg); }
+  .rfq-row.selected { background: var(--accent-lt); border-left: 3px solid var(--accent); padding-left: 13px; }
+  .rfq-row.selected .rfq-row-title { color: var(--accent); font-weight: 600; }
+
+  .rfq-row-body { flex: 1; min-width: 0; }
+  .rfq-row-title { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rfq-row-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .rfq-row-badges { margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 16px;
+  }
+  .badge-vendor { background: var(--accent-lt); color: var(--accent); border: 1px solid rgba(37,99,235,0.15); }
+  .badge-new { background: #FEF9C3; color: #854D0E; border: 1px solid #FDE68A; }
+
+  .bid-row {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.1s;
+  }
+  .bid-row:hover { background: var(--bg); }
+  .bid-row.selected { background: var(--accent-lt); border-left: 3px solid var(--accent); padding-left: 13px; }
+
+  .bid-row-body { flex: 1; min-width: 0; }
+  .bid-row-title { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bid-row-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .status-pending { background: var(--amber); }
+  .status-won { background: var(--green); }
+  .status-lost { background: var(--red); }
+
+  .status-label {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .status-label.won { background: var(--green-lt); color: var(--green); }
+  .status-label.lost { background: var(--red-lt); color: var(--red); }
+  .status-label.pending { background: var(--amber-lt); color: var(--amber); }
+
+  /* ── RIGHT PANE ── */
+  .right-pane {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  .right-empty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    gap: 8px;
+  }
+  .right-empty svg { opacity: 0.3; }
+  .right-empty p { font-size: 14px; }
+
+  /* ── BID FORM ── */
+  .detail-pane {
+    padding: 24px 28px;
+    max-width: 820px;
+  }
+
+  .detail-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .detail-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .meta-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .meta-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* bid form already submitted state */
+  .already-bid-banner {
+    background: var(--green-lt);
+    border: 1px solid #86EFAC;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* SKU table */
+  .sku-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .sku-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .sku-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sku-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .sku-table tr:last-child td { border-bottom: none; }
+
+  .sku-table td.vendor-cell {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .price-input {
+    width: 120px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 0.15s;
+  }
+  .price-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .price-input::placeholder { color: var(--text-3); }
+
+  .line-total { font-size: 13px; color: var(--text-2); text-align: right; min-width: 80px; }
+
+  /* form footer */
+  .form-footer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .notes-area {
+    flex: 1;
+  }
+
+  .notes-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--bg);
+    resize: vertical;
+    min-height: 60px;
+  }
+  .notes-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .notes-label { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+
+  .submit-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .total-display {
+    text-align: right;
+  }
+  .total-label { font-size: 11px; color: var(--text-3); }
+  .total-value { font-size: 22px; font-weight: 700; color: var(--text); }
+
+  .auth-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .auth-check input { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+
+  .btn-submit {
+    padding: 9px 22px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .btn-submit:hover:not(:disabled) { background: #1D4ED8; }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── WON / READ-ONLY view ── */
+  .won-banner {
+    background: var(--green-lt);
+    border: 1px solid #86EFAC;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .won-banner-icon { font-size: 22px; }
+  .won-banner-text { }
+  .won-banner-title { font-size: 14px; font-weight: 600; color: var(--green); }
+  .won-banner-sub { font-size: 12px; color: #15803D; margin-top: 2px; }
+
+  .lost-banner {
+    background: var(--red-lt);
+    border: 1px solid #FCA5A5;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .lost-banner-title { font-size: 14px; font-weight: 600; color: var(--red); }
+  .lost-banner-sub { font-size: 12px; color: #B91C1C; margin-top: 2px; }
+
+  .read-only-price td { color: var(--text-2); }
+
+  .submitted-total {
+    text-align: right;
+    padding: 12px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .submitted-total span { font-size: 12px; font-weight: 400; color: var(--text-3); margin-right: 6px; }
+
+  /* ── SUCCESS ── */
+  .success-pane {
+    padding: 40px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .success-icon { font-size: 40px; }
+  .success-title { font-size: 18px; font-weight: 700; color: var(--green); }
+  .success-sub { font-size: 14px; color: var(--text-2); }
+
+  /* ── EMPTY STATE ── */
+  .empty-list {
+    padding: 20px 16px;
+    font-size: 13px;
+    color: var(--text-3);
+    text-align: center;
+  }
+
+  /* ── LOADING ── */
+  .loading-row {
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+
+  /* ── SECTION SCROLL AREAS ── */
+  .scroll-section {
+    overflow-y: auto;
+  }
+
+  .left-pane-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .rfq-section {
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .bids-section {
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    border-top: 1px solid var(--border-dk);
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">BidBridge</div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-company" id="tb-company">Loading…</div>
+  <div class="topbar-right">
+    <div class="topbar-user" id="tb-user"></div>
+    <button class="btn-logout" onclick="handleLogout()">Sign out</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT PANE -->
+  <div class="left-pane">
+    <div class="left-pane-inner">
+
+      <!-- Open RFQs -->
+      <div class="rfq-section">
+        <div class="pane-section-header">
+          Open RFQs
+          <span class="pane-count" id="rfq-count">—</span>
+        </div>
+        <div class="pane-list scroll-section" id="rfq-list">
+          <div class="loading-row">Loading…</div>
+        </div>
+      </div>
+
+      <!-- My Bids -->
+      <div class="bids-section">
+        <div class="pane-section-header">
+          My Bids
+          <span class="pane-count" id="bids-count">—</span>
+        </div>
+        <div class="pane-list scroll-section" id="bids-list">
+          <div class="loading-row">Loading…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT PANE -->
+  <div class="right-pane" id="right-pane">
+    <div class="right-empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      <p>Select an RFQ to quote, or view a past bid</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(async function() {
+
+  // ── SUPABASE INIT ──
+  const { createClient } = supabase;
+  const _sb = createClient(
+    'https://kgejpzjoiewrgwzixcaa.supabase.co',
+    'sb_publishable_LMMf6U9Zg5qX5Buavl1hCA_NEVNRLSy'
+  );
+
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+  const userId = session.user.id;
+
+  // ── LOAD PROFILE ──
+  const { data: profile } = await _sb.from('reseller_profiles').select('company_name').eq('user_id', userId).single();
+  const { data: authUser } = await _sb.auth.getUser();
+  document.getElementById('tb-company').textContent = profile?.company_name || 'Your Company';
+  document.getElementById('tb-user').textContent = authUser?.user?.email || '';
+
+  // ── LOAD VENDOR AUTHORIZATIONS ──
+  const { data: myVendors } = await _sb.from('reseller_vendors').select('vendor, tier').eq('user_id', userId);
+  const myVendorNames = (myVendors || []).map(v => v.vendor);
+
+  // ── LOAD OPEN RFQs ──
+  let OPEN_RFQS = [];
+  let MY_BIDS = [];
+  let ALL_RFQS = {}; // id → rfq row (for bid display)
+
+  async function loadAll() {
+    // RFQs with my vendors
+    let rfqItems = [];
+    if (myVendorNames.length > 0) {
+      const { data: items } = await _sb.from('rfq_items').select('rfq_id, vendor, part_number, quantity, description').in('vendor', myVendorNames);
+      rfqItems = items || [];
+    }
+
+    const rfqIds = [...new Set(rfqItems.map(i => i.rfq_id))];
+    let rfqRows = [];
+    if (rfqIds.length > 0) {
+      const { data: rows } = await _sb.from('rfqs').select('id, title, status, strategy, vendor_awards, deadline, hq_location, created_at, buyer_id').in('id', rfqIds);
+      rfqRows = rows || [];
+    }
+
+    // Map items by rfq_id
+    const itemsByRfq = {};
+    rfqItems.forEach(i => {
+      if (!itemsByRfq[i.rfq_id]) itemsByRfq[i.rfq_id] = [];
+      itemsByRfq[i.rfq_id].push(i);
+    });
+
+    rfqRows.forEach(r => { ALL_RFQS[r.id] = Object.assign({}, r, { items: itemsByRfq[r.id] || [] }); });
+
+    OPEN_RFQS = rfqRows
+      .filter(r => r.status === 'active' || r.status === 'open')
+      .sort((a, b) => new Date(a.deadline || '9999') - new Date(b.deadline || '9999'));
+
+    // My bids — include all
+    const { data: bidRows } = await _sb.from('bids').select('id, rfq_id, total_price, status, notes, line_items, created_at').eq('reseller_id', userId).order('created_at', { ascending: false });
+
+    // Fetch any RFQs not yet in ALL_RFQS
+    const missingIds = (bidRows || []).map(b => b.rfq_id).filter(id => !ALL_RFQS[id]);
+    const uniqueMissing = [...new Set(missingIds)];
+    if (uniqueMissing.length > 0) {
+      const { data: extraRfqs } = await _sb.from('rfqs').select('id, title, status, strategy, vendor_awards, deadline, hq_location').in('id', uniqueMissing);
+      (extraRfqs || []).forEach(r => { ALL_RFQS[r.id] = Object.assign({}, r, { items: [] }); });
+    }
+
+    MY_BIDS = (bidRows || []).map(b => {
+      const rfq = ALL_RFQS[b.rfq_id];
+      let status = b.status;
+      if (rfq?.strategy === 'split' && rfq?.vendor_awards) {
+        const awarded = Object.values(rfq.vendor_awards).includes(b.id);
+        const decided = rfq.status === 'awarded' || rfq.status === 'closed';
+        status = awarded ? 'won' : decided ? 'lost' : 'pending';
+      } else if (b.status === 'accepted') {
+        status = 'won';
+      } else if (b.status === 'rejected') {
+        status = 'lost';
+      }
+      return Object.assign({}, b, { rfqTitle: rfq?.title || 'RFQ', derivedStatus: status });
+    });
+
+    renderRfqList();
+    renderBidsList();
+  }
+
+  function renderRfqList() {
+    const el = document.getElementById('rfq-list');
+    document.getElementById('rfq-count').textContent = OPEN_RFQS.length;
+    if (!OPEN_RFQS.length) {
+      el.innerHTML = '<div class="empty-list">No open RFQs right now</div>';
+      return;
+    }
+    el.innerHTML = OPEN_RFQS.map(r => {
+      const vendors = [...new Set((r.items || []).map(i => i.vendor))];
+      const dueDate = r.deadline ? new Date(r.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+      const isNew = r.created_at && (Date.now() - new Date(r.created_at)) < 2 * 86400000;
+      return `<div class="rfq-row" data-id="${r.id}" onclick="selectRfq('${r.id}')">
+        <div class="rfq-row-body">
+          <div class="rfq-row-title">${esc(r.title || 'Untitled RFQ')}</div>
+          <div class="rfq-row-meta">Due ${dueDate} · ${r.strategy === 'split' ? 'Split bid' : 'Sole source'}</div>
+          <div class="rfq-row-badges">
+            ${vendors.map(v => `<span class="badge badge-vendor">${esc(v)}</span>`).join('')}
+            ${isNew ? '<span class="badge badge-new">New</span>' : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderBidsList() {
+    const el = document.getElementById('bids-list');
+    document.getElementById('bids-count').textContent = MY_BIDS.length;
+    if (!MY_BIDS.length) {
+      el.innerHTML = '<div class="empty-list">No bids submitted yet</div>';
+      return;
+    }
+    el.innerHTML = MY_BIDS.map(b => {
+      const price = b.total_price ? '$' + Number(b.total_price).toLocaleString() : '—';
+      const labelClass = b.derivedStatus === 'won' ? 'won' : b.derivedStatus === 'lost' ? 'lost' : 'pending';
+      const labelText = b.derivedStatus === 'won' ? 'Won' : b.derivedStatus === 'lost' ? 'Lost' : 'Pending';
+      return `<div class="bid-row" data-bid="${b.id}" onclick="selectBid('${b.id}')">
+        <div class="status-dot status-${b.derivedStatus}"></div>
+        <div class="bid-row-body">
+          <div class="bid-row-title">${esc(b.rfqTitle)}</div>
+          <div class="bid-row-sub">${price}</div>
+        </div>
+        <span class="status-label ${labelClass}">${labelText}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── SELECT RFQ → show bid form ──
+  let selectedRfqId = null;
+
+  function selectRfq(rfqId) {
+    selectedRfqId = rfqId;
+    // Update selection highlight
+    document.querySelectorAll('.rfq-row').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.bid-row').forEach(el => el.classList.remove('selected'));
+    const rowEl = document.querySelector(`.rfq-row[data-id="${rfqId}"]`);
+    if (rowEl) rowEl.classList.add('selected');
+
+    const rfq = ALL_RFQS[rfqId];
+    if (!rfq) return;
+
+    // Check if reseller already bid on this RFQ
+    const existingBid = MY_BIDS.find(b => b.rfq_id === rfqId);
+    if (existingBid) {
+      selectBid(existingBid.id);
+      return;
+    }
+
+    renderBidForm(rfq);
+  }
+
+  function renderBidForm(rfq) {
+    const vendors = [...new Set((rfq.items || []).map(i => i.vendor))];
+    const dueDate = rfq.deadline ? new Date(rfq.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+    const loc = rfq.hq_location || '—';
+
+    const rows = (rfq.items || []).map((item, idx) => {
+      return `<tr>
+        <td class="vendor-cell">${esc(item.vendor || '—')}</td>
+        <td>${esc(item.description || item.part_number || '—')}</td>
+        <td>${esc(item.part_number || '—')}</td>
+        <td style="text-align:center">${item.quantity || 1}</td>
+        <td><input type="number" class="price-input" placeholder="0.00" min="0" step="0.01" data-idx="${idx}" data-qty="${item.quantity || 1}" oninput="recalcTotal()" id="price-${idx}"></td>
+        <td class="line-total" id="lt-${idx}">—</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('right-pane').innerHTML = `
+      <div class="detail-pane">
+        <div class="detail-header">
+          <div class="detail-title">${esc(rfq.title || 'Untitled RFQ')}</div>
+          <div class="detail-meta">
+            <div class="meta-item"><div class="meta-label">Due</div><div class="meta-value">${dueDate}</div></div>
+            <div class="meta-item"><div class="meta-label">Location</div><div class="meta-value">${esc(loc)}</div></div>
+            <div class="meta-item"><div class="meta-label">Strategy</div><div class="meta-value">${rfq.strategy === 'split' ? 'Split bid' : 'Sole source'}</div></div>
+            <div class="meta-item"><div class="meta-label">Vendors</div><div class="meta-value">${vendors.map(v => esc(v)).join(', ')}</div></div>
+          </div>
+        </div>
+
+        <div class="sku-section-label">Items to Quote</div>
+        <table class="sku-table">
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Description</th>
+              <th>Part #</th>
+              <th style="text-align:center">Qty</th>
+              <th>Your Unit Price</th>
+              <th style="text-align:right">Line Total</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+
+        <div class="form-footer">
+          <div class="notes-area">
+            <div class="notes-label">Notes (optional)</div>
+            <textarea class="notes-input" id="bid-notes" placeholder="Delivery timeline, warranties, terms…"></textarea>
+          </div>
+          <div class="submit-area">
+            <div class="total-display">
+              <div class="total-label">Bid Total</div>
+              <div class="total-value" id="bid-total">$0.00</div>
+            </div>
+            <label class="auth-check">
+              <input type="checkbox" id="auth-check" onchange="toggleSubmit()">
+              I am authorized to quote these prices
+            </label>
+            <button class="btn-submit" id="submit-btn" disabled onclick="submitBid('${rfq.id}')">Submit Bid</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  window.recalcTotal = function() {
+    let total = 0;
+    document.querySelectorAll('.price-input').forEach(inp => {
+      const val = parseFloat(inp.value) || 0;
+      const qty = parseInt(inp.dataset.qty) || 1;
+      const lt = val * qty;
+      total += lt;
+      const ltEl = document.getElementById('lt-' + inp.dataset.idx);
+      if (ltEl) ltEl.textContent = lt > 0 ? '$' + lt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+    });
+    const totalEl = document.getElementById('bid-total');
+    if (totalEl) totalEl.textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  window.toggleSubmit = function() {
+    const check = document.getElementById('auth-check');
+    const btn = document.getElementById('submit-btn');
+    if (btn) btn.disabled = !check?.checked;
+  };
+
+  window.submitBid = async function(rfqId) {
+    const btn = document.getElementById('submit-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+    const rfq = ALL_RFQS[rfqId];
+    const lineItems = (rfq?.items || []).map((item, idx) => {
+      const unit = parseFloat(document.getElementById('price-' + idx)?.value) || 0;
+      return { vendor: item.vendor, description: item.description, part_number: item.part_number, quantity: item.quantity || 1, unit_price: unit, line_total: unit * (item.quantity || 1) };
+    });
+    const total = lineItems.reduce((s, li) => s + li.line_total, 0);
+    const notes = document.getElementById('bid-notes')?.value || '';
+
+    const { data, error } = await _sb.from('bids').insert({
+      rfq_id: rfqId, reseller_id: userId, total_price: total, line_items: lineItems, notes: notes, status: 'pending'
+    }).select().single();
+
+    if (error) {
+      alert('Error submitting bid: ' + error.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit Bid'; }
+      return;
+    }
+
+    // Show success, then reload
+    document.getElementById('right-pane').innerHTML = `
+      <div class="success-pane">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Bid submitted!</div>
+        <div class="success-sub">Total: $${total.toLocaleString(undefined, {minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+        <div class="success-sub" style="color:var(--text-3);font-size:12px;margin-top:4px;">Refreshing…</div>
+      </div>`;
+
+    await loadAll();
+  };
+
+  // ── SELECT BID → show read-only ──
+  window.selectBid = function(bidId) {
+    document.querySelectorAll('.rfq-row').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll('.bid-row').forEach(el => el.classList.remove('selected'));
+    const rowEl = document.querySelector(`.bid-row[data-bid="${bidId}"]`);
+    if (rowEl) rowEl.classList.add('selected');
+
+    const bid = MY_BIDS.find(b => b.id === bidId);
+    if (!bid) return;
+    const rfq = ALL_RFQS[bid.rfq_id];
+    const dueDate = rfq?.deadline ? new Date(rfq.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+    const loc = rfq?.hq_location || '—';
+
+    let banner = '';
+    if (bid.derivedStatus === 'won') {
+      banner = `<div class="won-banner"><div class="won-banner-icon">🏆</div><div class="won-banner-text"><div class="won-banner-title">You won this bid</div><div class="won-banner-sub">The buyer will be in touch to finalize the order.</div></div></div>`;
+    } else if (bid.derivedStatus === 'lost') {
+      banner = `<div class="lost-banner"><div><div class="lost-banner-title">Bid not selected</div><div class="lost-banner-sub">The buyer awarded this RFQ to another reseller.</div></div></div>`;
+    } else {
+      banner = `<div class="already-bid-banner">⏳ Bid submitted — awaiting buyer decision</div>`;
+    }
+
+    const rows = (bid.line_items || []).map(li => {
+      const lt = (li.unit_price || 0) * (li.quantity || 1);
+      return `<tr class="read-only-price">
+        <td class="vendor-cell">${esc(li.vendor || '—')}</td>
+        <td>${esc(li.description || li.part_number || '—')}</td>
+        <td>${esc(li.part_number || '—')}</td>
+        <td style="text-align:center">${li.quantity || 1}</td>
+        <td>$${(li.unit_price || 0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td style="text-align:right">$${lt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('right-pane').innerHTML = `
+      <div class="detail-pane">
+        <div class="detail-header">
+          <div class="detail-title">${esc(rfq?.title || bid.rfqTitle || 'Untitled RFQ')}</div>
+          <div class="detail-meta">
+            <div class="meta-item"><div class="meta-label">Due</div><div class="meta-value">${dueDate}</div></div>
+            <div class="meta-item"><div class="meta-label">Location</div><div class="meta-value">${esc(loc)}</div></div>
+            <div class="meta-item"><div class="meta-label">Submitted</div><div class="meta-value">${bid.created_at ? new Date(bid.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</div></div>
+          </div>
+        </div>
+        ${banner}
+        <div class="sku-section-label">Your Quoted Prices</div>
+        <table class="sku-table">
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Description</th>
+              <th>Part #</th>
+              <th style="text-align:center">Qty</th>
+              <th>Unit Price</th>
+              <th style="text-align:right">Line Total</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="submitted-total"><span>Total bid</span>$${(bid.total_price || 0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+        ${bid.notes ? `<div style="margin-top:12px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2)"><div style="font-size:11px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Your Notes</div>${esc(bid.notes)}</div>` : ''}
+      </div>`;
+  };
+
+  window.handleLogout = async function() {
+    await _sb.auth.signOut();
+    window.location.href = 'bidbridge-auth_1.html';
+  };
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  await loadAll();
+
+})();
+</script>
+</body>
+</html>

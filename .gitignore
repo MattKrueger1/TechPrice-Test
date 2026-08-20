@@ -18,6 +18,5 @@ playwright-report/
 # Playwright MCP session data
 .playwright-mcp/
 
-# Screenshots and local scripts
+# Screenshots (local only)
 screenshots/
-scripts/

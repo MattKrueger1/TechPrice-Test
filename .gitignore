@@ -20,3 +20,4 @@ playwright-report/
 
 # Screenshots (local only)
 screenshots/
+reseller2-auth.json

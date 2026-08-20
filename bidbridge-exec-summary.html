@@ -579,37 +579,87 @@
   })();
 
   function showError(msg) {
-    // Distinguish "no RFQ selected" (user needs guidance) from real errors
     const isNoRfq = msg.includes('No RFQ') || msg.includes('specified');
     const isNoBids = msg.includes('No bids');
 
-    let title, subtitle, primaryCta, secondaryCta;
+    // Case A: no ?rfq= in URL — show a picker of the buyer's RFQs so they can generate a report inline
     if (isNoRfq) {
-      title = 'Choose an RFQ to see its Executive Summary';
-      subtitle = 'The Executive Summary is a shareable procurement report for a specific RFQ. Pick one below to generate the report.';
-      primaryCta = { href: 'bidbridge-my-rfqs.html', label: 'Browse my RFQs →' };
-      secondaryCta = { href: 'bidbridge-submit-rfq_2.html', label: 'Post a new RFQ' };
-    } else if (isNoBids) {
-      title = 'No bids yet on this RFQ';
-      subtitle = 'The Executive Summary is available as soon as resellers start submitting bids. Most active RFQs receive their first bid within 24 hours.';
-      primaryCta = { href: 'bidbridge-my-rfqs.html', label: 'View RFQ status →' };
-      secondaryCta = null;
-    } else {
-      title = 'Something went wrong';
-      subtitle = msg;
-      primaryCta = { href: 'bidbridge-my-rfqs.html', label: '← Back to My RFQs' };
-      secondaryCta = null;
+      renderRfqPicker();
+      return;
     }
 
+    // Case B: RFQ specified but has no bids yet — encouraging waiting state
+    if (isNoBids) {
+      document.getElementById('doc-wrap').innerHTML = `
+        <div style="max-width:520px;margin:80px auto;text-align:center;padding:48px 32px;background:var(--surface);border:1px solid var(--border);border-radius:16px;">
+          <div style="font-size:48px;margin-bottom:20px;">⏳</div>
+          <h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:10px;letter-spacing:-0.3px;">No bids yet on this RFQ</h2>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:28px;">The Executive Summary generates as soon as resellers start bidding. Most RFQs receive their first bid within 24 hours.</p>
+          <a href="bidbridge-my-rfqs.html" style="background:var(--accent);color:#fff;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">View RFQ status →</a>
+        </div>`;
+      return;
+    }
+
+    // Case C: real error
     document.getElementById('doc-wrap').innerHTML = `
       <div style="max-width:520px;margin:80px auto;text-align:center;padding:48px 32px;background:var(--surface);border:1px solid var(--border);border-radius:16px;">
-        <div style="font-size:48px;margin-bottom:20px;">${isNoRfq ? '📊' : isNoBids ? '⏳' : '⚠'}</div>
-        <h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:10px;letter-spacing:-0.3px;">${title}</h2>
-        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:28px;">${subtitle}</p>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <a href="${primaryCta.href}" style="background:var(--accent);color:#fff;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">${primaryCta.label}</a>
-          ${secondaryCta ? `<a href="${secondaryCta.href}" style="background:var(--surface-alt);color:var(--text);padding:11px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;border:1px solid var(--border);">${secondaryCta.label}</a>` : ''}
+        <div style="font-size:48px;margin-bottom:20px;">⚠</div>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:10px;letter-spacing:-0.3px;">Something went wrong</h2>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:28px;">${msg}</p>
+        <a href="bidbridge-my-rfqs.html" style="background:var(--accent);color:#fff;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">← Back to My RFQs</a>
+      </div>`;
+  }
+
+  // Load buyer's RFQs and render a click-to-generate picker
+  async function renderRfqPicker() {
+    document.getElementById('doc-wrap').innerHTML =
+      '<div style="max-width:640px;margin:60px auto;padding:32px;text-align:center;color:var(--text-muted);">Loading your RFQs…</div>';
+
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.href = 'bidbridge-auth_1.html'; return; }
+
+    // Only show RFQs where the buyer has bids (report is meaningless without bids)
+    const { data: rfqs } = await _supabase
+      .from('rfqs')
+      .select('id, title, status, created_at, deadline, bid_count')
+      .eq('buyer_id', session.user.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const eligible = (rfqs || []).filter(r => (r.bid_count || 0) > 0);
+
+    if (!eligible.length) {
+      document.getElementById('doc-wrap').innerHTML = `
+        <div style="max-width:520px;margin:80px auto;text-align:center;padding:48px 32px;background:var(--surface);border:1px solid var(--border);border-radius:16px;">
+          <div style="font-size:48px;margin-bottom:20px;">📊</div>
+          <h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:10px;">No RFQs ready for an Executive Summary yet</h2>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:28px;">Executive Summaries are shareable procurement reports available once you have bids on an RFQ. Post one and reports typically become available within 24 hours.</p>
+          <a href="bidbridge-submit-rfq_2.html" style="background:var(--accent);color:#fff;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">Post a new RFQ →</a>
+        </div>`;
+      return;
+    }
+
+    const rows = eligible.map(r => {
+      const status = (r.status || 'active').toUpperCase();
+      const statusColor = r.status === 'awarded' ? 'var(--success)' : r.status === 'closed' ? 'var(--text-muted)' : 'var(--accent)';
+      return `<a href="bidbridge-exec-summary.html?rfq=${r.id}" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text);transition:border-color .12s,background .12s;" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.title || 'Untitled RFQ'}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${r.bid_count} bid${r.bid_count !== 1 ? 's' : ''} · Posted ${new Date(r.created_at).toLocaleDateString()}</div>
         </div>
+        <span style="font-size:10px;font-weight:700;color:${statusColor};background:${statusColor}20;padding:3px 10px;border-radius:999px;white-space:nowrap;">${status}</span>
+        <span style="color:var(--accent);font-size:14px;">→</span>
+      </a>`;
+    }).join('');
+
+    document.getElementById('doc-wrap').innerHTML = `
+      <div style="max-width:720px;margin:40px auto;padding:0 24px;">
+        <div style="margin-bottom:24px;">
+          <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:4px;">Executive Summary</div>
+          <h1 style="font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.5px;margin-bottom:8px;">Choose an RFQ to generate a report</h1>
+          <p style="font-size:14px;color:var(--text-muted);line-height:1.6;">Executive Summaries are shareable, print-ready procurement reports — perfect for finance review or CFO handoff. Pick from the ${eligible.length} RFQ${eligible.length !== 1 ? 's' : ''} below.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">${rows}</div>
       </div>`;
   }
 </script>

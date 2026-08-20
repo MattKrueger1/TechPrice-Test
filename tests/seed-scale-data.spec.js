@@ -285,15 +285,22 @@ test('Seed scale test data — 50 RFQs, ~200 bids, multi-vendor mix', async () =
     // ── Seed messages on ~30% of RFQs ────────────────────────────────────
     if (Math.random() < 0.3 && (plan.r1BidId || plan.r2BidId)) {
       const talker = plan.r1BidId ? RESELLER1 : RESELLER2;
+      // Schema uses `content`, `recipient_id`, `sender_role` (not `body`)
       await restPost('messages', {
         rfq_id: plan.rfqId,
         sender_id: BUYER.id,
-        body: 'Hi — quick question on your bid, do you have stock available for the timeline in the RFQ?',
+        recipient_id: talker.id,
+        sender_role: 'buyer',
+        content: 'Hi — quick question on your bid, do you have stock available for the timeline in the RFQ?',
+        is_broadcast: false,
       });
       await restPost('messages', {
         rfq_id: plan.rfqId,
         sender_id: talker.id,
-        body: 'Yes, we have all units in stock and can ship next-day. Happy to jump on a call.',
+        recipient_id: BUYER.id,
+        sender_role: 'reseller',
+        content: 'Yes, we have all units in stock and can ship next-day. Happy to jump on a call.',
+        is_broadcast: false,
       });
       stats.messagesCreated += 2;
 

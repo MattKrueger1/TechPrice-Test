@@ -209,7 +209,7 @@
         <p id="unread-summary">6 unread notifications</p>
       </div>
       <div class="topbar-actions">
-        <button class="btn-outline" onclick="markAllRead()">Mark all as read</button>
+        <button id="btn-mark-all-read" onclick="markAllRead()" style="background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:none;">✓ Mark all read</button>
         <a class="btn-outline" href="bidbridge-settings.html" style="text-decoration:none;">⚙ Notification settings</a>
       </div>
     </div>
@@ -410,6 +410,12 @@
     else if (activeFilter === 'bid') filtered = allNotifications.filter(n => n.type === 'bid_submitted');
     else if (activeFilter !== 'all') filtered = allNotifications.filter(n => n.type === activeFilter);
 
+    // Sort unread-first, then by recency within each group. Cuts noise dramatically at scale.
+    filtered = [...filtered].sort((a, b) => {
+      if (a.unread !== b.unread) return a.unread ? -1 : 1;
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
     if (filtered.length === 0) {
       container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:16px;">🔔</div><h3>All caught up</h3><p>No notifications match this filter.</p></div>`;
       updateCounts();
@@ -549,6 +555,9 @@
     document.getElementById('unread-summary').textContent = unread > 0
       ? `${unread} unread notification${unread !== 1 ? 's' : ''}`
       : 'All caught up';
+    // Prominent "Mark all read" only shows up when there's something to mark
+    const markBtn = document.getElementById('btn-mark-all-read');
+    if (markBtn) markBtn.style.display = unread > 0 ? 'inline-block' : 'none';
   }
 
   /* ─── TIME HELPER ─── */

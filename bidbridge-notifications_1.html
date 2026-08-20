@@ -367,26 +367,42 @@
       .eq('user_id', _userId)
       .order('created_at', { ascending: false });
 
-    // Also load RFQ titles for context
+    // Also load RFQ metadata (title, deadline, bid_count) so notifications can show inline context
     const rfqIds = [...new Set((rows || []).map(r => r.rfq_id).filter(Boolean))];
-    let rfqTitleMap = {};
+    let rfqMetaMap = {};
+    let bidTotalsMap = {};
     if (rfqIds.length > 0) {
-      const { data: rfqRows } = await _supabase
-        .from('rfqs')
-        .select('id, title')
-        .in('id', rfqIds);
-      (rfqRows || []).forEach(r => { rfqTitleMap[r.id] = r.title; });
+      const [{ data: rfqRows }, { data: bidRows }] = await Promise.all([
+        _supabase.from('rfqs').select('id, title, deadline, bid_count, status').in('id', rfqIds),
+        _supabase.from('bids').select('rfq_id, total_price, status').in('rfq_id', rfqIds),
+      ]);
+      (rfqRows || []).forEach(r => { rfqMetaMap[r.id] = r; });
+      // Aggregate lowest bid total per RFQ for the dollar-amount context
+      (bidRows || []).forEach(b => {
+        const cur = bidTotalsMap[b.rfq_id];
+        const price = parseFloat(b.total_price) || 0;
+        if (!cur || price < cur.lowest) bidTotalsMap[b.rfq_id] = { lowest: price, count: (cur?.count || 0) + 1 };
+        else bidTotalsMap[b.rfq_id].count++;
+      });
     }
 
-    allNotifications = (rows || []).map(r => ({
-      id: r.id,
-      type: r.type,
-      rfq_id: r.rfq_id,
-      message: r.message,
-      unread: !r.read,
-      created_at: r.created_at,
-      rfqTitle: rfqTitleMap[r.rfq_id] || null,
-    }));
+    allNotifications = (rows || []).map(r => {
+      const meta = rfqMetaMap[r.rfq_id];
+      const bids = bidTotalsMap[r.rfq_id];
+      return {
+        id: r.id,
+        type: r.type,
+        rfq_id: r.rfq_id,
+        message: r.message,
+        unread: !r.read,
+        created_at: r.created_at,
+        rfqTitle: meta?.title || null,
+        rfqDeadline: meta?.deadline || null,
+        rfqStatus: meta?.status || null,
+        rfqBidCount: meta?.bid_count || bids?.count || 0,
+        rfqLowestBid: bids?.lowest || null,
+      };
+    });
 
     renderNotifications();
 
@@ -486,12 +502,36 @@
           : '';
         const groupTitle = n._count > 1 ? `${title} (${n._count} updates)` : title;
 
+        // Build contextual chips: deadline, bid count, lowest bid — gives actionable context
+        // instead of a naked notification message
+        const contextChips = [];
+        if (n.rfqDeadline) {
+          const days = Math.ceil((new Date(n.rfqDeadline) - new Date()) / 86400000);
+          if (days >= 0 && n.rfqStatus === 'active') {
+            const urgent = days <= 2;
+            const color = urgent ? '#DC2626' : days <= 5 ? '#D97706' : '#6B7280';
+            const bg    = urgent ? '#FEF2F2' : days <= 5 ? '#FFFBEB' : '#F3F4F6';
+            contextChips.push(`<span style="font-size:11px;font-weight:600;color:${color};background:${bg};padding:2px 8px;border-radius:6px;">⏱ ${days === 0 ? 'Due today' : days === 1 ? 'Due tomorrow' : days + 'd left'}</span>`);
+          }
+        }
+        if (n.rfqBidCount > 0) {
+          contextChips.push(`<span style="font-size:11px;color:#374151;background:#EFF6FF;padding:2px 8px;border-radius:6px;font-weight:500;">${n.rfqBidCount} bid${n.rfqBidCount !== 1 ? 's' : ''}</span>`);
+        }
+        if (n.rfqLowestBid) {
+          const amount = n.rfqLowestBid >= 1000 ? `$${(n.rfqLowestBid / 1000).toFixed(1)}k` : `$${n.rfqLowestBid.toFixed(0)}`;
+          contextChips.push(`<span style="font-size:11px;color:#374151;background:#ECFDF5;padding:2px 8px;border-radius:6px;font-weight:500;">Low: ${amount}</span>`);
+        }
+        const contextRow = contextChips.length > 0
+          ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">${contextChips.join('')}</div>`
+          : '';
+
         html += `
           <div class="notif-item ${borderClass}" onclick="handleClick('${n.id}', '${ctaLink}')" id="notif-${n.id}" style="cursor:pointer;">
             <div class="notif-icon-wrap ${cfg.iconClass}">${cfg.icon}</div>
             <div class="notif-content">
               <div class="notif-title">${groupTitle}${groupBadge}</div>
               <div class="notif-body">${n.message || ''}</div>
+              ${contextRow}
               <div class="notif-meta">
                 <span class="notif-time">${formatTimeAgo(n.created_at)}</span>
                 <span class="notif-tag tag-bid">${cfg.tagLabel}</span>

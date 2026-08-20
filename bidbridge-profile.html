@@ -295,6 +295,24 @@
       <!-- ── RIGHT: FORMS ── -->
       <div class="profile-forms">
 
+        <!-- PROFILE COMPLETENESS (hidden by default; only shows if profile is incomplete) -->
+        <div id="profile-completeness" style="display:none;background:linear-gradient(135deg,var(--accent-bg),var(--surface));border:1px solid #BFDBFE;border-radius:12px;padding:20px 22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:16px;">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;">Complete your profile</div>
+              <div id="completeness-sub" style="font-size:13px;color:var(--text-muted);">Resellers will see this info on your RFQs — make a good impression.</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div id="completeness-percent" style="font-size:24px;font-weight:800;color:var(--accent);letter-spacing:-0.5px;">0%</div>
+              <div id="completeness-count" style="font-size:11px;color:var(--text-muted);">0 of 4 complete</div>
+            </div>
+          </div>
+          <div style="background:#DBEAFE;border-radius:999px;height:6px;overflow:hidden;margin-bottom:12px;">
+            <div id="completeness-bar" style="background:var(--accent);height:100%;width:0%;transition:width .4s ease;border-radius:999px;"></div>
+          </div>
+          <div id="completeness-checklist" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+
         <!-- PERSONAL INFO -->
         <div class="section-card" id="section-personal">
           <div class="section-header">
@@ -620,15 +638,16 @@
       const ln = profile.last_name || '';
       const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '?';
 
+      const fullName = `${fn} ${ln}`.trim();
       /* Sidebar */
       document.getElementById('user-avatar').textContent = initials;
-      document.getElementById('user-name').textContent = `${fn} ${ln}`.trim();
-      document.getElementById('user-role').textContent = `Buyer · ${profile.company || ''}`;
+      document.getElementById('user-name').textContent = fullName || (session.user.email?.split('@')[0] || 'User');
+      document.getElementById('user-role').textContent = profile.company ? `Buyer · ${profile.company}` : 'Buyer';
 
       /* Profile card */
       document.getElementById('profile-avatar').textContent = initials;
-      document.getElementById('profile-name').textContent = `${fn} ${ln}`.trim();
-      document.getElementById('profile-company-display').textContent = profile.company || '—';
+      document.getElementById('profile-name').textContent = fullName || 'Complete your profile';
+      document.getElementById('profile-company-display').textContent = profile.company || 'Company not set';
 
       /* Personal section fields */
       setField('first', fn);
@@ -636,12 +655,11 @@
 
       /* Company section fields */
       setField('company', profile.company || '');
-      if (profile.company_hq) {
-        document.getElementById('view-hq').textContent = profile.company_hq;
-        document.getElementById('view-hq').classList.remove('field-empty');
-        document.getElementById('input-hq').value = profile.company_hq;
-      }
+      setField('hq', profile.company_hq || '');
       loadSmsPrefs(profile);
+
+      /* Show completeness bar so first-time users know what to do */
+      renderProfileCompleteness(profile, session);
     }
 
     /* Account details */
@@ -688,8 +706,49 @@
   function setField(id, value) {
     const view = document.getElementById('view-' + id);
     const input = document.getElementById('input-' + id);
-    if (view && value) view.textContent = value;
-    if (input && value) input.value = value;
+    // Always clear stale hardcoded placeholder values (e.g. "James", "Acme Corporation")
+    // even when the DB returns null/empty — otherwise the page shows fake data.
+    if (view) {
+      if (value) {
+        view.textContent = value;
+        view.classList.remove('field-empty');
+      } else {
+        view.textContent = 'Not set';
+        view.classList.add('field-empty');
+      }
+    }
+    if (input) input.value = value || '';
+  }
+
+  function renderProfileCompleteness(profile, session) {
+    const checks = [
+      { key: 'first_name', label: 'First name',  ok: !!profile.first_name },
+      { key: 'last_name',  label: 'Last name',   ok: !!profile.last_name  },
+      { key: 'company',    label: 'Company',     ok: !!profile.company    },
+      { key: 'company_hq', label: 'HQ location', ok: !!profile.company_hq },
+    ];
+    const done = checks.filter(c => c.ok).length;
+    const total = checks.length;
+    const pct = Math.round((done / total) * 100);
+    const el = document.getElementById('profile-completeness');
+    if (!el) return;
+    if (done === total) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    document.getElementById('completeness-percent').textContent = pct + '%';
+    document.getElementById('completeness-count').textContent = done + ' of ' + total + ' complete';
+    document.getElementById('completeness-bar').style.width = pct + '%';
+    document.getElementById('completeness-checklist').innerHTML = checks.map(c =>
+      `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:999px;background:${c.ok ? '#ECFDF5' : '#FEF2F2'};color:${c.ok ? '#059669' : '#B91C1C'};font-weight:500;">
+        ${c.ok ? '✓' : '○'} ${c.label}
+      </span>`
+    ).join('');
+    // Also update sub-message when nearly done
+    const sub = document.getElementById('completeness-sub');
+    if (sub) sub.textContent = done === 0
+      ? 'Resellers will see this info on your RFQs — make a good impression.'
+      : done === total - 1
+        ? 'Almost there — one field left.'
+        : 'A few more fields and you\'re done.';
   }
 
   /* ─── EDIT MODE ─── */

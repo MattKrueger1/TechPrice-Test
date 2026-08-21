@@ -1284,8 +1284,30 @@ if (!rawBids || rawBids.length === 0) {
                   <div><div class="bid-detail-label">Total price</div><div class="bid-detail-value price">$${bid.price.toLocaleString()}</div></div>
                   <div><div class="bid-detail-label">Savings vs highest</div><div class="bid-detail-value" style="color:${savings>0?'var(--success)':'var(--text-muted)'};">${savings>0?'$'+savings.toLocaleString():'— Highest ever'}</div></div>
                   <div><div class="bid-detail-label">Delivery</div><div class="bid-detail-value">${formatDate(bid.delivery) || 'TBD'}</div></div>
-                  ${revCount > 0 ? `<div><div class="bid-detail-label">Revisions</div><div class="bid-detail-value">${revCount} submitted</div></div>` : ''}
+                  ${revCount > 1 ? `<div><div class="bid-detail-label">Revisions</div><div class="bid-detail-value">${revCount - 1} revision${revCount - 1 !== 1 ? 's' : ''}</div></div>` : ''}
                 </div>
+                ${bid.bidHistory && bid.bidHistory.length > 1 ? (() => {
+                  // Inline mini-history trajectory so buyers immediately see the price journey
+                  // (started at $X, dropped to $Y, now $Z) instead of having to open bid detail drawer.
+                  const first = bid.bidHistory[0].total_price;
+                  const totalDrop = first - bid.price;
+                  const dropPct = first > 0 ? Math.round((totalDrop / first) * 100) : 0;
+                  const chips = bid.bidHistory.map((h, i) => {
+                    const isFirst = i === 0;
+                    const isLast = i === bid.bidHistory.length - 1;
+                    return '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;background:' + (isLast ? 'var(--accent-bg)' : 'var(--surface-alt)') + ';color:' + (isLast ? 'var(--accent)' : 'var(--text-muted)') + ';font-size:12px;font-weight:' + (isLast ? '700' : '500') + ';">' +
+                      (isFirst ? '🚀 ' : isLast ? '✓ ' : '') +
+                      '$' + (h.total_price || 0).toLocaleString('en-US', {maximumFractionDigits:0}) +
+                      (isLast ? ' (current)' : isFirst ? ' (initial)' : '') +
+                    '</span>';
+                  }).join('<span style="color:var(--text-light);font-size:14px;">→</span>');
+                  return `
+                    <div style="margin-top:14px;padding:12px 14px;background:var(--success-bg);border:1px solid rgba(5,150,105,0.2);border-radius:9px;">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;font-weight:600;">Price trajectory ${totalDrop > 0 ? `— down $${totalDrop.toLocaleString('en-US', {maximumFractionDigits:0})} (${dropPct}%)` : ''}</div>
+                      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${chips}</div>
+                    </div>
+                  `;
+                })() : ''}
                 ${bid.lineItems && bid.lineItems.length ? `
                 <div style="margin-top:16px;">
                   <div class="bid-detail-label" style="margin-bottom:10px;">Line item quote</div>

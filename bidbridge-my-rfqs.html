@@ -1671,7 +1671,19 @@
       </div>
     `).join('');
 
+    // Action buttons for active/review RFQs — surfaced at top so users don't need
+    // to chevron-expand the card in the list view to find them.
+    const actionButtons = (data.status === 'active' || data.status === 'review')
+      ? `<div class="drawer-section" style="display:flex;gap:8px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:16px;">
+          <button class="btn-action btn-secondary-action" onclick="editRFQ('${data.id}')">✏️ Edit RFQ</button>
+          <button class="btn-action btn-secondary-action" onclick="extendDeadline('${data.id}')">⏱ Extend deadline</button>
+          <button class="btn-action btn-secondary-action" onclick="broadcastMessage('${data.id}')">📢 Message resellers</button>
+          <button class="btn-action btn-danger-sm" onclick="openCancelModal('${data.id}')">✕ Cancel RFQ</button>
+        </div>`
+      : '';
+
     document.getElementById('drawer-body').innerHTML = `
+      ${actionButtons}
       <div class="drawer-section">
         <div class="drawer-section-title">Status</div>
         <span class="status-badge ${statusCls}">${statusLabel}</span>

@@ -832,16 +832,23 @@
     btn.disabled = true; btn.textContent = 'Submitting…';
     const { data: { session } } = await _supabase.auth.getSession();
     const lineItems = _currentBidItems.map((item, idx) => ({ rfq_item_id: item.id, vendor: item.vendor, sku: item.sku, quantity: item.quantity, unit_price: prices[idx], line_total: prices[idx] * item.quantity }));
+    // Detect revision by checking prior history
+    const { data: priorHistory } = await _supabase
+      .from('bid_history')
+      .select('total_price')
+      .eq('rfq_id', _currentBidRfqId)
+      .eq('reseller_id', session.user.id)
+      .order('submitted_at', { ascending: false })
+      .limit(1);
+    const isRevision = (priorHistory || []).length > 0;
+    const priorPrice = isRevision ? parseFloat(priorHistory[0].total_price) : null;
+
     const { data: upsertResult, error } = await _supabase.from('bids').upsert({ rfq_id: _currentBidRfqId, reseller_id: session.user.id, total_price: netTotal, notes, line_items: lineItems, status: 'pending' }, { onConflict: 'rfq_id,reseller_id' }).select('id').single();
     if (error) { btn.disabled = false; btn.textContent = 'Submit bid →'; errEl.textContent = 'Error: ' + error.message; errEl.style.display = 'block'; return; }
     try {
       if (upsertResult?.id) await _supabase.from('bid_history').insert({ bid_id: upsertResult.id, rfq_id: _currentBidRfqId, reseller_id: session.user.id, total_price: netTotal, line_items: lineItems });
     } catch(e) {}
-    try {
-      const rfqTitle = (window._ALL_VENDOR_RFQS || []).find(r => r.id === _currentBidRfqId)?.title || 'your RFQ';
-      const { data: rfqRow } = await _supabase.from('rfqs').select('buyer_id').eq('id', _currentBidRfqId).single();
-      if (rfqRow?.buyer_id) await _supabase.from('notifications').insert({ user_id: rfqRow.buyer_id, type: 'bid_submitted', rfq_id: _currentBidRfqId, message: 'A new bid of $' + netTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' was submitted on "' + rfqTitle + '".', read: false });
-    } catch(e) {}
+    try { await sendBidNotifications(_currentBidRfqId, session.user.id, netTotal, isRevision, priorPrice); } catch(e) { console.warn('Notification error:', e); }
     document.getElementById('bid-modal-footer').style.display = 'none';
     document.getElementById('bid-modal-body').innerHTML = '<div class="bid-success"><div class="bid-success-icon">✅</div><div class="bid-success-title">Bid submitted!</div><div class="bid-success-sub">Your bid of <strong style="color:var(--accent);">$' + netTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</strong> has been sent to the buyer.<br>You\'ll be notified when they respond.</div><button class="btn-submit-bid" style="margin-top:20px;" onclick="window.location.reload()">Done</button></div>';
   }
@@ -850,6 +857,49 @@
     document.getElementById('bid-modal').classList.add('hidden');
     document.getElementById('right-pane-empty').style.display = 'flex';
     _currentBidRfqId = null; _currentBidItems = [];
+  }
+
+  /* Notify buyer + affected resellers when a bid is submitted or revised. */
+  async function sendBidNotifications(rfqId, resellerId, newPrice, isRevision, priorPrice) {
+    const [{ data: rfq }, { data: allBids }, { data: resellerProfile }] = await Promise.all([
+      _supabase.from('rfqs').select('id, title, buyer_id, strategy').eq('id', rfqId).single(),
+      _supabase.from('bids').select('id, reseller_id, total_price').eq('rfq_id', rfqId).eq('status', 'pending'),
+      _supabase.from('reseller_profiles').select('company').eq('id', resellerId).maybeSingle(),
+    ]);
+    if (!rfq) return;
+    const rfqTitle = rfq.title || 'RFQ';
+    const companyName = resellerProfile?.company || 'A reseller';
+
+    let buyerMsg;
+    if (isRevision && priorPrice !== null) {
+      const delta = priorPrice - newPrice;
+      const direction = delta > 0 ? 'dropped' : delta < 0 ? 'increased' : 'updated';
+      buyerMsg = `${companyName} ${direction} their bid on "${rfqTitle}" ${delta !== 0 ? '(' + (delta > 0 ? '−' : '+') + '$' + Math.abs(delta).toLocaleString('en-US', {maximumFractionDigits:0}) + ')' : ''}`;
+    } else {
+      buyerMsg = `New bid from ${companyName} on "${rfqTitle}" — $${newPrice.toLocaleString('en-US', {maximumFractionDigits:0})}`;
+    }
+    await _supabase.from('notifications').insert({
+      user_id: rfq.buyer_id,
+      type: isRevision ? 'bid_revised' : 'bid_submitted',
+      message: buyerMsg,
+      rfq_id: rfqId,
+      read: false,
+    });
+
+    const sorted = (allBids || []).slice().sort((a, b) => (a.total_price || 0) - (b.total_price || 0));
+    for (const b of sorted) {
+      if (b.reseller_id === resellerId) continue;
+      const theirRank = sorted.findIndex(x => x.reseller_id === b.reseller_id) + 1;
+      if (b.total_price > newPrice) {
+        await _supabase.from('notifications').insert({
+          user_id: b.reseller_id,
+          type: 'rank_changed',
+          message: `New competing bid on "${rfqTitle}" — you're now #${theirRank}. Consider revising your price.`,
+          rfq_id: rfqId,
+          read: false,
+        }).then(() => {}, () => {});
+      }
+    }
   }
 
   /* NOTIFICATION PANEL */

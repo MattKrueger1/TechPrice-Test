@@ -1015,8 +1015,8 @@
       const expandId = 'bids-expand-' + rfq.id;
 
       // Contextual button label — say "Waiting for bids" when there aren't any yet
-      // instead of the misleading "View bids →"
-      const bidCount = rfq.bidCount || rfq.bid_count || 0;
+      // instead of the misleading "View bids →". Note: field name is `bids`, not `bidCount`.
+      const bidCount = typeof rfq.bids === 'number' ? rfq.bids : (rfq.bidCount || rfq.bid_count || 0);
       const primaryAction = rfq.status === 'review'
         ? `<button class="btn-action btn-compare" onclick="navigateToCompareBids('${rfq.id}')">Compare bids →</button>`
         : rfq.status === 'draft'
@@ -1033,7 +1033,7 @@
       const strategyLabel = rfq.strategy === 'split' ? 'Split bid' : 'Sole source';
 
       return `
-        <div class="rfq-card${rfq.hasNew ? ' has-new' : ''}${(rfq.status === 'awarded' || rfq.status === 'closed' || rfq.status === 'cancelled') ? ' dimmed' : ''}" onclick="openDrawer('${rfq.id}')" style="cursor:pointer;">
+        <div class="rfq-card${rfq.hasNew ? ' has-new' : ''}${(rfq.status === 'awarded' || rfq.status === 'closed' || rfq.status === 'cancelled') ? ' dimmed' : ''}" onclick="${hasBids ? `navigateToCompareBids('${rfq.id}')` : `openDrawer('${rfq.id}')`}" style="cursor:pointer;" title="${hasBids ? 'View bids' : 'View RFQ details'}">
           <div class="rfq-card-main">
             <div class="rfq-card-body">
               <div class="rfq-title-row">
@@ -1049,9 +1049,9 @@
               </div>
             </div>
             <div class="rfq-card-right">
-              ${hasBids ? `<div class="bid-count-pill"><span class="num">${rfq.bids}</span><span class="lbl">bid${rfq.bids !== 1 ? 's' : ''}</span></div>` : ''}
+              ${hasBids ? `<div class="bid-count-pill" onclick="event.stopPropagation();navigateToCompareBids('${rfq.id}')" style="cursor:pointer;" title="View bids"><span class="num">${rfq.bids}</span><span class="lbl">bid${rfq.bids !== 1 ? 's' : ''}</span></div>` : ''}
               <div onclick="event.stopPropagation()">${primaryAction}</div>
-              <button class="expand-chevron-btn${hasBids ? '' : ' hidden'}" id="expand-chev-${rfq.id}" onclick="toggleBidExpand('${rfq.id}', event)" aria-label="Expand">▾</button>
+              <button class="expand-chevron-btn" id="expand-chev-${rfq.id}" onclick="event.stopPropagation();openDrawer('${rfq.id}')" aria-label="View RFQ details" title="View RFQ details (edit, message resellers, cancel)">⋯</button>
             </div>
           </div>
           <div class="bid-expand-panel" id="${expandId}">

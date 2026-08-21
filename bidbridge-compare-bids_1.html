@@ -1253,7 +1253,7 @@ if (!rawBids || rawBids.length === 0) {
               <div class="bid-row-name">
                 ${bid.resellerName}
                 ${bid.awarded ? '<span class="bid-row-badge winner-badge">Awarded</span>' : isLowest ? '<span class="bid-row-badge lowest-badge">Lowest</span>' : ''}
-                ${revCount > 1 ? `<span style="background:#FFFBEB;color:var(--gold);border:1px solid #FDE68A;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;">↻ ${ordinal(revCount)}</span>` : ''}
+                ${revCount > 1 ? `<span title="This reseller has revised their bid ${revCount - 1} time${revCount - 1 !== 1 ? 's' : ''} — see the Price trajectory below for the full history" style="background:#FFFBEB;color:var(--gold);border:1px solid #FDE68A;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;">↻ Revised ${revCount - 1}×</span>` : ''}
               </div>
               <div class="bid-row-meta"><span class="tier-badge ${tierClass}">${tierLabel}</span><span>${bid.vendor}</span>${bid.company ? `<span>${bid.company}</span>` : ''}</div>
             </div>
